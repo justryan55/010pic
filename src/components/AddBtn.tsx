@@ -1,9 +1,14 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
+import { useSubscription } from "@/providers/SubscriptionProvider";
 
 export default function AddBtn() {
+  const { toggleSubscription } = useSubscription();
   return (
     <button
+      onClick={toggleSubscription}
       type="button"
       aria-label="Add item"
       className="flex justify-center items-center bg-black text-white w-[28px] h-[28px] rounded-full hover:cursor-pointer"
