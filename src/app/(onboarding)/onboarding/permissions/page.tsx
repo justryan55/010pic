@@ -23,7 +23,7 @@ export default function Permissions() {
             To choose your 10 favorite photos
           </p>
         </div>
-        <Link href="/">
+        <Link href="/date">
           <Button text="Next" />
         </Link>
       </div>
