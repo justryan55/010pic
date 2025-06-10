@@ -4,7 +4,6 @@ import BottomNav from "@/components/HomePage/BottomNav";
 import "../globals.css";
 import Header from "@/components/HomePage/Header";
 import YearSelector from "@/components/HomePage/YearSelector";
-import Subscription from "@/components/Subscription";
 import SubscriptionProvider from "@/providers/SubscriptionProvider";
 
 export default function OnboardingLayout({

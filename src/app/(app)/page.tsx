@@ -1,7 +1,5 @@
-import Header from "@/components/HomePage/Header";
 import MonthHeader from "@/components/HomePage/MonthGrid/MonthHeader";
 import PhotoGrid from "@/components/HomePage/MonthGrid/PhotoGrid";
-import YearSelector from "@/components/HomePage/YearSelector";
 import React from "react";
 
 const months = ["March", "February", "January"];
