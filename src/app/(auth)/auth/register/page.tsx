@@ -9,13 +9,9 @@ import Link from "next/link";
 export default function Register() {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header  */}
-
       <LogoText position={"pt-[26px] pl-6"} />
 
-      {/* Main Body  */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 ">
-        {/* Heading  */}
         <div className="text-center mb-6 w-full flex justify-between max-w-[300px] ">
           <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px] ">
             Create account
@@ -29,8 +25,6 @@ export default function Register() {
             />
           </Link>
         </div>
-
-        {/* Form Section */}
 
         <form className="space-y-4">
           <div>
@@ -61,8 +55,6 @@ export default function Register() {
             />
           </div>
 
-          {/* Terms and Conditions */}
-
           <div className="flex items-center mb-4">
             <input
               type="checkbox"
@@ -80,7 +72,6 @@ export default function Register() {
             <Button text="Sign Up" />
           </div>
 
-          {/* Social Login Section */}
           <div className="text-center pt-3">
             <div className="flex items-center mb-6">
               <div className="flex-1 h-px bg-gray-300"></div>
@@ -101,13 +92,13 @@ export default function Register() {
           </div>
         </form>
 
-        {/* Create Account Section */}
         <div className="text-center mt-6">
           <p className="text-black text-sm font-normal mb-2">
             Have an account?
           </p>
           <Link
-            href="/auth/login"
+            // href="/auth/login"
+            href="/onboarding/welcome"
             className="text-black text-sm font-bold underline hover:no-underline hover:cursor-pointer"
           >
             Login
