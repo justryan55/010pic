@@ -1,7 +1,11 @@
+"use client";
+
 import BottomNav from "@/components/HomePage/BottomNav";
 import "../globals.css";
 import Header from "@/components/HomePage/Header";
 import YearSelector from "@/components/HomePage/YearSelector";
+import Subscription from "@/components/Subscription";
+import SubscriptionProvider from "@/providers/SubscriptionProvider";
 
 export default function OnboardingLayout({
   children,
@@ -9,13 +13,15 @@ export default function OnboardingLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--brand-bg)]">
-      <div className={`sticky top-0 z-10 bg-[var(--brand-bg)] px-6`}>
-        <Header />
-        <YearSelector />
+    <SubscriptionProvider>
+      <div className="flex flex-col min-h-screen bg-[var(--brand-bg)]">
+        <div className={`sticky top-0 z-10 bg-[var(--brand-bg)] px-6`}>
+          <Header />
+          <YearSelector />
+        </div>
+        <div className="flex-1 px-6">{children}</div>
+        <BottomNav />
       </div>
-      <div className="flex-1 px-6">{children}</div>
-      <BottomNav />
-    </div>
+    </SubscriptionProvider>
   );
 }
