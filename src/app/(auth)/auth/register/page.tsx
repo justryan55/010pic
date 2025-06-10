@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function Register() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="max-h-screen flex flex-col">
       <LogoText position={"pt-[26px] pl-6"} />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 ">
