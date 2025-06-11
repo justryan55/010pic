@@ -83,7 +83,7 @@ const ImagePicker = () => {
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-evenly transition-transform duration-300 min-h-screen ${
+      className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around transition-transform duration-300 min-h-screen ${
         isPhotoPickerOpen ? "translate-y-0" : "translate-y-full"
       } `}
     >
