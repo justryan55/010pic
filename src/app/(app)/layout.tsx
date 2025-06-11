@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import BottomNav from "@/components/HomePage/BottomNav";
 import "../globals.css";
 import Header from "@/components/HomePage/Header";

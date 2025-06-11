@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createSupabaseServer } from "@/lib/supabase/createSupabaseServer";
 import "../globals.css";
 import { redirect } from "next/navigation";
