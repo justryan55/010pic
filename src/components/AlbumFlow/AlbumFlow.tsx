@@ -27,12 +27,15 @@ export default function AlbumFlow() {
 
     selectedPhotos.forEach((photo, index) => {
       slots.push(
-        <div key={photo.id} className="flex justify-center items-center">
+        <div
+          key={photo.id}
+          className="relative flex justify-center items-center"
+        >
           <Image
             src={photo.previewUrl}
             alt={`Photo ${index + 1}`}
-            width={100}
-            height={100}
+            fill
+            // className="object-cover"
           />
         </div>
       );
@@ -67,6 +70,7 @@ export default function AlbumFlow() {
   return (
     <div>
       <StepOne
+        selectedPhotos={selectedPhotos}
         renderPhotoGrid={renderPhotoGrid}
         handleBulkPhotoSelect={handleBulkPhotoSelect}
       />

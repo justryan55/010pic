@@ -5,7 +5,21 @@ import { useAlbumFlow } from "@/providers/AlbumFlowProvider";
 import Image from "next/image";
 import React from "react";
 
-export default function StepOne({ handleBulkPhotoSelect, renderPhotoGrid }: { handleBulkPhotoSelect: (event: React.ChangeEvent<HTMLInputElement>) => void, renderPhotoGrid: () => React.ReactNode }) {
+type Photo = {
+  id: string;
+  file: File;
+  previewUrl: string;
+};
+
+export default function StepOne({
+  selectedPhotos,
+  handleBulkPhotoSelect,
+  renderPhotoGrid,
+}: {
+  selectedPhotos: Photo[];
+  handleBulkPhotoSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  renderPhotoGrid: () => React.ReactNode;
+}) {
   const { isFlowOpen, toggleFlow } = useAlbumFlow();
   return (
     <div
@@ -35,7 +49,9 @@ export default function StepOne({ handleBulkPhotoSelect, renderPhotoGrid }: { ha
             <h1 className="text-black font-medidum text-[28px] leading-[120%]">
               Add Photos
             </h1>
-            <p className="text-sm font-normal text-[#6F6F6F]">00/10</p>
+            <p className="text-sm font-normal text-[#6F6F6F]">
+              {selectedPhotos?.length ?? "00"}/10
+            </p>
           </div>
 
           <div className="grid grid-cols-5 grid-rows-2 h-56 gap-1">
