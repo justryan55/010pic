@@ -111,14 +111,14 @@ const ImagePicker = () => {
               <Image
                 src={mainImage.src}
                 alt="Selected"
-                className="w-full h-80 object-cover rounded-lg"
+                className="w-full h-100 object-cover rounded-lg"
                 width={100}
                 height={100}
               />
             </div>
           ) : (
             <div
-              className="w-full h-100 border border-[#DFDFDF]  flex flex-col items-center justify-center mb-4 cursor-pointer "
+              className="w-full h-100 border rounded-lg border-[#DFDFDF] flex flex-col items-center justify-center mb-4 cursor-pointer "
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onClick={() => fileInputRef.current?.click()}
@@ -153,7 +153,7 @@ const ImagePicker = () => {
               {selectedImages.map((image) => (
                 <div
                   key={image.id}
-                  className={`relative cursor-pointer flex-none w-20 h-28 overflow-hidden border-2 transition-all ${
+                  className={`relative cursor-pointer flex-none w-20 h-28 rounded-lg overflow-hidden border-2 transition-all ${
                     mainImage?.id === image.id
                       ? "border-black ring-1 ring-black"
                       : "border-transparent hover:border-gray-300"
@@ -188,7 +188,7 @@ const ImagePicker = () => {
                   <button
                     key={`add-btn-${i}`}
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex-none w-20 h-28 border border-[#DFDFDF] flex items-center justify-center"
+                    className="flex-none w-20 h-28 rounded-lg border border-[#DFDFDF] flex items-center justify-center"
                     aria-label="Add image"
                   >
                     <Image
