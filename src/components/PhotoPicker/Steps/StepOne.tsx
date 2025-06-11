@@ -15,7 +15,14 @@ const ImagePicker = () => {
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [mainImage, setMainImage] = useState<SelectedImage | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { isPhotoPickerOpen, togglePhotoPicker } = usePhotoFlow();
+  const {
+    targetMonth,
+    targetYear,
+    imagesByMonth,
+    setImagesByMonth,
+    isPhotoPickerOpen,
+    togglePhotoPicker,
+  } = usePhotoFlow();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -81,7 +88,19 @@ const ImagePicker = () => {
   };
 
   const handleNext = () => {
-    // Here you would typically navigate to next step or save data
+    if (targetMonth && targetYear && selectedImages.length > 0) {
+      const monthKey = `${targetYear}-${targetMonth}`;
+
+      setImagesByMonth((prev: Record<string, SelectedImage[]>) => ({
+        ...prev,
+        [monthKey]: [...(prev[monthKey] || []), ...selectedImages],
+      }));
+
+      setSelectedImages([]);
+      setMainImage(null);
+      togglePhotoPicker();
+    }
+    console.log(imagesByMonth);
   };
 
   return (

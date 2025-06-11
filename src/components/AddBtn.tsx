@@ -11,15 +11,23 @@ export default function AddBtn({ subscribed }: { subscribed: boolean }) {
   const { toggleAlbumFlow, togglePhotoPicker } = usePhotoFlow();
   const pathname = useGetPathname();
 
+  const handleClick = () => {
+    if (!subscribed) {
+      toggleSubscription();
+      return;
+    }
+
+    if (pathname === "/date") {
+      togglePhotoPicker();
+      return;
+    }
+
+    toggleAlbumFlow();
+  };
+
   return (
     <button
-      onClick={
-        !subscribed
-          ? toggleSubscription
-          : pathname === "/date"
-          ? togglePhotoPicker
-          : toggleAlbumFlow
-      }
+      onClick={handleClick}
       type="button"
       aria-label="Add item"
       className="flex justify-center items-center bg-black text-white w-[28px] h-[28px] rounded-full hover:cursor-pointer"
