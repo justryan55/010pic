@@ -26,7 +26,7 @@ export default function SubscriptionProvider({
   return (
     <SubscriptionContext.Provider value={{ isSubOpen, toggleSubscription }}>
       {children}
-      {isSubOpen && <Subscription />}
+      <Subscription />
     </SubscriptionContext.Provider>
   );
 }

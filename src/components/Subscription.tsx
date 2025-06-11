@@ -32,7 +32,7 @@ export default function Subscription() {
   const { isSubOpen, toggleSubscription } = useSubscription();
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 h-[90vh] ${
+      className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 h-[90vh]  ${
         isSubOpen ? "translate-y-0" : "translate-y-full"
       }`}
     >
@@ -53,7 +53,7 @@ export default function Subscription() {
           {items.map((item, index) => (
             <div
               key={index}
-              className="flex flex-row gap-x-5 items-center w-full mt-8"
+              className="flex flex-row gap-x-5 items-center w-full mt-8 hover:pointer-cursor"
             >
               <Image
                 src={item.svg}
