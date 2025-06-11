@@ -14,13 +14,16 @@ interface SelectedImage {
 const ImagePicker = () => {
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [mainImage, setMainImage] = useState<SelectedImage | null>(null);
-  const [allowMultiple, setAllowMultiple] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isPhotoPickerOpen, togglePhotoPicker } = usePhotoFlow();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     processFiles(files);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const processFiles = (files: File[]) => {
@@ -97,7 +100,7 @@ const ImagePicker = () => {
             height={14}
           />
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-2">
           <h2 className="text-sm font-semibold">Title</h2>
           <div className="flex items-center gap-4">
             <span className="text-gray-500 text-sm font-normal">
@@ -118,7 +121,7 @@ const ImagePicker = () => {
             </div>
           ) : (
             <div
-              className="w-full h-100 border rounded-lg border-[#DFDFDF] flex flex-col items-center justify-center mb-4 cursor-pointer "
+              className="w-full h-100 border rounded-lg border-[#DFDFDF] flex flex-col items-center justify-center mb-4 cursor-pointer  "
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onClick={() => fileInputRef.current?.click()}
@@ -132,24 +135,8 @@ const ImagePicker = () => {
             </div>
           )}
 
-          <div className="flex justify-end items-center gap-2 mb-4">
-            <input
-              type="checkbox"
-              id="multiple"
-              checked={allowMultiple}
-              onChange={(e) => setAllowMultiple(e.target.checked)}
-              className="w-4 h-4"
-            />
-            <label
-              htmlFor="multiple"
-              className="text-sm font-normal leading-[120%]"
-            >
-              Add multiple
-            </label>
-          </div>
-
           <div>
-            <div className="flex gap-2 overflow-x-auto  [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
+            <div className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
               {selectedImages.map((image) => (
                 <div
                   key={image.id}
@@ -163,7 +150,7 @@ const ImagePicker = () => {
                   <Image
                     src={image.src}
                     alt="Thumbnail"
-                    className="w-full h-28 object-cover"
+                    className="w-full h-28 object-cover "
                     fill
                   />
                   <button
@@ -202,7 +189,7 @@ const ImagePicker = () => {
               )}
             </div>
           </div>
-        </div>{" "}
+        </div>
       </div>
 
       <Button
@@ -218,7 +205,7 @@ const ImagePicker = () => {
         ref={fileInputRef}
         id="file-upload"
         type="file"
-        multiple={allowMultiple}
+        multiple={true}
         accept="image/*"
         onChange={handleFileSelect}
         className="hidden"
