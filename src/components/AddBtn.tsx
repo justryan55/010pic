@@ -3,14 +3,23 @@
 import React from "react";
 import Image from "next/image";
 import { useSubscription } from "@/providers/SubscriptionProvider";
-import { useAlbumFlow } from "@/providers/AlbumFlowProvider";
+import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
+import { useGetPathname } from "@/helpers/getPathname";
 
 export default function AddBtn({ subscribed }: { subscribed: boolean }) {
   const { toggleSubscription } = useSubscription();
-  const { toggleFlow } = useAlbumFlow();
+  const { toggleAlbumFlow, togglePhotoPicker } = usePhotoFlow();
+  const pathname = useGetPathname();
+
   return (
     <button
-      onClick={!subscribed ? toggleSubscription : toggleFlow}
+      onClick={
+        !subscribed
+          ? toggleSubscription
+          : pathname === "/date"
+          ? togglePhotoPicker
+          : toggleAlbumFlow
+      }
       type="button"
       aria-label="Add item"
       className="flex justify-center items-center bg-black text-white w-[28px] h-[28px] rounded-full hover:cursor-pointer"

@@ -1,7 +1,7 @@
 "use client";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
-import { useAlbumFlow } from "@/providers/AlbumFlowProvider";
+import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Image from "next/image";
 import React from "react";
 
@@ -20,11 +20,11 @@ export default function StepOne({
   handleBulkPhotoSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
   renderPhotoGrid: () => React.ReactNode;
 }) {
-  const { isFlowOpen, toggleFlow } = useAlbumFlow();
+  const { isAlbumFlowOpen, toggleAlbumFlow } = usePhotoFlow();
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 min-h-screen ${
-        isFlowOpen ? "translate-y-0" : "translate-y-full"
+        isAlbumFlowOpen ? "translate-y-0" : "translate-y-full"
       } `}
     >
       <div className="flex flex-col min-h-screen justify-between">
@@ -35,7 +35,7 @@ export default function StepOne({
             </h1>
 
             <Image
-              onClick={toggleFlow}
+              onClick={toggleAlbumFlow}
               src="/images/X.svg"
               alt="Cancel Button"
               width={14}

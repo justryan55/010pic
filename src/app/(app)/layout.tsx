@@ -7,7 +7,7 @@ import SubscriptionProvider from "@/providers/SubscriptionProvider";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
 import { createSupabaseServer } from "@/lib/supabase/createSupabaseServer";
 import { redirect } from "next/navigation";
-import AlbumFlowProvider from "@/providers/AlbumFlowProvider";
+import AlbumFlowProvider from "@/providers/PhotoFlowProvider";
 
 export default async function OnboardingLayout({
   children,
