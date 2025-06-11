@@ -1,3 +1,4 @@
+import AuthForm from "@/components/AuthForm";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Label from "@/components/Label";
@@ -9,7 +10,8 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col">
       <LogoText position={"pt-[26px] pl-6"} />
-      <main className="flex-1 flex flex-col items-center justify-evenly px-6 ">
+      <AuthForm />
+      {/* <main className="flex-1 flex flex-col items-center justify-evenly px-6 ">
         <div className="text-center mb-12 w-full flex justify-center ">
           <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px] ">
             Remember{" "}
@@ -73,7 +75,7 @@ export default function Login() {
             Create Account
           </Link>
         </div>
-      </main>
+      </main> */}
     </div>
   );
 }

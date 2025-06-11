@@ -1,8 +1,10 @@
+import AuthForm from "@/components/AuthForm";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Label from "@/components/Label";
 import LogoText from "@/components/LogoText";
 import SocialLoginButton from "@/components/SocialLoginButton";
+import { useGetPathname } from "@/helpers/getPathname";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -10,8 +12,9 @@ export default function Register() {
   return (
     <div className="max-h-screen flex flex-col">
       <LogoText position={"pt-[26px] pl-6"} />
+      <AuthForm />
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6 ">
+      {/* <main className="flex-1 flex flex-col items-center justify-center px-6 ">
         <div className="text-center  w-full flex justify-between max-w-[300px] py-2">
           <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px] ">
             Create account
@@ -103,7 +106,7 @@ export default function Register() {
             Login
           </Link>
         </div>
-      </main>
+      </main> */}
     </div>
   );
 }
