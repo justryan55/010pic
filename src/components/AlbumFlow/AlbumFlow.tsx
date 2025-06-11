@@ -4,7 +4,9 @@ import StepOne from "./Steps/StepOne";
 import Image from "next/image";
 
 export default function AlbumFlow() {
-  const [selectedPhotos, setSelectedPhotos] = useState<Array<{ id: string; file: File; previewUrl: string }>>([]);
+  const [selectedPhotos, setSelectedPhotos] = useState<
+    Array<{ id: string; file: File; previewUrl: string }>
+  >([]);
   const maxPhotos = 10;
 
   const handleBulkPhotoSelect = (event: ChangeEvent<HTMLInputElement>) => {
@@ -25,7 +27,7 @@ export default function AlbumFlow() {
 
     selectedPhotos.forEach((photo, index) => {
       slots.push(
-        <div key={photo.id} className="flex justify-center items-center p-2">
+        <div key={photo.id} className="flex justify-center items-center">
           <Image
             src={photo.previewUrl}
             alt={`Photo ${index + 1}`}
