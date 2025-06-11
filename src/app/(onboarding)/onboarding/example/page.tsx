@@ -13,24 +13,24 @@ export default function Example() {
               <Image
                 src="/images/example-mess.svg"
                 width={160}
-                height={300}
+                height={275}
                 alt="Example of previous messy photo album"
-                className="w-full max-h-[300px]"
+                className="w-full max-h-[275px]"
               />
               <Image
                 src="/images/example-mess.svg"
                 width={160}
-                height={300}
+                height={275}
                 alt="Example of previous messy photo album"
-                className="w-full max-h-[300px]"
+                className="w-full max-h-[275px]"
               />
             </div>
             <Image
               src="/images/example-tidy.svg"
               width={160}
-              height={300}
+              height={275}
               alt="Example of organised photos"
-              className="w-full max-h-[300px]"
+              className="w-full max-h-[275px]"
             />
           </div>
           <div className="flex flex-row gap-5 w-full text-center">
