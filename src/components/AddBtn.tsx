@@ -4,11 +4,11 @@ import React from "react";
 import Image from "next/image";
 import { useSubscription } from "@/providers/SubscriptionProvider";
 
-export default function AddBtn() {
+export default function AddBtn({ subscribed }: { subscribed: boolean }) {
   const { toggleSubscription } = useSubscription();
   return (
     <button
-      onClick={toggleSubscription}
+      onClick={!subscribed ? toggleSubscription : () => {}}
       type="button"
       aria-label="Add item"
       className="flex justify-center items-center bg-black text-white w-[28px] h-[28px] rounded-full hover:cursor-pointer"

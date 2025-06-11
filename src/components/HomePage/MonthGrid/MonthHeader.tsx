@@ -8,7 +8,7 @@ export default function MonthHeader({ month }: { month: string }) {
         <h1 className={`font-medium text-[28px] leading-[120%]`}>{month}</h1>
         <p className="text-sm font-normal text-[#6F6F6F]">00/10</p>
       </div>
-      <AddBtn />
+      <AddBtn subscribed={true} />
     </div>
   );
 }
