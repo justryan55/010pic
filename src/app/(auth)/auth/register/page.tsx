@@ -92,7 +92,7 @@ export default function Register() {
           </div>
         </form>
 
-        <div className="text-center mt-6">
+        <div className="text-center">
           <p className="text-black text-sm font-normal mb-2">
             Have an account?
           </p>
