@@ -3,12 +3,14 @@
 import React from "react";
 import Image from "next/image";
 import { useSubscription } from "@/providers/SubscriptionProvider";
+import { useAlbumFlow } from "@/providers/AlbumFlowProvider";
 
 export default function AddBtn({ subscribed }: { subscribed: boolean }) {
   const { toggleSubscription } = useSubscription();
+  const { toggleFlow } = useAlbumFlow();
   return (
     <button
-      onClick={!subscribed ? toggleSubscription : () => {}}
+      onClick={!subscribed ? toggleSubscription : toggleFlow}
       type="button"
       aria-label="Add item"
       className="flex justify-center items-center bg-black text-white w-[28px] h-[28px] rounded-full hover:cursor-pointer"

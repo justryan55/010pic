@@ -1,11 +1,12 @@
 import AddBtn from "@/components/AddBtn";
+import AlbumFlow from "@/components/AlbumFlow/AlbumFlow";
 import Image from "next/image";
 import React from "react";
 
 export default function People() {
   return (
     <div className="flex flex-col justify-center items-center min-h-[70vh]">
-      <AddBtn subscribed={false}/>
+      <AddBtn subscribed={false} />
       <div className="flex flex-row gap-x-2 mt-2">
         <Image
           src="/images/lock.svg"
@@ -17,6 +18,7 @@ export default function People() {
           Add Place
         </p>
       </div>
+      <AlbumFlow />
     </div>
   );
 }
