@@ -3,7 +3,6 @@
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Label from "@/components/Label";
-import LogoText from "@/components/LogoText";
 import SocialLoginButton from "@/components/SocialLoginButton";
 import { useGetPathname } from "@/helpers/getPathname";
 import Image from "next/image";
