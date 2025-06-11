@@ -1,7 +1,7 @@
 "use client";
 
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import React, { useState } from "react";
+import React from "react";
 
 const years = Array.from({ length: 75 }, (_, i) => 2025 - i);
 
@@ -13,9 +13,9 @@ export default function YearSelector() {
       {years.map((year) => (
         <li
           key={year}
-          onClick={() => setTargetYear(year.toString())}
+          onClick={() => setTargetYear(year)}
           className={`hover:cursor-pointer whitespace-nowrap select-none flex-shrink-0 ${
-            targetYear === year.toString()
+            Number(targetYear) === year
               ? "text-black"
               : "text-[var(--brand-inactive)]"
           }`}
