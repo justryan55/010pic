@@ -12,17 +12,15 @@ export default async function OnboardingLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  
   const supabase = await createSupabaseServer();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/auth/login");
-  }
+  // if (!user) {
+  //   redirect("/auth/login");
+  // }
   return (
     <SupabaseProvider>
       <SubscriptionProvider>
