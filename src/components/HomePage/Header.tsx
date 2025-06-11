@@ -6,12 +6,14 @@ export default function Header() {
   return (
     <div className="flex flex-row items-center justify-between pt-[26px]">
       <LogoText />
-      <Link
+      {/* <Link
         href="/profile"
         className="font-medium leading-[120%] underline hover:pointer-cursor"
-      >
+      > */}
+      <p className="font-medium leading-[120%] underline hover:pointer-cursor">
         Profile
-      </Link>
+      </p>
+      {/* </Link> */}
     </div>
   );
 }
