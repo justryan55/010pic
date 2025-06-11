@@ -12,7 +12,7 @@ export default function Register() {
       <LogoText position={"pt-[26px] pl-6"} />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 ">
-        <div className="text-center mb-6 w-full flex justify-between max-w-[300px] ">
+        <div className="text-center  w-full flex justify-between max-w-[300px] py-2">
           <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px] ">
             Create account
           </h1>
@@ -25,7 +25,6 @@ export default function Register() {
             />
           </Link>
         </div>
-
         <form className="space-y-4">
           <div>
             <Label text="Name" htmlFor="name" />
