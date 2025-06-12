@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Button from "@/components/Button";
 import Image from "next/image";
@@ -25,7 +25,7 @@ const ImagePicker = () => {
   } = usePhotoFlow();
 
   const monthKey = `${targetYear}-${targetMonth}`;
-  const monthImages = imagesByMonth[monthKey] || [];
+  const monthImages = React.useMemo(() => imagesByMonth[monthKey] || [], [imagesByMonth, monthKey]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -55,11 +55,6 @@ const ImagePicker = () => {
           file: file,
           name: file.name,
         };
-
-        // setImagesByMonth((prev) => ({
-        //   ...prev,
-        //   [monthKey]: [...(prev[monthKey] || []), newImage],
-        // }));
 
         setSelectedImages((prev) => [...prev, newImage]);
 
@@ -121,6 +116,15 @@ const ImagePicker = () => {
 
     togglePhotoPicker();
   };
+
+  useEffect(() => {
+    if (isPhotoPickerOpen && !mainImage) {
+      const allImages = [...monthImages, ...selectedImages];
+      if (allImages.length > 0) {
+        setMainImage(allImages[0]);
+      }
+    }
+  }, [isPhotoPickerOpen, mainImage, monthImages, selectedImages]);
 
   return (
     <div
