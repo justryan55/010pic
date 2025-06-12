@@ -25,7 +25,10 @@ const ImagePicker = () => {
   } = usePhotoFlow();
 
   const monthKey = `${targetYear}-${targetMonth}`;
-  const monthImages = React.useMemo(() => imagesByMonth[monthKey] || [], [imagesByMonth, monthKey]);
+  const monthImages = React.useMemo(
+    () => imagesByMonth[monthKey] || [],
+    [imagesByMonth, monthKey]
+  );
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -133,21 +136,28 @@ const ImagePicker = () => {
       } `}
     >
       <div>
-        <div className="w-full flex justify-end my-3">
-          <Image
-            onClick={handleClose}
-            src="/images/X.svg"
-            alt="Close Button"
-            width={14}
-            height={14}
-          />
+        <div className="flex flex-row items-center">
+          <h1 className="font-medium text-[28px] leading-[120%]">
+            {targetMonth}
+          </h1>
+          <div className="w-full flex justify-end my-3">
+            <Image
+              onClick={handleClose}
+              src="/images/X.svg"
+              alt="Close Button"
+              width={14}
+              height={14}
+            />
+          </div>
         </div>
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-sm font-semibold">Title</h2>
+        <div className="flex justify-start items-center my-2 mb-1 gap-2">
+          <h2 className="text-sm font-semibold">Add Photos</h2>
           <div className="flex items-center gap-4">
             <span className="text-gray-500 text-sm font-normal">
-              You have {10 - monthImages.length - selectedImages.length} photos
-              left
+              {(0 + monthImages.length + selectedImages.length)
+                .toString()
+                .padStart(2, "0")}
+              /10
             </span>
           </div>
         </div>
@@ -170,9 +180,9 @@ const ImagePicker = () => {
               onClick={() => fileInputRef.current?.click()}
             >
               <Image
-                src="/images/plus-black.svg"
-                height={14.5}
-                width={14.5}
+                src="/images/file-add.svg"
+                height={32}
+                width={32}
                 alt="Plus icon"
               />
             </div>
@@ -223,9 +233,9 @@ const ImagePicker = () => {
                   aria-label="Add image"
                 >
                   <Image
-                    src="/images/plus-black.svg"
-                    height={14.5}
-                    width={14.5}
+                    src="/images/file-add.svg"
+                    height={20}
+                    width={20}
                     alt="Plus icon"
                   />
                 </button>

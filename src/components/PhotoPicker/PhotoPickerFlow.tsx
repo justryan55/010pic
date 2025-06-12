@@ -1,5 +1,5 @@
 import React from "react";
-import ImagePicker from "./Steps/StepOne";
+import ImagePicker from "./Steps/ImagePicker";
 
 export default function PhotoPickerFlow() {
   return (
