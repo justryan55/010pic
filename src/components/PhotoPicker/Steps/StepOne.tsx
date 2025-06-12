@@ -97,14 +97,6 @@ const ImagePicker = () => {
         [monthKey]: updated,
       };
     });
-
-    // setSelectedImages((prev) => {
-    //   const updated = prev.filter((img) => img.id !== imageId);
-    //   if (mainImage?.id === imageId) {
-    //     setMainImage(updated.length > 0 ? updated[0] : null);
-    //   }
-    //   return updated;
-    // });
   };
 
   const handleNext = () => {
@@ -117,14 +109,17 @@ const ImagePicker = () => {
       }));
 
       setSelectedImages([]);
-      // setMainImage(null);
+      setMainImage(null);
+      setMainImage(monthImages.length > 0 ? monthImages[0] : null);
+
       togglePhotoPicker();
     }
   };
 
   const handleClose = () => {
     setSelectedImages([]);
-    // setMainImage(null);
+    setMainImage(null);
+
     togglePhotoPicker();
   };
 
