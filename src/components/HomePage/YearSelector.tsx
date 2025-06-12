@@ -3,12 +3,18 @@
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import { nanoid } from "nanoid";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+const yearsStorageKey = "savedYears";
 
 const years = Array.from({ length: 75 }, (_, i) => 2025 - i);
 
 export default function YearSelector() {
-  const [savedYears, setSavedYears] = useState([2025]);
+  const [savedYears, setSavedYears] = useState<number[]>(() => {
+    if (typeof window === "undefined") return [2025];
+    const saved = localStorage.getItem(yearsStorageKey);
+    return saved ? JSON.parse(saved) : [2025];
+  });
 
   const { targetYear, setTargetYear } = usePhotoFlow();
   const [isOpen, setIsOpen] = useState(false);
@@ -27,6 +33,10 @@ export default function YearSelector() {
   };
 
   const remainingYears = years.filter((year) => !savedYears.includes(year));
+
+  useEffect(() => {
+    localStorage.setItem(yearsStorageKey, JSON.stringify(savedYears));
+  }, [savedYears]);
 
   return (
     <div className="relative flex flex-col max-w-sm mb-4 ">
