@@ -25,7 +25,7 @@ export default function Home() {
 
   return (
     <div>
-      <div className="mb-28">
+      <div className="mb-14">
         {months.map((month) => (
           <div key={month} onClick={() => setTargetMonth(month)}>
             <MonthHeader month={month} />
