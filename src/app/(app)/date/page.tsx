@@ -5,7 +5,7 @@ import PhotoGrid from "@/components/HomePage/MonthGrid/PhotoGrid";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React from "react";
 
-const months = [
+const allMonths = [
   "December",
   "November",
   "October",
@@ -21,12 +21,24 @@ const months = [
 ];
 
 export default function Home() {
-  const { setTargetMonth } = usePhotoFlow();
+  const { setTargetMonth, targetYear } = usePhotoFlow();
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonthIndex = now.getMonth();
+
+  const filteredMonths =
+    targetYear === currentYear
+      ? allMonths.filter((month) => {
+          const indexInCalendar = 11 - currentMonthIndex;
+          return allMonths.indexOf(month) >= indexInCalendar;
+        })
+      : allMonths;
 
   return (
     <div>
       <div className="mb-14">
-        {months.map((month) => (
+        {filteredMonths.map((month) => (
           <div key={month} onClick={() => setTargetMonth(month)}>
             <MonthHeader month={month} />
             <PhotoGrid month={month} />
