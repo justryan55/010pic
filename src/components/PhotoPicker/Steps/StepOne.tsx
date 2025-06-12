@@ -24,6 +24,9 @@ const ImagePicker = () => {
     togglePhotoPicker,
   } = usePhotoFlow();
 
+  const monthKey = `${targetYear}-${targetMonth}`;
+  const monthImages = imagesByMonth[monthKey] || [];
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     processFiles(files);
@@ -34,7 +37,7 @@ const ImagePicker = () => {
   };
 
   const processFiles = (files: File[]) => {
-    const remainingSlots = 10 - selectedImages.length;
+    const remainingSlots = 10 - monthImages.length - selectedImages.length;
     const validFiles = files
       .filter((file) => file.type.startsWith("image/"))
       .slice(0, remainingSlots);
@@ -52,6 +55,11 @@ const ImagePicker = () => {
           file: file,
           name: file.name,
         };
+
+        // setImagesByMonth((prev) => ({
+        //   ...prev,
+        //   [monthKey]: [...(prev[monthKey] || []), newImage],
+        // }));
 
         setSelectedImages((prev) => [...prev, newImage]);
 
@@ -78,13 +86,25 @@ const ImagePicker = () => {
   };
 
   const removeImage = (imageId: string) => {
-    setSelectedImages((prev) => {
-      const updated = prev.filter((img) => img.id !== imageId);
+    setImagesByMonth((prev) => {
+      const updated = monthImages.filter((img) => img.id !== imageId);
+
       if (mainImage?.id === imageId) {
         setMainImage(updated.length > 0 ? updated[0] : null);
       }
-      return updated;
+      return {
+        ...prev,
+        [monthKey]: updated,
+      };
     });
+
+    // setSelectedImages((prev) => {
+    //   const updated = prev.filter((img) => img.id !== imageId);
+    //   if (mainImage?.id === imageId) {
+    //     setMainImage(updated.length > 0 ? updated[0] : null);
+    //   }
+    //   return updated;
+    // });
   };
 
   const handleNext = () => {
@@ -97,10 +117,15 @@ const ImagePicker = () => {
       }));
 
       setSelectedImages([]);
-      setMainImage(null);
+      // setMainImage(null);
       togglePhotoPicker();
     }
-    console.log(imagesByMonth);
+  };
+
+  const handleClose = () => {
+    setSelectedImages([]);
+    // setMainImage(null);
+    togglePhotoPicker();
   };
 
   return (
@@ -112,9 +137,9 @@ const ImagePicker = () => {
       <div>
         <div className="w-full flex justify-end my-3">
           <Image
-            onClick={togglePhotoPicker}
+            onClick={handleClose}
             src="/images/X.svg"
-            alt="Cancel Button"
+            alt="Close Button"
             width={14}
             height={14}
           />
@@ -123,7 +148,8 @@ const ImagePicker = () => {
           <h2 className="text-sm font-semibold">Title</h2>
           <div className="flex items-center gap-4">
             <span className="text-gray-500 text-sm font-normal">
-              You have {10 - selectedImages.length} photos left
+              You have {10 - monthImages.length - selectedImages.length} photos
+              left
             </span>
           </div>
         </div>
@@ -156,7 +182,7 @@ const ImagePicker = () => {
 
           <div>
             <div className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
-              {selectedImages.map((image) => (
+              {[...monthImages, ...selectedImages].map((image) => (
                 <div
                   key={image.id}
                   className={`relative cursor-pointer flex-none w-20 h-28 rounded-lg overflow-hidden border-2 transition-all ${
@@ -189,23 +215,23 @@ const ImagePicker = () => {
                   </button>
                 </div>
               ))}
-              {Array.from({ length: 10 - selectedImages.length }).map(
-                (_, i) => (
-                  <button
-                    key={`add-btn-${i}`}
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex-none w-20 h-28 rounded-lg border border-[#DFDFDF] flex items-center justify-center"
-                    aria-label="Add image"
-                  >
-                    <Image
-                      src="/images/plus-black.svg"
-                      height={14.5}
-                      width={14.5}
-                      alt="Plus icon"
-                    />
-                  </button>
-                )
-              )}
+              {Array.from({
+                length: 10 - monthImages.length - selectedImages.length,
+              }).map((_, i) => (
+                <button
+                  key={`add-btn-${i}`}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-none w-20 h-28 rounded-lg border border-[#DFDFDF] flex items-center justify-center"
+                  aria-label="Add image"
+                >
+                  <Image
+                    src="/images/plus-black.svg"
+                    height={14.5}
+                    width={14.5}
+                    alt="Plus icon"
+                  />
+                </button>
+              ))}
             </div>
           </div>
         </div>
