@@ -29,6 +29,7 @@ const ImagePicker = () => {
     () => imagesByMonth[monthKey] || [],
     [imagesByMonth, monthKey]
   );
+  const storageKey = `photoFlow-${targetYear}-${targetMonth}`;
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -84,27 +85,42 @@ const ImagePicker = () => {
   };
 
   const removeImage = (imageId: string) => {
-    setImagesByMonth((prev) => {
-      const updated = monthImages.filter((img) => img.id !== imageId);
+    const updated = monthImages.filter((img) => img.id !== imageId);
 
-      if (mainImage?.id === imageId) {
-        setMainImage(updated.length > 0 ? updated[0] : null);
-      }
-      return {
-        ...prev,
-        [monthKey]: updated,
-      };
-    });
+    if (mainImage?.id === imageId) {
+      setMainImage(updated.length > 0 ? updated[0] : null);
+    }
+
+    setImagesByMonth((prev) => ({
+      ...prev,
+      [monthKey]: updated,
+    }));
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+    } catch (e) {
+      console.error("Failed to save to localStorage", e);
+    }
   };
 
   const handleNext = () => {
     if (targetMonth && targetYear && selectedImages.length > 0) {
       const monthKey = `${targetYear}-${targetMonth}`;
+      const updatedImages = [
+        ...(imagesByMonth[monthKey] || []),
+        ...selectedImages,
+      ];
 
       setImagesByMonth((prev: Record<string, SelectedImage[]>) => ({
         ...prev,
-        [monthKey]: [...(prev[monthKey] || []), ...selectedImages],
+        [monthKey]: updatedImages,
       }));
+
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(updatedImages));
+      } catch (e) {
+        console.error("Failed to save to localStorage", e);
+      }
 
       setSelectedImages([]);
       setMainImage(null);

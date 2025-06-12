@@ -2,7 +2,7 @@
 
 import AlbumFlow from "@/components/AlbumFlow/AlbumFlow";
 import PhotoPickerFlow from "@/components/PhotoPicker/PhotoPickerFlow";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface SelectedImage {
   id: string;
@@ -46,11 +46,15 @@ export default function AlbumFlowProvider({
 }) {
   const [isAlbumFlowOpen, setIsAlbumFlowOpen] = useState(false);
   const [isPhotoPickerOpen, setIsPhotoPickerOpen] = useState(false);
-  const [targetMonth, setTargetMonth] = useState<string | null>(null);
+  const [targetMonth, setTargetMonth] = useState<string | null>(
+    new Date().toLocaleString("default", { month: "2-digit" })
+  );
   const [targetYear, setTargetYear] = useState<number | null>(
     new Date().getFullYear()
   );
-  const [imagesByMonth, setImagesByMonth] = useState({});
+  const [imagesByMonth, setImagesByMonth] = useState<
+    Record<string, SelectedImage[]>
+  >({});
 
   const toggleAlbumFlow = () => {
     setIsAlbumFlowOpen((prev) => !prev);
@@ -59,6 +63,29 @@ export default function AlbumFlowProvider({
   const togglePhotoPicker = () => {
     setIsPhotoPickerOpen((prev) => !prev);
   };
+
+  useEffect(() => {
+    const storedImagesByMonth: Record<string, SelectedImage[]> = {};
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("photoFlow-")) {
+        try {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            storedImagesByMonth[key.replace("photoFlow-", "")] =
+              JSON.parse(stored);
+          }
+        } catch (e) {
+          console.error("Failed to parse stored images", e);
+        }
+      }
+    }
+
+    if (Object.keys(storedImagesByMonth).length > 0) {
+      setImagesByMonth(storedImagesByMonth);
+    }
+  }, []);
 
   return (
     <PhotoFlowContext.Provider
