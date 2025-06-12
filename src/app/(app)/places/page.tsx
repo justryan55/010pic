@@ -6,7 +6,7 @@ import React from "react";
 export default function People() {
   return (
     <div className="flex flex-col justify-center items-center min-h-[70vh]">
-      <AddBtn subscribed={false} />
+      <AddBtn subscribed={true} />
       <div className="flex flex-row gap-x-2 mt-2">
         <Image
           src="/images/lock.svg"
