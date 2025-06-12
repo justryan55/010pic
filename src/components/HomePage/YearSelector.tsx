@@ -37,7 +37,7 @@ export default function YearSelector() {
   };
 
   const selectOrRemoveYear = (year: number) => {
-    if (isOpen) {
+    if (isOpen && year !== currentYear) {
       openDeletionModal(year);
       return;
     }
