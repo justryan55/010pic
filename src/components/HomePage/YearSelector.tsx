@@ -64,8 +64,10 @@ export default function YearSelector() {
           </p>
         </div>
         <div
-          className={`absolute min-h-[40px] top-5 flex flex-row gap-7 overflow-x-auto max-w-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x transition duration-200 ${
-            isOpen ? "opacity-100" : "opacity-0"
+          className={`absolute min-h-[40px] top-5 flex flex-row gap-7 overflow-x-auto max-w-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x transition duration-200 transform ease-out ${
+            isOpen
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 -translate-y-2 pointer-events-none"
           }`}
         >
           {remainingYears.map((year) => (
