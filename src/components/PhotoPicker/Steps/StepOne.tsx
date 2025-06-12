@@ -110,7 +110,6 @@ const ImagePicker = () => {
 
       setSelectedImages([]);
       setMainImage(null);
-      setMainImage(monthImages.length > 0 ? monthImages[0] : null);
 
       togglePhotoPicker();
     }
