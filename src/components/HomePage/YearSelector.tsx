@@ -29,8 +29,8 @@ export default function YearSelector() {
   const remainingYears = years.filter((year) => !savedYears.includes(year));
 
   return (
-    <div className="relative flex flex-col max-w-sm ">
-      <div className=" flex flex-row gap-6 mt-6 items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
+    <div className="relative flex flex-col max-w-sm mb-4 ">
+      <div className=" flex flex-row gap-6  mt-6 items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
         {savedYears.map((year) => {
           return (
             <ul key={nanoid()}>
@@ -66,7 +66,7 @@ export default function YearSelector() {
       </div>
 
       <div
-        className={`flex flex-row gap-7 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x transition duration-200 transform ease-out ${
+        className={`pt-1 flex flex-row gap-7 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x transition duration-200 transform ease-out ${
           isOpen
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-2 pointer-events-none"
