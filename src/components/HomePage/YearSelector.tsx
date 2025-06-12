@@ -4,6 +4,7 @@ import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import { nanoid } from "nanoid";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import Button from "../Button";
 
 const yearsStorageKey = "savedYears";
 
@@ -16,8 +17,11 @@ export default function YearSelector() {
     return saved ? JSON.parse(saved) : [2025];
   });
 
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [yearToRemove, setYearToRemove] = useState<number | null>(null);
   const { targetYear, setTargetYear } = usePhotoFlow();
   const [isOpen, setIsOpen] = useState(false);
+  const currentYear = new Date().getFullYear();
 
   const toggleYearMenu = () => {
     setIsOpen((prev) => !prev);
@@ -27,8 +31,17 @@ export default function YearSelector() {
     setSavedYears((prev) => [...prev, year].sort((a, b) => b - a));
   };
 
-  const setDisplayYear = (year: number) => {
-    setIsOpen(false);
+  const openDeletionModal = (year: number) => {
+    setOpenDeleteModal(true);
+    setYearToRemove(year);
+  };
+
+  const selectOrRemoveYear = (year: number) => {
+    if (isOpen) {
+      openDeletionModal(year);
+      return;
+    }
+
     setTargetYear(year);
   };
 
@@ -39,66 +52,129 @@ export default function YearSelector() {
   }, [savedYears]);
 
   return (
-    <div className="relative flex flex-col max-w-sm mb-4 ">
-      <div className=" flex flex-row gap-6  mt-6 items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
-        {savedYears.map((year) => {
-          return (
-            <ul key={nanoid()}>
-              <li
-                key={year}
-                onClick={() => setDisplayYear(year)}
-                className={`hover:cursor-pointer whitespace-nowrap select-none flex-shrink-0 text-sm ${
-                  Number(targetYear) === year
-                    ? "text-black"
-                    : "text-[var(--brand-inactive)]"
-                }`}
-              >
-                {year}
-              </li>
+    <div className="flex flex-col">
+      <div className="flex flex-row max-w-sm mb-4 ">
+        <div className=" flex flex-row mt-6 items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
+          <div className="flex flex-row items-center gap-5">
+            <ul className="flex flex-row items-center gap-5">
+              {savedYears.map((year) => {
+                return (
+                  <li
+                    key={year}
+                    onClick={() => selectOrRemoveYear(year)}
+                    className={`relative pl-3 hover:cursor-pointer whitespace-nowrap select-none flex-shrink-0 text-sm ${
+                      isOpen && "text-black"
+                    }
+                    ${
+                      Number(targetYear) === year
+                        ? "text-black"
+                        : "text-[var(--brand-inactive)]"
+                    }`}
+                  >
+                    {isOpen && currentYear !== year && (
+                      <Image
+                        src="/images/minus-black.svg"
+                        width={8}
+                        height={1}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 transition-all duration-300 ease-in-out"
+                        alt="Minus icon"
+                      />
+                    )}
+                    {year}
+                  </li>
+                );
+              })}
             </ul>
-          );
-        })}
 
-        <div className="flex flex-row" onClick={() => toggleYearMenu()}>
-          <Image
-            src="/images/arrow.svg"
-            width={6.7}
-            height={11.3}
-            className={`transition duration-300 ${
-              isOpen ? "rotate-90" : "rotate-none"
-            }`}
-            alt="Arrow button"
-          />
-          <p className="font-normal text-[13px] leading-[120%] ml-1 text-[#6F6F6F] min-w-min whitespace-nowrap">
-            Add Years
-          </p>
+            <div
+              className="flex flex-row items-center bg-black py-[11px] px-[15px] rounded-full min-w-[89px] w-full h-7"
+              onClick={() => toggleYearMenu()}
+            >
+              <div className="relative w-[14.5px] h-[14.5px] mr-2">
+                <Image
+                  src="/images/plus.svg"
+                  fill
+                  className={`absolute transition-all duration-300 ease-in-out ${
+                    isOpen ? "opacity-0 scale-90" : "opacity-100 scale-100"
+                  }`}
+                  alt="Plus icon"
+                />
+                <Image
+                  src="/images/minus.svg"
+                  fill
+                  className={`absolute transition-all duration-300 ease-in-out ${
+                    isOpen ? "opacity-100 scale-100" : "opacity-0 scale-90"
+                  }`}
+                  alt="Minus icon"
+                />
+              </div>
+              <p className="font-normal text-[13px] leading-[120%] ml-1 text-white min-w-min whitespace-nowrap">
+                Year
+              </p>
+              {isOpen &&
+                remainingYears.map((year) => (
+                  <ul key={nanoid()} className="flex flex-row mr-2">
+                    <li
+                      key={year}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addYearToList(year);
+                      }}
+                      // className={`hover:cursor-pointer whitespace-nowrap select-none  flex-shrink-0 text-black text-sm flex flex-row items-center gap-1`}
+                      className={`flex items-center text-white text-sm cursor-pointer`}
+                    >
+                      <div className="flex flex-row mr-2">
+                        <Image
+                          src="/images/plus.svg"
+                          width={9}
+                          height={9}
+                          alt="Add year button"
+                          className="ml-5 mr-1"
+                        />
+                        {year}
+                      </div>
+                    </li>
+                  </ul>
+                ))}
+            </div>
+          </div>{" "}
         </div>
       </div>
-
       <div
-        className={`pt-1 flex flex-row gap-7 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x transition duration-200 transform ease-out ${
-          isOpen
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-2 pointer-events-none"
-        }`}
+        className={`${
+          openDeleteModal ? "opacity-100 h-[163px]" : "opacity-0 h-0 hidden"
+        } relative w-full  border border-black flex flex-col items-center justify-evenly transition duration-200 ease-in-out `}
       >
-        {remainingYears.map((year) => (
-          <ul key={nanoid()} className="mt-1 mr-2">
-            <li
-              key={year}
-              onClick={() => addYearToList(year)}
-              className={`hover:cursor-pointer whitespace-nowrap select-none  flex-shrink-0 text-black text-sm flex flex-row items-center gap-1`}
-            >
-              <Image
-                src="/images/plus-black.svg"
-                width={9}
-                height={9}
-                alt="Add year button"
-              />
-              {year}
-            </li>
-          </ul>
-        ))}
+        <button
+          aria-label="Cancel deletion"
+          className="absolute top-3 right-3 cursor-pointer"
+          onClick={() => setOpenDeleteModal(false)}
+        >
+          <Image
+            src="/images/X.svg"
+            alt="Cancel Button"
+            width={14}
+            height={14}
+          />
+        </button>
+        <p className="text-sm font-normal leading-[120%] text-center w-[178px]">
+          All pictures from this year will be deleted
+        </p>
+        <Button
+          text="Confirm & Delete"
+          uppercase={false}
+          padding="[15px]"
+          textSize="text-[13px]"
+          maxWidth="max-w-[159px]"
+          onClick={() => {
+            const updatedYears = savedYears.filter(
+              (year) => year !== yearToRemove
+            );
+            setSavedYears(updatedYears);
+            setOpenDeleteModal(false);
+            setYearToRemove(null);
+          }}
+        />
       </div>
     </div>
   );
