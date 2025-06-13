@@ -1,6 +1,7 @@
 "use client";
 
 import AlbumFlow from "@/components/AlbumFlow/AlbumFlow";
+import DatePhotoPicker from "@/components/DatePhotoPicker";
 import PhotoPickerFlow from "@/components/PhotoPicker/PhotoPickerFlow";
 import { createContext, useContext, useEffect, useState } from "react";
 
@@ -39,7 +40,7 @@ const PhotoFlowContext = createContext<PhotoFlowContext>({
   setImagesByMonth: () => {},
 });
 
-export default function AlbumFlowProvider({
+export default function PhotoFlowProvider({
   children,
 }: {
   children: React.ReactNode;
@@ -104,7 +105,7 @@ export default function AlbumFlowProvider({
     >
       {children}
       <AlbumFlow />
-      <PhotoPickerFlow />
+      <DatePhotoPicker />
     </PhotoFlowContext.Provider>
   );
 }

@@ -7,7 +7,7 @@ import SubscriptionProvider from "@/providers/SubscriptionProvider";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
 import { createSupabaseServer } from "@/lib/supabase/createSupabaseServer";
 import { redirect } from "next/navigation";
-import AlbumFlowProvider from "@/providers/PhotoFlowProvider";
+import PhotoFlowProvider from "@/providers/PhotoFlowProvider";
 
 export default async function OnboardingLayout({
   children,
@@ -26,7 +26,7 @@ export default async function OnboardingLayout({
   return (
     <SupabaseProvider>
       <SubscriptionProvider>
-        <AlbumFlowProvider>
+        <PhotoFlowProvider>
           <div className="flex flex-col min-h-screen bg-[var(--brand-bg)]">
             <div className={`sticky top-0 z-10 bg-[var(--brand-bg)] px-6`}>
               <Header />
@@ -35,7 +35,7 @@ export default async function OnboardingLayout({
             <div className="flex-1 px-6">{children}</div>
             <BottomNav />
           </div>
-        </AlbumFlowProvider>
+        </PhotoFlowProvider>
       </SubscriptionProvider>
     </SupabaseProvider>
   );

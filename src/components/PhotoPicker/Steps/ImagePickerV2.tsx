@@ -11,25 +11,34 @@ interface SelectedImage {
   name: string;
 }
 
-const ImagePicker = () => {
+interface ImagePickerConfig {
+  title: string;
+  maxImages: number;
+  storageKey: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (images: SelectedImage[]) => void;
+  existingImages?: SelectedImage[];
+}
+
+interface ImagePickerProps {
+  config: ImagePickerConfig;
+}
+
+const ImagePickerV2: React.FC<ImagePickerProps> = ({ config }) => {
+  const {
+    title,
+    maxImages,
+    storageKey,
+    isOpen,
+    onClose,
+    onSave,
+    existingImages = [],
+  } = config;
+
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [mainImage, setMainImage] = useState<SelectedImage | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const {
-    targetMonth,
-    targetYear,
-    imagesByMonth,
-    setimagesByMonth,
-    isPhotoPickerOpen,
-    togglePhotoPicker,
-  } = usePhotoFlow();
-
-  const monthKey = `${targetYear}-${targetMonth}`;
-  const monthImages = React.useMemo(
-    () => imagesByMonth[monthKey] || [],
-    [imagesByMonth, monthKey]
-  );
-  const storageKey = `photoFlow-${targetYear}-${targetMonth}`;
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -41,7 +50,8 @@ const ImagePicker = () => {
   };
 
   const processFiles = (files: File[]) => {
-    const remainingSlots = 10 - monthImages.length - selectedImages.length;
+    const remainingSlots =
+      maxImages - existingImages.length - selectedImages.length;
     const validFiles = files
       .filter((file) => file.type.startsWith("image/"))
       .slice(0, remainingSlots);
@@ -79,77 +89,62 @@ const ImagePicker = () => {
   };
 
   const removeImage = (imageId: string) => {
-    const updated = monthImages.filter((img) => img.id !== imageId);
+    const isExistingImage = existingImages.some((img) => img.id === imageId);
 
-    if (mainImage?.id === imageId) {
-      setMainImage(updated.length > 0 ? updated[0] : null);
+    if (isExistingImage) {
+      const updatedExisting = existingImages.filter(
+        (img) => img.id !== imageId
+      );
+      onSave(updatedExisting);
+    } else {
+      setSelectedImages((prev) => prev.filter((img) => img.id !== imageId));
     }
 
-    setimagesByMonth((prev) => ({
-      ...prev,
-      [monthKey]: updated,
-    }));
-
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(updated));
-    } catch (e) {
-      console.error("Failed to save to localStorage", e);
+    if (mainImage?.id === imageId) {
+      const allImages = [...existingImages, ...selectedImages].filter(
+        (img) => img.id !== imageId
+      );
+      setMainImage(allImages.length > 0 ? allImages[0] : null);
     }
   };
 
-  const handleNext = () => {
-    if (targetMonth && targetYear && selectedImages.length > 0) {
-      const monthKey = `${targetYear}-${targetMonth}`;
-      const updatedImages = [
-        ...(imagesByMonth[monthKey] || []),
-        ...selectedImages,
-      ];
-
-      setimagesByMonth((prev: Record<string, SelectedImage[]>) => ({
-        ...prev,
-        [monthKey]: updatedImages,
-      }));
-
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(updatedImages));
-      } catch (e) {
-        console.error("Failed to save to localStorage", e);
-      }
-
+  const handleSave = () => {
+    if (selectedImages.length > 0) {
+      const allImages = [...selectedImages, ...existingImages];
+      onSave(allImages);
       setSelectedImages([]);
       setMainImage(null);
-
-      togglePhotoPicker();
     }
+    onClose();
   };
 
   const handleClose = () => {
     setSelectedImages([]);
     setMainImage(null);
-
-    togglePhotoPicker();
+    onClose();
   };
 
   useEffect(() => {
-    if (isPhotoPickerOpen && !mainImage) {
-      const allImages = [...monthImages, ...selectedImages];
+    if (isOpen && !mainImage) {
+      const allImages = [...existingImages, ...selectedImages];
       if (allImages.length > 0) {
         setMainImage(allImages[0]);
       }
     }
-  }, [isPhotoPickerOpen, mainImage, monthImages, selectedImages]);
+  }, [isOpen, mainImage, existingImages, selectedImages]);
+
+  const allImages = [...existingImages, ...selectedImages];
+  const totalCount = allImages.length;
 
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around transition-transform duration-300 min-h-screen ${
-        isPhotoPickerOpen ? "translate-y-0" : "translate-y-full"
+        isOpen ? "translate-y-0" : "translate-y-full"
       } `}
     >
       <div>
         <div className="flex flex-row items-center">
-          <h1 className="font-medium text-[28px] leading-[120%]">
-            {targetMonth}
-          </h1>
+          <h1 className="font-medium text-[28px] leading-[120%]">{title}</h1>
           <div className="w-full flex justify-end my-3">
             <Image
               onClick={handleClose}
@@ -164,10 +159,7 @@ const ImagePicker = () => {
           <h2 className="text-sm font-semibold">Add Photos</h2>
           <div className="flex items-center gap-4">
             <span className="text-gray-500 text-sm font-normal">
-              {(0 + monthImages.length + selectedImages.length)
-                .toString()
-                .padStart(2, "0")}
-              /10
+              {totalCount.toString().padStart(2, "0")} / {maxImages}
             </span>
           </div>
         </div>
@@ -200,7 +192,7 @@ const ImagePicker = () => {
 
           <div>
             <div className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
-              {[...monthImages, ...selectedImages].map((image) => (
+              {allImages.map((image) => (
                 <div
                   key={image.id}
                   className={`relative cursor-pointer flex-none w-20 h-28 rounded-lg overflow-hidden border-2 transition-all ${
@@ -234,7 +226,7 @@ const ImagePicker = () => {
                 </div>
               ))}
               {Array.from({
-                length: 10 - monthImages.length - selectedImages.length,
+                length: maxImages - totalCount,
               }).map((_, i) => (
                 <button
                   key={`add-btn-${i}`}
@@ -257,7 +249,7 @@ const ImagePicker = () => {
 
       <Button
         text="NEXT"
-        onClick={handleNext}
+        onClick={handleSave}
         disabled={selectedImages.length === 0}
       />
 
@@ -279,4 +271,4 @@ const ImagePicker = () => {
   );
 };
 
-export default ImagePicker;
+export default ImagePickerV2;

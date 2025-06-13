@@ -19,7 +19,7 @@ export default function YearSelector() {
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [yearToRemove, setYearToRemove] = useState<number | null>(null);
-  const { targetYear, setTargetYear, imagesByMonth, setImagesByMonth } =
+  const { targetYear, setTargetYear, imagesByMonth, setimagesByMonth } =
     usePhotoFlow();
   const [isOpen, setIsOpen] = useState(false);
   const currentYear = new Date().getFullYear();
@@ -41,7 +41,9 @@ export default function YearSelector() {
   const confirmDeletion = () => {
     const updatedYears = savedYears.filter((year) => year !== yearToRemove);
 
-    const updatedImages = Object.entries(imagesByMonth).reduce<Record<string, typeof imagesByMonth[keyof typeof imagesByMonth]>>((acc, obj) => {
+    const updatedImages = Object.entries(imagesByMonth).reduce<
+      Record<string, (typeof imagesByMonth)[keyof typeof imagesByMonth]>
+    >((acc, obj) => {
       const key = obj[0];
       const value = obj[1];
 
@@ -53,7 +55,7 @@ export default function YearSelector() {
     }, {});
 
     setSavedYears(updatedYears);
-    setImagesByMonth(updatedImages);
+    setimagesByMonth(updatedImages);
 
     setOpenDeleteModal(false);
     setYearToRemove(null);
