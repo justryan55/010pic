@@ -76,31 +76,11 @@ export default function Subscription() {
       </div>
 
       <div>
-        <div className="flex flex-row justify-between">
-          <div>
-            <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px] ">
-              Monthly
-            </h1>
-            <p className="text-lg leading-[120%] font-normal text-[#6F6F6F]">
-              20 kr.
-            </p>
-          </div>
-          <div className="max-w-sm">
-            <Button text="Choose" />
-          </div>
+        <div className="flex flex-row justify-center items-center">
+          <Button text="Monthly - 20 kr." />
         </div>
-        <div className="flex flex-row justify-between mt-6">
-          <div>
-            <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px] ">
-              Yearly
-            </h1>
-            <p className="text-lg leading-[120%] font-normal text-[#6F6F6F]">
-              200 kr.
-            </p>
-          </div>
-          <div className="max-w-sm">
-            <Button text="Choose" />
-          </div>
+        <div className="flex flex-row justify-center items-center mt-4">
+          <Button text="Yearly - 200 kr." />
         </div>
         <div className="flex flex-row items-center justify-center gap-1 my-10">
           <p className="text-black font-semibold text-sm leading-[120%] ">
