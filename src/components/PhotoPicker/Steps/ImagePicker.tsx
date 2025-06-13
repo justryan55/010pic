@@ -47,10 +47,6 @@ const ImagePicker = () => {
       .slice(0, remainingSlots);
 
     validFiles.forEach((file: File) => {
-      if (!file.type.startsWith("image/")) {
-        return;
-      }
-
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
         const newImage = {
@@ -62,9 +58,7 @@ const ImagePicker = () => {
 
         setSelectedImages((prev) => [...prev, newImage]);
 
-        if (!mainImage) {
-          setMainImage(newImage);
-        }
+        setMainImage(newImage);
       };
       reader.readAsDataURL(file);
     });
