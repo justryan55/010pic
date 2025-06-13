@@ -2,9 +2,11 @@
 
 import AlbumFlow from "@/components/AlbumFlow/AlbumFlow";
 import DatePhotoPicker from "@/components/DatePhotoPicker";
-import PhotoPickerFlow from "@/components/PhotoPicker/PhotoPickerFlow";
+import PeoplePhotoPicker from "@/components/PeoplePhotoPicker";
+import PlacesPhotoPicker from "@/components/PlacesPhotoPicker";
 import { createContext, useContext, useEffect, useState } from "react";
 
+type PhotoPickerType = "date" | "people" | "places" | null;
 interface SelectedImage {
   id: string;
   src: string;
@@ -13,6 +15,9 @@ interface SelectedImage {
 }
 
 type PhotoFlowContext = {
+  activePicker: PhotoPickerType;
+  togglePicker: (picker: PhotoPickerType) => void;
+
   isAlbumFlowOpen: boolean;
   toggleAlbumFlow: () => void;
   isPhotoPickerOpen: boolean;
@@ -21,13 +26,21 @@ type PhotoFlowContext = {
   targetYear: number | null;
   setTargetMonth: (month: string | null) => void;
   setTargetYear: (year: number | null) => void;
+
   imagesByMonth: Record<string, SelectedImage[]>;
   setImagesByMonth: React.Dispatch<
+    React.SetStateAction<Record<string, SelectedImage[]>>
+  >;
+  imagesByPlace: Record<string, SelectedImage[]>;
+  setImagesByPlace: React.Dispatch<
     React.SetStateAction<Record<string, SelectedImage[]>>
   >;
 };
 
 const PhotoFlowContext = createContext<PhotoFlowContext>({
+  activePicker: null,
+  togglePicker: () => {},
+
   isAlbumFlowOpen: false,
   toggleAlbumFlow: () => {},
   isPhotoPickerOpen: false,
@@ -38,6 +51,8 @@ const PhotoFlowContext = createContext<PhotoFlowContext>({
   setTargetYear: () => {},
   imagesByMonth: {},
   setImagesByMonth: () => {},
+  imagesByPlace: {},
+  setImagesByPlace: () => {},
 });
 
 export default function PhotoFlowProvider({
@@ -47,15 +62,43 @@ export default function PhotoFlowProvider({
 }) {
   const [isAlbumFlowOpen, setIsAlbumFlowOpen] = useState(false);
   const [isPhotoPickerOpen, setIsPhotoPickerOpen] = useState(false);
+  const [activePicker, setActivePicker] = useState<PhotoPickerType>(null);
+
   const [targetMonth, setTargetMonth] = useState<string | null>(
     new Date().toLocaleString("default", { month: "2-digit" })
   );
   const [targetYear, setTargetYear] = useState<number | null>(
     new Date().getFullYear()
   );
+
+  const [imagesByPlace, setImagesByPlace] = useState<
+    Record<string, SelectedImage[]>
+  >({});
+
   const [imagesByMonth, setImagesByMonth] = useState<
     Record<string, SelectedImage[]>
   >({});
+
+  const togglePicker = (picker: PhotoPickerType) => {
+    setActivePicker((current) => (current === picker ? null : picker));
+    console.log(picker);
+  };
+
+  useEffect(() => {
+    const stored: Record<string, SelectedImage[]> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith("photoFlow-")) {
+        try {
+          const images = JSON.parse(localStorage.getItem(key)!);
+          stored[key.replace("photoFlow-", "")] = images;
+        } catch (e) {
+          console.error("Failed to parse stored images", e);
+        }
+      }
+    }
+    setImagesByMonth(stored);
+  }, []);
 
   const toggleAlbumFlow = () => {
     setIsAlbumFlowOpen((prev) => !prev);
@@ -63,34 +106,14 @@ export default function PhotoFlowProvider({
 
   const togglePhotoPicker = () => {
     setIsPhotoPickerOpen((prev) => !prev);
+    setActivePicker(null);
   };
-
-  useEffect(() => {
-    const storedImagesByMonth: Record<string, SelectedImage[]> = {};
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith("photoFlow-")) {
-        try {
-          const stored = localStorage.getItem(key);
-          if (stored) {
-            storedImagesByMonth[key.replace("photoFlow-", "")] =
-              JSON.parse(stored);
-          }
-        } catch (e) {
-          console.error("Failed to parse stored images", e);
-        }
-      }
-    }
-
-    if (Object.keys(storedImagesByMonth).length > 0) {
-      setImagesByMonth(storedImagesByMonth);
-    }
-  }, []);
 
   return (
     <PhotoFlowContext.Provider
       value={{
+        activePicker,
+        togglePicker,
         isAlbumFlowOpen,
         toggleAlbumFlow,
         isPhotoPickerOpen,
@@ -101,11 +124,15 @@ export default function PhotoFlowProvider({
         setTargetYear,
         imagesByMonth,
         setImagesByMonth,
+        imagesByPlace,
+        setImagesByPlace,
       }}
     >
       {children}
-      <AlbumFlow />
-      <DatePhotoPicker />
+      {isAlbumFlowOpen && <AlbumFlow />}
+      {activePicker === "date" && <DatePhotoPicker />}
+      {activePicker === "people" && <PeoplePhotoPicker />}
+      {activePicker === "places" && <PlacesPhotoPicker />}
     </PhotoFlowContext.Provider>
   );
 }

@@ -1,8 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+"use client";
+
+import React, { useState, useRef, useEffect, ReactNode } from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Button from "@/components/Button";
 import Image from "next/image";
 import { nanoid } from "nanoid";
+import Input from "@/components/Input";
 
 interface SelectedImage {
   id: string;
@@ -12,7 +15,8 @@ interface SelectedImage {
 }
 
 interface ImagePickerConfig {
-  title: string;
+  title: string | ReactNode;
+  setTitle?: (value: string) => void;
   maxImages: number;
   storageKey: string;
   isOpen: boolean;
@@ -28,12 +32,14 @@ interface ImagePickerProps {
 const ImagePickerV2: React.FC<ImagePickerProps> = ({ config }) => {
   const {
     title,
+    setTitle,
     maxImages,
     storageKey,
     isOpen,
     onClose,
     onSave,
     existingImages = [],
+    needsTitleInput = false,
   } = config;
 
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
@@ -136,6 +142,10 @@ const ImagePickerV2: React.FC<ImagePickerProps> = ({ config }) => {
   const allImages = [...existingImages, ...selectedImages];
   const totalCount = allImages.length;
 
+  useEffect(() => {
+    console.log(title);
+  }, [title]);
+
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around transition-transform duration-300 min-h-screen ${
@@ -144,7 +154,20 @@ const ImagePickerV2: React.FC<ImagePickerProps> = ({ config }) => {
     >
       <div>
         <div className="flex flex-row items-center">
-          <h1 className="font-medium text-[28px] leading-[120%]">{title}</h1>
+          {needsTitleInput ? (
+            <Input
+              id="places"
+              type="text"
+              placeholder="Enter place title"
+              value={title}
+              onChange={(e) => setTitle?.(e.target.value)}
+            />
+          ) : (
+            <div className="font-medium text-[28px] leading-[120%]">
+              {title}
+            </div>
+          )}
+
           <div className="w-full flex justify-end my-3">
             <Image
               onClick={handleClose}

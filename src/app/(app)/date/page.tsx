@@ -1,6 +1,6 @@
 "use client";
 
-import MonthHeader from "@/components/HomePage/MonthGrid/MonthHeader";
+import CollectionHeader from "@/components/CollectionHeader";
 import PhotoGrid from "@/components/HomePage/MonthGrid/PhotoGrid";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React from "react";
@@ -21,7 +21,7 @@ const allMonths = [
 ];
 
 export default function Home() {
-  const { setTargetMonth, targetYear } = usePhotoFlow();
+  const { setTargetMonth, targetYear, imagesByMonth } = usePhotoFlow();
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -35,13 +35,29 @@ export default function Home() {
         })
       : allMonths;
 
+  function MonthPhotoGrid({ month }: { month: string }) {
+    const monthKey = `${targetYear}-${month}`;
+    const images = imagesByMonth[monthKey] || [];
+
+    return <PhotoGrid images={images} />;
+  }
+
+  function MonthHeader({ month }: { month: string }) {
+    const displayYear = targetYear || new Date().getFullYear();
+    const monthKey = `${displayYear}-${month}`;
+
+    const monthImages = imagesByMonth[monthKey] || [];
+    const imageCount = monthImages.length;
+    return <CollectionHeader header={month} imageCount={imageCount} />;
+  }
+
   return (
     <div>
       <div className="mb-14">
         {filteredMonths.map((month) => (
           <div key={month} onClick={() => setTargetMonth(month)}>
             <MonthHeader month={month} />
-            <PhotoGrid month={month} />
+            <MonthPhotoGrid month={month} />
           </div>
         ))}
       </div>

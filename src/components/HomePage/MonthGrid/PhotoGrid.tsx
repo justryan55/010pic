@@ -1,3 +1,5 @@
+"use client";
+
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Image from "next/image";
 import React, { useState } from "react";
@@ -8,14 +10,14 @@ interface SelectedImage {
   name: string;
 }
 
-export default function PhotoGrid({ month }: { month: string }) {
+interface PhotoGridProps {
+  images: SelectedImage[];
+}
+
+export default function PhotoGrid({ images }: PhotoGridProps) {
   const [fullScreenImage, setFullScreenImage] = useState<SelectedImage | null>(
     null
   );
-
-  const { targetYear, imagesByMonth } = usePhotoFlow();
-  const monthKey = `${targetYear}-${month}`;
-  const monthImages: SelectedImage[] = imagesByMonth[monthKey] || [];
 
   const openFullScreen = (image: SelectedImage) => {
     setFullScreenImage(image);
@@ -29,7 +31,7 @@ export default function PhotoGrid({ month }: { month: string }) {
     <div>
       <div className="grid grid-cols-5 grid-rows-2 h-56 gap-1 mt-2">
         {Array.from({ length: 10 }, (_, i) => {
-          const image = monthImages[i];
+          const image = images[i];
 
           return (
             <div key={i} className="border border-[#DFDFDF] overflow-hidden">

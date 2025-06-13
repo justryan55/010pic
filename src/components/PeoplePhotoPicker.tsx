@@ -9,14 +9,14 @@ interface SelectedImage {
   name: string;
 }
 
-export default function DatePhotoPicker() {
+export default function PeoplePhotoPicker() {
   const {
-    activePicker,
     targetMonth,
     targetYear,
     imagesByMonth,
-    setImagesByMonth,
+    setimagesByMonth,
     isPhotoPickerOpen,
+    activePicker,
     togglePhotoPicker,
   } = usePhotoFlow();
 
@@ -24,7 +24,7 @@ export default function DatePhotoPicker() {
   const monthImages = imagesByMonth[monthKey] || [];
 
   const handleSave = (images: SelectedImage[]) => {
-    setImagesByMonth((prev) => ({
+    setimagesByMonth((prev) => ({
       ...prev,
       [monthKey]: images,
     }));
@@ -34,7 +34,7 @@ export default function DatePhotoPicker() {
     title: targetMonth || "Select Month",
     maxImages: 10,
     storageKey: `photoFlow-${targetYear}-${targetMonth}`,
-    isOpen: activePicker === "date",
+    isOpen: activePicker === "people",
     onClose: togglePhotoPicker,
     onSave: handleSave,
     existingImages: monthImages,

@@ -8,7 +8,9 @@ import { useGetPathname } from "@/helpers/getPathname";
 
 export default function AddBtn({ subscribed }: { subscribed: boolean }) {
   const { toggleSubscription } = useSubscription();
-  const { toggleAlbumFlow, togglePhotoPicker } = usePhotoFlow();
+  // const { toggleAlbumFlow, togglePhotoPicker } = usePhotoFlow();
+  const { togglePicker, activePicker } = usePhotoFlow();
+
   const pathname = useGetPathname();
 
   const handleClick = () => {
@@ -18,11 +20,20 @@ export default function AddBtn({ subscribed }: { subscribed: boolean }) {
     }
 
     if (pathname === "/date") {
-      togglePhotoPicker();
+      togglePicker("date");
       return;
     }
 
-    toggleAlbumFlow();
+    if (pathname === "/people") {
+      togglePicker("people");
+      return;
+    }
+
+    if (pathname === "/places") {
+      togglePicker("places");
+      return;
+    }
+    // toggleAlbumFlow();
   };
 
   return (
