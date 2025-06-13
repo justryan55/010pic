@@ -19,7 +19,8 @@ export default function YearSelector() {
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [yearToRemove, setYearToRemove] = useState<number | null>(null);
-  const { targetYear, setTargetYear } = usePhotoFlow();
+  const { targetYear, setTargetYear, imagesByMonth, setImagesByMonth } =
+    usePhotoFlow();
   const [isOpen, setIsOpen] = useState(false);
   const currentYear = new Date().getFullYear();
 
@@ -31,9 +32,31 @@ export default function YearSelector() {
     setSavedYears((prev) => [...prev, year].sort((a, b) => b - a));
   };
 
-  const openDeletionModal = (year: number) => {
+  const openDeletionModal = (yearToRemove: number) => {
     setOpenDeleteModal(true);
-    setYearToRemove(year);
+
+    setYearToRemove(yearToRemove);
+  };
+
+  const confirmDeletion = () => {
+    const updatedYears = savedYears.filter((year) => year !== yearToRemove);
+
+    const updatedImages = Object.entries(imagesByMonth).reduce<Record<string, typeof imagesByMonth[keyof typeof imagesByMonth]>>((acc, obj) => {
+      const key = obj[0];
+      const value = obj[1];
+
+      if (yearToRemove && !key.startsWith(String(yearToRemove))) {
+        acc[key] = value;
+      }
+
+      return acc;
+    }, {});
+
+    setSavedYears(updatedYears);
+    setImagesByMonth(updatedImages);
+
+    setOpenDeleteModal(false);
+    setYearToRemove(null);
   };
 
   const selectOrRemoveYear = (year: number) => {
@@ -167,12 +190,7 @@ export default function YearSelector() {
           textSize="text-[13px]"
           maxWidth="max-w-[159px]"
           onClick={() => {
-            const updatedYears = savedYears.filter(
-              (year) => year !== yearToRemove
-            );
-            setSavedYears(updatedYears);
-            setOpenDeleteModal(false);
-            setYearToRemove(null);
+            confirmDeletion();
           }}
         />
       </div>
