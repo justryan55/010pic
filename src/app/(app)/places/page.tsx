@@ -2,7 +2,7 @@
 
 import AddBtn from "@/components/AddBtn";
 import CollectionHeader from "@/components/CollectionHeader";
-import PhotoGrid from "@/components/HomePage/MonthGrid/PhotoGrid";
+import PhotoGrid from "@/components/PhotoGrid";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React from "react";
 
@@ -59,17 +59,11 @@ export default function Places() {
           className="mt-4 w-full"
           onClick={() => setTargetPlace(placeKey)}
         >
-          {/* <div className="flex justify-between">
-            <h3 className="text-lg font-semibold mb-2 capitalize">
-              {placeKey.replace(`${targetYear}-place-`, "").replace(/_/g, " ")}
-            </h3>
-            <AddBtn subscribed={true} />
-          </div> */}
           <PlacesHeader place={placeKey} />
 
           <PlacesPhotoGrid place={placeKey} />
         </div>
-      ))}{" "}
+      ))}
     </div>
   );
 }

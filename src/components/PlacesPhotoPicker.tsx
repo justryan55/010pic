@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import ImagePicker from "./PhotoPicker/Steps/ImagePicker";
+import ImagePicker from "./ImagePicker";
 
 interface SelectedImage {
   id: string;
@@ -50,7 +50,6 @@ export default function PlacesPhotoPicker() {
   };
 
   const config = {
-    // title: "Title",
     title: placeTitle,
     setTitle: setPlaceTitle,
     maxImages: 10,

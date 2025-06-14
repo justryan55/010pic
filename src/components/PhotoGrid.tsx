@@ -1,6 +1,5 @@
 "use client";
 
-import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Image from "next/image";
 import React, { useState } from "react";
 

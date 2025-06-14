@@ -8,8 +8,7 @@ import { useGetPathname } from "@/helpers/getPathname";
 
 export default function AddBtn({ subscribed }: { subscribed: boolean }) {
   const { toggleSubscription } = useSubscription();
-  // const { toggleAlbumFlow, togglePhotoPicker } = usePhotoFlow();
-  const { togglePicker, activePicker } = usePhotoFlow();
+  const { togglePicker } = usePhotoFlow();
 
   const pathname = useGetPathname();
 
@@ -33,7 +32,6 @@ export default function AddBtn({ subscribed }: { subscribed: boolean }) {
       togglePicker("places");
       return;
     }
-    // toggleAlbumFlow();
   };
 
   return (

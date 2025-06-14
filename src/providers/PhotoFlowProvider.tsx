@@ -17,8 +17,6 @@ type PhotoFlowContext = {
   activePicker: PhotoPickerType;
   togglePicker: (picker: PhotoPickerType) => void;
 
-  isAlbumFlowOpen: boolean;
-  toggleAlbumFlow: () => void;
   isPhotoPickerOpen: boolean;
   togglePhotoPicker: () => void;
   targetMonth: string | null;
@@ -51,8 +49,6 @@ const PhotoFlowContext = createContext<PhotoFlowContext>({
   activePicker: null,
   togglePicker: () => {},
 
-  isAlbumFlowOpen: false,
-  toggleAlbumFlow: () => {},
   isPhotoPickerOpen: false,
   togglePhotoPicker: () => {},
   targetMonth: null,
@@ -74,7 +70,6 @@ export default function PhotoFlowProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [isAlbumFlowOpen, setIsAlbumFlowOpen] = useState(false);
   const [isPhotoPickerOpen, setIsPhotoPickerOpen] = useState(false);
   const [activePicker, setActivePicker] = useState<PhotoPickerType>(null);
 
@@ -134,10 +129,6 @@ export default function PhotoFlowProvider({
     setImagesByPerson(personImages);
   }, []);
 
-  const toggleAlbumFlow = () => {
-    setIsAlbumFlowOpen((prev) => !prev);
-  };
-
   const togglePhotoPicker = () => {
     setIsPhotoPickerOpen((prev) => !prev);
     setActivePicker(null);
@@ -148,8 +139,6 @@ export default function PhotoFlowProvider({
       value={{
         activePicker,
         togglePicker,
-        isAlbumFlowOpen,
-        toggleAlbumFlow,
         isPhotoPickerOpen,
         togglePhotoPicker,
         targetMonth,

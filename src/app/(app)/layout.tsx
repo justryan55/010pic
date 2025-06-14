@@ -1,7 +1,7 @@
-import BottomNav from "@/components/HomePage/BottomNav";
+import BottomNav from "@/components/BottomNav";
 import "../globals.css";
-import Header from "@/components/HomePage/Header";
-import YearSelector from "@/components/HomePage/YearSelector";
+import Header from "@/components/Header";
+import YearSelector from "@/components/YearSelector";
 import SubscriptionProvider from "@/providers/SubscriptionProvider";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
 import { createSupabaseServer } from "@/lib/supabase/createSupabaseServer";

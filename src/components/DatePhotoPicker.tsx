@@ -1,6 +1,6 @@
 import React from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import ImagePicker from "./PhotoPicker/Steps/ImagePicker";
+import ImagePicker from "./ImagePicker";
 
 interface SelectedImage {
   id: string;
@@ -16,7 +16,6 @@ export default function DatePhotoPicker() {
     targetYear,
     imagesByMonth,
     setImagesByMonth,
-    isPhotoPickerOpen,
     togglePhotoPicker,
   } = usePhotoFlow();
 

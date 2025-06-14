@@ -3,7 +3,7 @@
 import AddBtn from "@/components/AddBtn";
 import React from "react";
 import CollectionHeader from "@/components/CollectionHeader";
-import PhotoGrid from "@/components/HomePage/MonthGrid/PhotoGrid";
+import PhotoGrid from "@/components/PhotoGrid";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 
 export default function People() {
@@ -64,7 +64,7 @@ export default function People() {
 
           <PeoplePhotoGrid person={personKey} />
         </div>
-      ))}{" "}
+      ))}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import { nanoid } from "nanoid";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import Button from "../Button";
+import Button from "./Button";
 
 const yearsStorageKey = "savedYears";
 

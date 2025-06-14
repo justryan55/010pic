@@ -1,7 +1,7 @@
 "use client";
 
 import CollectionHeader from "@/components/CollectionHeader";
-import PhotoGrid from "@/components/HomePage/MonthGrid/PhotoGrid";
+import PhotoGrid from "@/components/PhotoGrid";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React from "react";
 
