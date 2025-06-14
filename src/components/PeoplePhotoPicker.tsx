@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import ImagePicker from "./ImagePicker";
 
@@ -48,6 +48,10 @@ export default function PeoplePhotoPicker() {
     togglePhotoPicker();
     setTargetPerson(null);
   };
+
+  useEffect(() => {
+    setPersonTitle(initialTitle);
+  }, [initialTitle]);
 
   const config = {
     title: personTitle,

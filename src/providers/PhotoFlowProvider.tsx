@@ -63,6 +63,8 @@ const PhotoFlowContext = createContext<PhotoFlowContext>({
   setImagesByPlace: () => {},
   imagesByPerson: {},
   setImagesByPerson: () => {},
+  targetPerson: null,
+  setTargetPerson: () => {},
 });
 
 export default function PhotoFlowProvider({
