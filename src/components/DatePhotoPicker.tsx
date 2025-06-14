@@ -1,6 +1,6 @@
 import React from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import ImagePickerV2 from "./PhotoPicker/Steps/ImagePickerV2";
+import ImagePicker from "./PhotoPicker/Steps/ImagePicker";
 
 interface SelectedImage {
   id: string;
@@ -24,6 +24,12 @@ export default function DatePhotoPicker() {
   const monthImages = imagesByMonth[monthKey] || [];
 
   const handleSave = (images: SelectedImage[]) => {
+    const serialized = JSON.stringify(images);
+
+    const storageKey = `photoFlow-${targetYear}-${targetMonth}`;
+
+    localStorage.setItem(storageKey, serialized);
+
     setImagesByMonth((prev) => ({
       ...prev,
       [monthKey]: images,
@@ -40,5 +46,5 @@ export default function DatePhotoPicker() {
     existingImages: monthImages,
   };
 
-  return <ImagePickerV2 config={config} />;
+  return <ImagePicker config={config} />;
 }

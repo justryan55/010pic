@@ -1,6 +1,6 @@
 import React from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import ImagePickerV2 from "./PhotoPicker/Steps/ImagePickerV2";
+import ImagePicker from "./PhotoPicker/Steps/ImagePicker";
 
 interface SelectedImage {
   id: string;
@@ -40,5 +40,5 @@ export default function PeoplePhotoPicker() {
     existingImages: monthImages,
   };
 
-  return <ImagePickerV2 config={config} />;
+  return <ImagePicker config={config} />;
 }

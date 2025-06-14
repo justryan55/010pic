@@ -1,6 +1,5 @@
 "use client";
 
-import AlbumFlow from "@/components/AlbumFlow/AlbumFlow";
 import DatePhotoPicker from "@/components/DatePhotoPicker";
 import PeoplePhotoPicker from "@/components/PeoplePhotoPicker";
 import PlacesPhotoPicker from "@/components/PlacesPhotoPicker";
@@ -27,6 +26,9 @@ type PhotoFlowContext = {
   setTargetMonth: (month: string | null) => void;
   setTargetYear: (year: number | null) => void;
 
+  targetPlace: string | null;
+  setTargetPlace: (place: string | null) => void;
+
   imagesByMonth: Record<string, SelectedImage[]>;
   setImagesByMonth: React.Dispatch<
     React.SetStateAction<Record<string, SelectedImage[]>>
@@ -49,6 +51,8 @@ const PhotoFlowContext = createContext<PhotoFlowContext>({
   targetYear: null,
   setTargetMonth: () => {},
   setTargetYear: () => {},
+  targetPlace: null,
+  setTargetPlace: () => {},
   imagesByMonth: {},
   setImagesByMonth: () => {},
   imagesByPlace: {},
@@ -79,25 +83,36 @@ export default function PhotoFlowProvider({
     Record<string, SelectedImage[]>
   >({});
 
+  const [targetPlace, setTargetPlace] = useState<string | null>(null);
+
   const togglePicker = (picker: PhotoPickerType) => {
     setActivePicker((current) => (current === picker ? null : picker));
-    console.log(picker);
   };
 
   useEffect(() => {
-    const stored: Record<string, SelectedImage[]> = {};
+    const monthImages: Record<string, SelectedImage[]> = {};
+    const placeImages: Record<string, SelectedImage[]> = {};
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith("photoFlow-")) {
-        try {
-          const images = JSON.parse(localStorage.getItem(key)!);
-          stored[key.replace("photoFlow-", "")] = images;
-        } catch (e) {
-          console.error("Failed to parse stored images", e);
+      if (!key?.startsWith("photoFlow-")) continue;
+
+      try {
+        const data = JSON.parse(localStorage.getItem(key)!);
+        const cleanedKey = key.replace("photoFlow-", "");
+
+        if (cleanedKey.includes("-place-")) {
+          placeImages[cleanedKey] = data;
+        } else {
+          monthImages[cleanedKey] = data;
         }
+      } catch (e) {
+        console.error("Failed to parse stored images", e);
       }
     }
-    setImagesByMonth(stored);
+
+    setImagesByMonth(monthImages);
+    setImagesByPlace(placeImages);
   }, []);
 
   const toggleAlbumFlow = () => {
@@ -122,6 +137,8 @@ export default function PhotoFlowProvider({
         targetYear,
         setTargetMonth,
         setTargetYear,
+        targetPlace,
+        setTargetPlace,
         imagesByMonth,
         setImagesByMonth,
         imagesByPlace,
@@ -129,7 +146,6 @@ export default function PhotoFlowProvider({
       }}
     >
       {children}
-      {isAlbumFlowOpen && <AlbumFlow />}
       {activePicker === "date" && <DatePhotoPicker />}
       {activePicker === "people" && <PeoplePhotoPicker />}
       {activePicker === "places" && <PlacesPhotoPicker />}
@@ -140,7 +156,7 @@ export default function PhotoFlowProvider({
 export const usePhotoFlow = () => {
   const context = useContext(PhotoFlowContext);
   if (!context) {
-    throw new Error("usePhotoFlow must be used within an AlbumFlowProvider");
+    throw new Error("usePhotoFlow must be used within an PhotoFlowProvider");
   }
   return context;
 };

@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import ImagePickerV2 from "./PhotoPicker/Steps/ImagePickerV2";
-import Input from "./Input";
+import ImagePicker from "./PhotoPicker/Steps/ImagePicker";
 
 interface SelectedImage {
   id: string;
@@ -19,36 +18,52 @@ export default function PlacesPhotoPicker() {
     setImagesByPlace,
     activePicker,
     togglePhotoPicker,
+    targetPlace,
+    setTargetPlace,
   } = usePhotoFlow();
 
-  const [placeTitle, setPlaceTitle] = useState("");
-  const formattedTitle = placeTitle.trim().replace(/\s+/g, "_") || "untitled";
+  const initialTitle =
+    targetPlace?.replace(`${targetYear}-place-`, "").replace(/_/g, " ") ?? "";
+  const [placeTitle, setPlaceTitle] = useState(initialTitle);
+
+  const formattedTitle = placeTitle.trim().replace(/\s+/g, "_") || "Untitled";
   const placesKey = `${targetYear}-place-${formattedTitle}`;
-  const placesImages = imagesByPlace[placesKey] || [];
+  const placesImages = imagesByPlace[targetPlace ?? ""] || [];
 
   const handleSave = (images: SelectedImage[]) => {
+    const key = `photoFlow-${placesKey}`;
+    const serialized = JSON.stringify(images);
+
+    localStorage.setItem(key, serialized);
+
     setImagesByPlace((prev) => ({
       ...prev,
-      [placesKey]: images,
+      [placesKey]: [...images],
     }));
+
+    setTargetPlace(placesKey);
   };
 
+  const onClose = () => {
+    togglePhotoPicker();
+    setTargetPlace(null);
+  };
 
   const config = {
+    // title: "Title",
     title: placeTitle,
     setTitle: setPlaceTitle,
     maxImages: 10,
-    storageKey: `photoFlow-places-${targetYear}-${formattedTitle}`,
     isOpen: activePicker === "places",
-    onClose: togglePhotoPicker,
+    onClose: onClose,
     onSave: handleSave,
     existingImages: placesImages,
-    needsTitleInput: true,
+    needsTitleInput: initialTitle === "",
   };
 
   return (
     <>
-      <ImagePickerV2 config={config} />
+      <ImagePicker config={config} />
     </>
   );
 }

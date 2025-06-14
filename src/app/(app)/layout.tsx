@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import BottomNav from "@/components/HomePage/BottomNav";
 import "../globals.css";
 import Header from "@/components/HomePage/Header";
@@ -6,8 +5,10 @@ import YearSelector from "@/components/HomePage/YearSelector";
 import SubscriptionProvider from "@/providers/SubscriptionProvider";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
 import { createSupabaseServer } from "@/lib/supabase/createSupabaseServer";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { redirect } from "next/navigation";
 import PhotoFlowProvider from "@/providers/PhotoFlowProvider";
+import AddPeoplePlaceBtn from "@/components/AddPeoplePlaceBtn";
 
 export default async function OnboardingLayout({
   children,
@@ -17,6 +18,7 @@ export default async function OnboardingLayout({
   const supabase = await createSupabaseServer();
 
   const {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     data: { user },
   } = await supabase.auth.getUser();
 
@@ -31,6 +33,7 @@ export default async function OnboardingLayout({
             <div className={`sticky top-0 z-10 bg-[var(--brand-bg)] px-6`}>
               <Header />
               <YearSelector />
+              <AddPeoplePlaceBtn />
             </div>
             <div className="flex-1 px-6">{children}</div>
             <BottomNav />

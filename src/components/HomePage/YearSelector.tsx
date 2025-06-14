@@ -19,7 +19,7 @@ export default function YearSelector() {
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [yearToRemove, setYearToRemove] = useState<number | null>(null);
-  const { targetYear, setTargetYear, imagesByMonth, setimagesByMonth } =
+  const { targetYear, setTargetYear, imagesByMonth, setImagesByMonth } =
     usePhotoFlow();
   const [isOpen, setIsOpen] = useState(false);
   const currentYear = new Date().getFullYear();
@@ -55,7 +55,7 @@ export default function YearSelector() {
     }, {});
 
     setSavedYears(updatedYears);
-    setimagesByMonth(updatedImages);
+    setImagesByMonth(updatedImages);
 
     setOpenDeleteModal(false);
     setYearToRemove(null);
@@ -82,14 +82,14 @@ export default function YearSelector() {
         <div className=" flex flex-row mt-6 items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
           <div className="flex flex-row items-center gap-5">
             <ul className="flex flex-row items-center gap-5">
-              {savedYears.map((year) => {
+              {savedYears.map((year, index) => {
                 return (
                   <li
                     key={year}
                     onClick={() => selectOrRemoveYear(year)}
-                    className={`relative pl-3 hover:cursor-pointer whitespace-nowrap select-none flex-shrink-0 text-sm ${
-                      isOpen && "text-black"
-                    }
+                    className={`relative hover:cursor-pointer whitespace-nowrap select-none flex-shrink-0 text-sm 
+                      ${isOpen && "text-black"}
+                      ${index !== 0 ? "pl-3" : ""}
                     ${
                       Number(targetYear) === year
                         ? "text-black"

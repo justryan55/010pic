@@ -7,7 +7,7 @@ import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React from "react";
 
 export default function Places() {
-  const { targetYear, imagesByPlace } = usePhotoFlow();
+  const { targetYear, imagesByPlace, setTargetPlace } = usePhotoFlow();
 
   const placeKeys = Object.keys(imagesByPlace).filter((key) =>
     key.startsWith(`${targetYear}-place-`)
@@ -54,7 +54,11 @@ export default function Places() {
         </>
       )}
       {placeKeys.map((placeKey) => (
-        <div key={placeKey} className="mt-4 w-full px-4">
+        <div
+          key={placeKey}
+          className="mt-4 w-full"
+          onClick={() => setTargetPlace(placeKey)}
+        >
           {/* <div className="flex justify-between">
             <h3 className="text-lg font-semibold mb-2 capitalize">
               {placeKey.replace(`${targetYear}-place-`, "").replace(/_/g, " ")}
@@ -62,6 +66,7 @@ export default function Places() {
             <AddBtn subscribed={true} />
           </div> */}
           <PlacesHeader place={placeKey} />
+
           <PlacesPhotoGrid place={placeKey} />
         </div>
       ))}{" "}
