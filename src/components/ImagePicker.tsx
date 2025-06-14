@@ -45,8 +45,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isOpen) return;
-
     const files = Array.from(event.target.files || []);
     processFiles(files);
 
@@ -81,20 +79,16 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    if (!isOpen) return;
-
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
     processFiles(files);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    if (!isOpen) return;
     e.preventDefault();
   };
 
   const selectMainImage = (image: SelectedImage) => {
-    if (!isOpen) return;
     setMainImage(image);
   };
 
@@ -119,8 +113,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   };
 
   const handleSave = () => {
-    if (!isOpen) return;
-
     if (selectedImages.length > 0) {
       const allImages = [...selectedImages, ...existingImages];
       onSave(allImages);
@@ -131,8 +123,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   };
 
   const handleClose = () => {
-    if (!isOpen) return;
-    
     setSelectedImages([]);
     setMainImage(null);
     onClose();
@@ -153,9 +143,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around transition-transform duration-300 min-h-screen ${
-        isOpen
-          ? "translate-y-0 pointer-events-auto"
-          : "translate-y-full pointer-events-none"
+        isOpen ? "translate-y-0 pointer" : "translate-y-full"
       } `}
     >
       <div>
