@@ -33,7 +33,7 @@ export default function Subscription() {
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 h-[90vh]  ${
-        isSubOpen ? "translate-y-0" : "translate-y-[150%]"
+        isSubOpen ? "translate-y-0 fixed" : "translate-y-[150%] hidden"
       }`}
     >
       <div>
