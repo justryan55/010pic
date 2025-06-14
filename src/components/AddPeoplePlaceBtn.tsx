@@ -5,9 +5,13 @@ import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React from "react";
 
 export default function AddPeoplePlaceBtn() {
-    const { togglePicker } = usePhotoFlow();
-  
+  const { togglePicker, imagesByPlace, targetYear } = usePhotoFlow();
+
   const pathname = useGetPathname();
+
+  const placeKeys = Object.keys(imagesByPlace).filter((key) =>
+    key.startsWith(`${targetYear}-place-`)
+  );
 
   const handleClick = () => {
     if (pathname === "/people") {
@@ -22,8 +26,8 @@ export default function AddPeoplePlaceBtn() {
   };
   return (
     <div onClick={() => handleClick()}>
-      {pathname !== "/date" && (
-        <p className="text-[13px] leading-[120%] font-normal underline text-left">
+      {pathname !== "/date" && placeKeys.length !== 0 && (
+        <p className="text-[13px] leading-[120%] font-normal underline text-left cursor-pointer">
           Add {pathname === "/places" ? "Place" : "People"}
         </p>
       )}
