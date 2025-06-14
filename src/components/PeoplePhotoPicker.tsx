@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import ImagePicker from "./ImagePicker";
 
@@ -24,24 +23,45 @@ export default function PeoplePhotoPicker() {
 
   const initialTitle =
     targetPerson?.replace(`${targetYear}-person-`, "").replace(/_/g, " ") ?? "";
+
   const [personTitle, setPersonTitle] = useState(initialTitle);
 
-  const formattedTitle = personTitle.trim().replace(/\s+/g, "_") || "Untitled";
-  const personKey = `${targetYear}-person-${formattedTitle}`;
-  const peopleImages = imagesByPerson[targetPerson ?? ""] || [];
+  // Memoize the current person key to prevent it from changing during the session
+  const currentPersonKey = useMemo(() => {
+    return targetPerson || `${targetYear}-person-new`;
+  }, [targetPerson, targetYear]);
+
+  // Get existing images using the stable currentPersonKey
+  const peopleImages = imagesByPerson[currentPersonKey] || [];
 
   const handleSave = (images: SelectedImage[]) => {
-    const key = `photoFlow-${personKey}`;
-    const serialized = JSON.stringify(images);
+    // Generate the final key based on the current title
+    const formattedTitle =
+      personTitle.trim().replace(/\s+/g, "_") || "Untitled";
+    const finalPersonKey = `${targetYear}-person-${formattedTitle}`;
 
+    // Save to localStorage
+    const key = `photoFlow-${finalPersonKey}`;
+    const serialized = JSON.stringify(images);
     localStorage.setItem(key, serialized);
 
-    setImagesByPerson((prev) => ({
-      ...prev,
-      [personKey]: [...images],
-    }));
+    // Update state - handle key change if needed
+    setImagesByPerson((prev) => {
+      const newState = { ...prev };
 
-    setTargetPerson(personKey);
+      // If the key changed, remove old entry and add new one
+      if (currentPersonKey !== finalPersonKey && currentPersonKey in newState) {
+        delete newState[currentPersonKey];
+        // Also remove from localStorage
+        localStorage.removeItem(`photoFlow-${currentPersonKey}`);
+      }
+
+      newState[finalPersonKey] = [...images];
+      return newState;
+    });
+
+    // Update the target person to the final key
+    setTargetPerson(finalPersonKey);
   };
 
   const onClose = () => {

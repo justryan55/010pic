@@ -42,7 +42,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [mainImage, setMainImage] = useState<SelectedImage | null>(null);
-  const [isProcessingFiles, setIsProcessingFiles] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,11 +53,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     }
   };
 
-  const processFiles = async (files: File[]) => {
-    if (files.length === 0) return;
-
-    setIsProcessingFiles(true);
-
+  const processFiles = (files: File[]) => {
     const remainingSlots =
       maxImages - existingImages.length - selectedImages.length;
 
@@ -66,42 +61,22 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
       .filter((file) => file.type.startsWith("image/"))
       .slice(0, remainingSlots);
 
-    try {
-      // Process files sequentially to avoid race conditions
-      const newImages: SelectedImage[] = [];
-
-      for (const file of validFiles) {
-        const result = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (e: ProgressEvent<FileReader>) => {
-            resolve(e.target?.result as string);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-
-        const newImage: SelectedImage = {
+    validFiles.forEach((file: File) => {
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const newImage = {
           id: nanoid(),
-          src: result,
+          src: e.target?.result as string,
           file: file,
           name: file.name,
         };
 
-        newImages.push(newImage);
-      }
+        setSelectedImages((prev) => [...prev, newImage]);
 
-      // Update state with all new images at once
-      setSelectedImages((prev) => [...prev, ...newImages]);
-
-      // Set main image to the first new image if no main image exists
-      if (!mainImage && newImages.length > 0) {
-        setMainImage(newImages[0]);
-      }
-    } catch (error) {
-      console.error("Error processing files:", error);
-    } finally {
-      setIsProcessingFiles(false);
-    }
+        setMainImage(newImage);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -139,9 +114,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   };
 
   const handleSave = () => {
-    // Prevent multiple clicks while processing
-    if (isProcessingFiles) return;
-
     const allImages = [...selectedImages, ...existingImages];
     if (allImages.length > 0) {
       onSave(allImages);
@@ -168,14 +140,12 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
   const allImages = [...existingImages, ...selectedImages];
   const totalCount = allImages.length;
-  const hasImages = totalCount > 0;
-  const isButtonDisabled = !hasImages || isProcessingFiles;
 
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around transition-transform duration-300 min-h-screen ${
         isOpen ? "translate-y-0" : "translate-y-[150%]"
-      }`}
+      }      } `}
     >
       <div>
         <div className="flex flex-row justify-between items-center">
@@ -213,7 +183,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
           <div className="flex items-center gap-4">
             <span className="text-gray-500 text-sm font-normal">
               {totalCount.toString().padStart(2, "0")} / {maxImages}
-              {isProcessingFiles && " (Processing...)"}
             </span>
           </div>
         </div>
@@ -287,7 +256,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
                   onClick={() => fileInputRef.current?.click()}
                   className="flex-none w-20 h-28 rounded-lg border border-[#DFDFDF] flex items-center justify-center"
                   aria-label="Add image"
-                  disabled={isProcessingFiles}
                 >
                   <Image
                     src="/images/file-add.svg"
@@ -303,9 +271,9 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
       </div>
 
       <Button
-        text={isProcessingFiles ? "PROCESSING..." : "NEXT"}
+        text="NEXT"
         onClick={handleSave}
-        disabled={isButtonDisabled}
+        disabled={existingImages.length === 0 && selectedImages.length === 0}
       />
 
       <label htmlFor="file-upload" className="hidden">
@@ -321,7 +289,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
         className="hidden"
         aria-label="Upload Images"
         title="Upload Images"
-        disabled={isProcessingFiles}
       />
     </div>
   );
