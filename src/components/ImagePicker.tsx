@@ -55,6 +55,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const processFiles = (files: File[]) => {
     const remainingSlots =
       maxImages - existingImages.length - selectedImages.length;
+
     const validFiles = files
       .filter((file) => file.type.startsWith("image/"))
       .slice(0, remainingSlots);
@@ -111,9 +112,10 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     }
   };
 
-  const handleSave = () => {
-    if (selectedImages.length > 0) {
-      const allImages = [...selectedImages, ...existingImages];
+  const handleSave = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const allImages = [...selectedImages, ...existingImages];
+    if (allImages.length > 0) {
       onSave(allImages);
       setSelectedImages([]);
       setMainImage(null);
@@ -138,6 +140,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
   const allImages = [...existingImages, ...selectedImages];
   const totalCount = allImages.length;
+
+  const isDisabled = existingImages.length === 0 && selectedImages.length === 0;
 
   return (
     <div
@@ -269,13 +273,17 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
       </div>
 
       <button
-        // text="NEXT"
         onClick={handleSave}
-        className={`w-full bg-black text-lg text-normal leading-[120%] text-white pt-[11px] pb-[11px] pr-[25px] pl-[25px] rounded-full hover:bg-gray-800 transition-colors cursor-pointer  ${
-          existingImages.length === 0 && selectedImages.length === 0
-            ? "disabled:bg-gray-300 disabled:cursor-not-allowed"
-            : ""
+        disabled={isDisabled}
+        className={`w-full text-lg font-normal leading-[120%] pt-[11px] pb-[11px] pr-[25px] pl-[25px] rounded-full transition-colors ${
+          isDisabled
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-black text-white hover:bg-gray-800 active:bg-gray-900 cursor-pointer"
         }`}
+        style={{
+          touchAction: "manipulation",
+          WebkitTapHighlightColor: "transparent",
+        }}
       >
         Next
       </button>
