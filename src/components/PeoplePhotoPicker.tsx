@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import ImagePicker from "./PhotoPicker/Steps/ImagePicker";
 
@@ -11,33 +13,51 @@ interface SelectedImage {
 
 export default function PeoplePhotoPicker() {
   const {
-    targetMonth,
     targetYear,
-    imagesByMonth,
-    setimagesByMonth,
-    isPhotoPickerOpen,
+    targetPerson,
+    setTargetPerson,
+    imagesByPerson,
+    setImagesByPerson,
     activePicker,
     togglePhotoPicker,
   } = usePhotoFlow();
 
-  const monthKey = `${targetYear}-${targetMonth}`;
-  const monthImages = imagesByMonth[monthKey] || [];
+  const initialTitle =
+    targetPerson?.replace(`${targetYear}-place-`, "").replace(/_/g, " ") ?? "";
+  const [personTitle, setPersonTitle] = useState(initialTitle);
+
+  const formattedTitle = personTitle.trim().replace(/\s+/g, "_") || "Untitled";
+  const personKey = `${targetYear}-person-${formattedTitle}`;
+  const peopleImages = imagesByPerson[targetPerson ?? ""] || [];
 
   const handleSave = (images: SelectedImage[]) => {
-    setimagesByMonth((prev) => ({
+    const key = `photoFlow-${personKey}`;
+    const serialized = JSON.stringify(images);
+
+    localStorage.setItem(key, serialized);
+
+    setImagesByPerson((prev) => ({
       ...prev,
-      [monthKey]: images,
+      [personKey]: [...images],
     }));
+
+    setTargetPerson(personKey);
+  };
+
+  const onClose = () => {
+    togglePhotoPicker();
+    setTargetPerson(null);
   };
 
   const config = {
-    title: targetMonth || "Select Month",
+    title: personTitle,
+    setTitle: setPersonTitle,
     maxImages: 10,
-    storageKey: `photoFlow-${targetYear}-${targetMonth}`,
     isOpen: activePicker === "people",
-    onClose: togglePhotoPicker,
+    onClose: onClose,
     onSave: handleSave,
-    existingImages: monthImages,
+    existingImages: peopleImages,
+    needsTitleInput: initialTitle === "",
   };
 
   return <ImagePicker config={config} />;

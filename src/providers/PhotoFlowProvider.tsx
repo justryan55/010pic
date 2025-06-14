@@ -29,12 +29,20 @@ type PhotoFlowContext = {
   targetPlace: string | null;
   setTargetPlace: (place: string | null) => void;
 
+  targetPerson: string | null;
+  setTargetPerson: (person: string | null) => void;
+
   imagesByMonth: Record<string, SelectedImage[]>;
   setImagesByMonth: React.Dispatch<
     React.SetStateAction<Record<string, SelectedImage[]>>
   >;
   imagesByPlace: Record<string, SelectedImage[]>;
   setImagesByPlace: React.Dispatch<
+    React.SetStateAction<Record<string, SelectedImage[]>>
+  >;
+
+  imagesByPerson: Record<string, SelectedImage[]>;
+  setImagesByPerson: React.Dispatch<
     React.SetStateAction<Record<string, SelectedImage[]>>
   >;
 };
@@ -57,6 +65,8 @@ const PhotoFlowContext = createContext<PhotoFlowContext>({
   setImagesByMonth: () => {},
   imagesByPlace: {},
   setImagesByPlace: () => {},
+  imagesByPerson: {},
+  setImagesByPerson: () => {},
 });
 
 export default function PhotoFlowProvider({
@@ -83,7 +93,12 @@ export default function PhotoFlowProvider({
     Record<string, SelectedImage[]>
   >({});
 
+  const [imagesByPerson, setImagesByPerson] = useState<
+    Record<string, SelectedImage[]>
+  >({});
+
   const [targetPlace, setTargetPlace] = useState<string | null>(null);
+  const [targetPerson, setTargetPerson] = useState<string | null>(null);
 
   const togglePicker = (picker: PhotoPickerType) => {
     setActivePicker((current) => (current === picker ? null : picker));
@@ -92,6 +107,7 @@ export default function PhotoFlowProvider({
   useEffect(() => {
     const monthImages: Record<string, SelectedImage[]> = {};
     const placeImages: Record<string, SelectedImage[]> = {};
+    const personImages: Record<string, SelectedImage[]> = {};
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -103,6 +119,8 @@ export default function PhotoFlowProvider({
 
         if (cleanedKey.includes("-place-")) {
           placeImages[cleanedKey] = data;
+        } else if (cleanedKey.includes("-person-")) {
+          personImages[cleanedKey] = data;
         } else {
           monthImages[cleanedKey] = data;
         }
@@ -113,6 +131,7 @@ export default function PhotoFlowProvider({
 
     setImagesByMonth(monthImages);
     setImagesByPlace(placeImages);
+    setImagesByPerson(personImages);
   }, []);
 
   const toggleAlbumFlow = () => {
@@ -143,6 +162,10 @@ export default function PhotoFlowProvider({
         setImagesByMonth,
         imagesByPlace,
         setImagesByPlace,
+        imagesByPerson,
+        setImagesByPerson,
+        targetPerson,
+        setTargetPerson,
       }}
     >
       {children}
