@@ -8,7 +8,9 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className={`sticky bottom-0 h-[103px] w-full bg-[var(--brand-bg)]`}>
+    <nav
+      className={`fixed bottom-0 left-0 right-0  h-[103px] w-full bg-[var(--brand-bg)]`}
+    >
       <div className="flex flex-row justify-evenly items-center h-full">
         <Link
           href="/places"
