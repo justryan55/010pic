@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { nanoid } from "nanoid";
 import Input from "@/components/Input";
+import Button from "./Button";
 
 interface SelectedImage {
   id: string;
@@ -112,8 +113,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     }
   };
 
-  const handleSave = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
+  const handleSave = () => {
     const allImages = [...selectedImages, ...existingImages];
     if (allImages.length > 0) {
       onSave(allImages);
@@ -140,8 +140,6 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
   const allImages = [...existingImages, ...selectedImages];
   const totalCount = allImages.length;
-
-  const isDisabled = existingImages.length === 0 && selectedImages.length === 0;
 
   return (
     <div
@@ -272,21 +270,11 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
         </div>
       </div>
 
-      <button
+      <Button
+        text="NEXT"
         onClick={handleSave}
-        disabled={isDisabled}
-        className={`w-full text-lg font-normal leading-[120%] pt-[11px] pb-[11px] pr-[25px] pl-[25px] rounded-full transition-colors ${
-          isDisabled
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-            : "bg-black text-white hover:bg-gray-800 active:bg-gray-900 cursor-pointer"
-        }`}
-        style={{
-          touchAction: "manipulation",
-          WebkitTapHighlightColor: "transparent",
-        }}
-      >
-        Next
-      </button>
+        disabled={existingImages.length === 0 && selectedImages.length === 0}
+      />
 
       <label htmlFor="file-upload" className="hidden">
         Upload Images
