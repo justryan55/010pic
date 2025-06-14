@@ -21,7 +21,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
-      type="submit"
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className={`w-full bg-black ${textSize} text-normal ${
