@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import Button from "@/components/Button";
 import Image from "next/image";
 import { nanoid } from "nanoid";
 import Input from "@/components/Input";
@@ -269,11 +268,17 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
         </div>
       </div>
 
-      <Button
-        text="NEXT"
+      <button
+        // text="NEXT"
         onClick={handleSave}
-        disabled={existingImages.length === 0 && selectedImages.length === 0}
-      />
+        className={`w-full bg-black text-lg text-normal leading-[120%] text-white pt-[11px] pb-[11px] pr-[25px] pl-[25px] rounded-full hover:bg-gray-800 transition-colors cursor-pointer  ${
+          existingImages.length === 0 && selectedImages.length === 0
+            ? "disabled:bg-gray-300 disabled:cursor-not-allowed"
+            : ""
+        }`}
+      >
+        Next
+      </button>
 
       <label htmlFor="file-upload" className="hidden">
         Upload Images
