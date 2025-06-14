@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Instrument_Sans, Inria_Serif } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,13 @@ const inriaSerif = Inria_Serif({
 export const metadata: Metadata = {
   title: "O10P",
   description: "Remember only what matters",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
