@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import ImagePicker from "./PhotoPicker/Steps/ImagePicker";
+import ImagePicker from "./ImagePicker";
 
 interface SelectedImage {
   id: string;
@@ -23,7 +23,7 @@ export default function PeoplePhotoPicker() {
   } = usePhotoFlow();
 
   const initialTitle =
-    targetPerson?.replace(`${targetYear}-place-`, "").replace(/_/g, " ") ?? "";
+    targetPerson?.replace(`${targetYear}-person-`, "").replace(/_/g, " ") ?? "";
   const [personTitle, setPersonTitle] = useState(initialTitle);
 
   const formattedTitle = personTitle.trim().replace(/\s+/g, "_") || "Untitled";
