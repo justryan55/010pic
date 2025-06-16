@@ -14,7 +14,7 @@ export default function BottomNav() {
       <div className="flex flex-row justify-evenly items-center h-full">
         <Link
           href="/places"
-          className="flex flex-col items-center h-[49px] w-[86px] justify-between hover:cursor-pointer"
+          className="flex flex-col items-center h-[49px] w-[86px] justify-between cursor-pointer"
         >
           <svg
             width="20"
@@ -41,7 +41,7 @@ export default function BottomNav() {
 
         <Link
           href="/date"
-          className="flex flex-col items-center h-[49px] w-[86px] justify-between hover:cursor-pointer"
+          className="flex flex-col items-center h-[49px] w-[86px] justify-between cursor-pointer"
         >
           <svg
             width="18"
@@ -70,7 +70,7 @@ export default function BottomNav() {
 
         <Link
           href="/people"
-          className="flex flex-col items-center h-[49px] w-[86px] justify-between hover:cursor-pointer"
+          className="flex flex-col items-center h-[49px] w-[86px] justify-between cursor-pointer"
         >
           <svg
             width="22"

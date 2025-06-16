@@ -11,7 +11,7 @@ export default function Header() {
         href="/profile"
         className="font-medium leading-[120%] underline hover:pointer-cursor"
       > */}
-      <p className="font-medium leading-[120%] underline hover:pointer-cursor">
+      <p className="font-medium leading-[120%] underline pointer-cursor">
         Profile
       </p>
       {/* </Link> */}

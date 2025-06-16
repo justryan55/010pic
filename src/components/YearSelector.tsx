@@ -87,7 +87,7 @@ export default function YearSelector() {
                   <li
                     key={year}
                     onClick={() => selectOrRemoveYear(year)}
-                    className={`relative hover:cursor-pointer whitespace-nowrap select-none flex-shrink-0 text-sm 
+                    className={`relative cursor-pointer whitespace-nowrap select-none flex-shrink-0 text-sm 
                       ${isOpen && "text-black"}
                       ${index !== 0 ? "pl-3" : ""}
                     ${

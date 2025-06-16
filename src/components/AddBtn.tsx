@@ -39,7 +39,7 @@ export default function AddBtn({ subscribed }: { subscribed: boolean }) {
       onClick={handleClick}
       type="button"
       aria-label="Add item"
-      className="flex justify-center items-center bg-black text-white w-[28px] h-[28px] rounded-full hover:cursor-pointer"
+      className="flex justify-center items-center bg-black text-white w-[28px] h-[28px] rounded-full cursor-pointer"
     >
       <Image
         src="/images/plus.svg"

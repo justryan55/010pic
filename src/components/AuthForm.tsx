@@ -144,7 +144,7 @@ export default function AuthForm() {
               ? "/onboarding/welcome"
               : "/auth/register"
           }`}
-          className="text-black text-sm font-bold underline hover:no-underline hover:cursor-pointer"
+          className="text-black text-sm font-bold underline hover:no-underline cursor-pointer"
         >
           {useGetPathname() === "/auth/register" ? "Login" : "Register"}
         </Link>

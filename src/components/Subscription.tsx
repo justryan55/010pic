@@ -53,7 +53,7 @@ export default function Subscription() {
           {items.map((item, index) => (
             <div
               key={index}
-              className="flex flex-row gap-x-5 items-center w-full mt-8 hover:pointer-cursor"
+              className="flex flex-row gap-x-5 items-center w-full mt-8 pointer-cursor"
             >
               <Image
                 src={item.svg}
