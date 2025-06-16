@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import ImagePicker from "./ImagePicker";
@@ -8,6 +7,12 @@ interface SelectedImage {
   id: string;
   src: string;
   file: File;
+  name: string;
+}
+
+interface SerializableImage {
+  id: string;
+  src: string;
   name: string;
 }
 
@@ -25,15 +30,21 @@ export default function PeoplePhotoPicker() {
   const initialTitle =
     targetPerson?.replace(`${targetYear}-person-`, "").replace(/_/g, " ") ?? "";
   const [personTitle, setPersonTitle] = useState(initialTitle);
-
   const formattedTitle = personTitle.trim().replace(/\s+/g, "_") || "Untitled";
   const personKey = `${targetYear}-person-${formattedTitle}`;
-  const peopleImages = imagesByPerson[targetPerson ?? ""] || [];
+
+  const peopleImages = imagesByPerson[personKey] || [];
 
   const handleSave = (images: SelectedImage[]) => {
     const key = `photoFlow-${personKey}`;
-    const serialized = JSON.stringify(images);
 
+    const serializableImages: SerializableImage[] = images.map((img) => ({
+      id: img.id,
+      src: img.src,
+      name: img.name,
+    }));
+
+    const serialized = JSON.stringify(serializableImages);
     localStorage.setItem(key, serialized);
 
     setImagesByPerson((prev) => ({
