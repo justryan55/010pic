@@ -269,11 +269,19 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
         </div>
       </div>
 
-      <Button
+      {/* <Button
         text="NEXT"
         onClick={handleSave}
         disabled={existingImages.length === 0 && selectedImages.length === 0}
-      />
+      /> */}
+
+      <button
+        // text="NEXT"
+        onClick={handleSave}
+        // disabled={existingImages.length === 0 && selectedImages.length === 0}
+      >
+        Next
+      </button>
 
       <label htmlFor="file-upload" className="hidden">
         Upload Images
