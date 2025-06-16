@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { nanoid } from "nanoid";
 import Input from "@/components/Input";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from "./Button";
 
 interface SelectedImage {
