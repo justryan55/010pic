@@ -5,7 +5,7 @@ import Image from "next/image";
 import { nanoid } from "nanoid";
 import Input from "@/components/Input";
 import Button from "./Button";
-import { uploadImagesToSupabase } from "@/lib/imagesDB";
+import { softDeleteImage, uploadImagesToSupabase } from "@/lib/imagesDB";
 
 interface SelectedImage {
   id: string;
@@ -107,10 +107,16 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     setMainImage(image);
   };
 
-  const removeImage = (imageId: string) => {
+  const removeImage = async (imageId: string) => {
     const isExistingImage = existingImages.some((img) => img.id === imageId);
 
     if (isExistingImage) {
+      const success = await softDeleteImage(imageId);
+      if (!success) {
+        console.error("Failed to soft delete image");
+        return;
+      }
+
       const updatedExisting = existingImages.filter(
         (img) => img.id !== imageId
       );
@@ -126,7 +132,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
       setMainImage(allImages.length > 0 ? allImages[0] : null);
     }
   };
-
+  
   const handleSave = async () => {
     if (pendingFiles.length === 0) return;
 

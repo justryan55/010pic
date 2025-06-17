@@ -1,26 +1,35 @@
 "use client";
 
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import { nanoid } from "nanoid";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Button from "./Button";
-
-const yearsStorageKey = "savedYears";
+import {
+  addYearToDB,
+  confirmDeletionFromDb,
+  fetchSavedYears,
+} from "@/lib/imagesDB";
 
 const years = Array.from({ length: 75 }, (_, i) => 2025 - i);
 
 export default function YearSelector() {
-  const [savedYears, setSavedYears] = useState<number[]>(() => {
-    if (typeof window === "undefined") return [2025];
-    const saved = localStorage.getItem(yearsStorageKey);
-    return saved ? JSON.parse(saved) : [2025];
+  const [savedYearsByTab, setSavedYearsByTab] = useState<
+    Record<string, number[]>
+  >({
+    people: [],
+    places: [],
+    dates: [],
   });
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [yearToRemove, setYearToRemove] = useState<number | null>(null);
-  const { targetYear, setTargetYear, imagesByMonth, setImagesByMonth } =
-    usePhotoFlow();
+  const {
+    targetYear,
+    setTargetYear,
+    imagesByMonth,
+    setImagesByMonth,
+    activeTab,
+  } = usePhotoFlow();
   const [isOpen, setIsOpen] = useState(false);
   const currentYear = new Date().getFullYear();
 
@@ -28,8 +37,20 @@ export default function YearSelector() {
     setIsOpen((prev) => !prev);
   };
 
-  const addYearToList = (year: number) => {
-    setSavedYears((prev) => [...prev, year].sort((a, b) => b - a));
+  const addYearToList = async (year: number) => {
+    const res = await addYearToDB(year, activeTab);
+
+    if (!res?.success) return;
+
+    setSavedYearsByTab((prev) => {
+      const updatedYears = [...(prev[activeTab] || []), year].sort(
+        (a, b) => b - a
+      );
+      return {
+        ...prev,
+        [activeTab]: updatedYears,
+      };
+    });
   };
 
   const openDeletionModal = (yearToRemove: number) => {
@@ -38,23 +59,35 @@ export default function YearSelector() {
     setYearToRemove(yearToRemove);
   };
 
-  const confirmDeletion = () => {
-    const updatedYears = savedYears.filter((year) => year !== yearToRemove);
+  const confirmDeletion = async (yearToRemove: number) => {
+    if (!yearToRemove) return;
+
+    const res = await confirmDeletionFromDb(yearToRemove, activeTab);
+
+    if (!res?.success) {
+      console.error("Failed to delete year from DB");
+      return;
+    }
+
+    setSavedYearsByTab((prev) => {
+      const updatedYears = (prev[activeTab] || []).filter(
+        (year) => year !== yearToRemove
+      );
+      return {
+        ...prev,
+        [activeTab]: updatedYears,
+      };
+    });
 
     const updatedImages = Object.entries(imagesByMonth).reduce<
       Record<string, (typeof imagesByMonth)[keyof typeof imagesByMonth]>
-    >((acc, obj) => {
-      const key = obj[0];
-      const value = obj[1];
-
-      if (yearToRemove && !key.startsWith(String(yearToRemove))) {
+    >((acc, [key, value]) => {
+      if (!key.startsWith(String(yearToRemove))) {
         acc[key] = value;
       }
-
       return acc;
     }, {});
 
-    setSavedYears(updatedYears);
     setImagesByMonth(updatedImages);
 
     setOpenDeleteModal(false);
@@ -70,11 +103,32 @@ export default function YearSelector() {
     setTargetYear(year);
   };
 
+  const savedYears = savedYearsByTab[activeTab] || [];
   const remainingYears = years.filter((year) => !savedYears.includes(year));
 
   useEffect(() => {
-    localStorage.setItem(yearsStorageKey, JSON.stringify(savedYears));
-  }, [savedYears]);
+    const fetchYears = async () => {
+      const res = await fetchSavedYears(activeTab);
+
+      if (!res?.success) return;
+
+      let yearsFromDb = res?.data?.map((row) => row.year) ?? [];
+
+      if (!yearsFromDb.includes(currentYear)) {
+        const addRes = await addYearToDB(currentYear, activeTab);
+        if (addRes?.success) {
+          yearsFromDb = [...yearsFromDb, currentYear];
+        }
+      }
+
+      setSavedYearsByTab((prev) => ({
+        ...prev,
+        [activeTab]: yearsFromDb.sort((a, b) => b - a),
+      }));
+    };
+
+    fetchYears();
+  }, [currentYear, activeTab]);
 
   return (
     <div className="flex flex-col">
@@ -136,17 +190,16 @@ export default function YearSelector() {
               <p className="font-normal text-[13px] leading-[120%] ml-1 text-white min-w-min whitespace-nowrap">
                 Year
               </p>
-              {isOpen &&
-                remainingYears.map((year) => (
-                  <ul key={nanoid()} className="flex flex-row mr-2">
+              {isOpen && (
+                <ul className="flex flex-row mr-2">
+                  {remainingYears.map((year) => (
                     <li
                       key={year}
                       onClick={(e) => {
                         e.stopPropagation();
                         addYearToList(year);
                       }}
-                      // className={`hover:cursor-pointer whitespace-nowrap select-none  flex-shrink-0 text-black text-sm flex flex-row items-center gap-1`}
-                      className={`flex items-center text-white text-sm cursor-pointer`}
+                      className="flex items-center text-white text-sm cursor-pointer"
                     >
                       <div className="flex flex-row mr-2">
                         <Image
@@ -159,8 +212,9 @@ export default function YearSelector() {
                         {year}
                       </div>
                     </li>
-                  </ul>
-                ))}
+                  ))}
+                </ul>
+              )}
             </div>
           </div>{" "}
         </div>
@@ -191,8 +245,10 @@ export default function YearSelector() {
           padding="[15px]"
           textSize="text-[13px]"
           maxWidth="max-w-[159px]"
-          onClick={() => {
-            confirmDeletion();
+          onClick={async () => {
+            if (yearToRemove !== null) {
+              await confirmDeletion(yearToRemove);
+            }
           }}
         />
       </div>

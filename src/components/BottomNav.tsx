@@ -1,11 +1,14 @@
 "use client";
 
+import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { setActiveTab, setTargetYear } = usePhotoFlow();
+  const currentYear = new Date().getFullYear();
 
   return (
     <nav
@@ -15,6 +18,10 @@ export default function BottomNav() {
         <Link
           href="/places"
           className="flex flex-col items-center h-[49px] w-[86px] justify-between cursor-pointer"
+          onClick={() => {
+            setActiveTab("places");
+            setTargetYear(currentYear);
+          }}
         >
           <svg
             width="20"
@@ -42,6 +49,10 @@ export default function BottomNav() {
         <Link
           href="/date"
           className="flex flex-col items-center h-[49px] w-[86px] justify-between cursor-pointer"
+          onClick={() => {
+            setActiveTab("date");
+            setTargetYear(currentYear);
+          }}
         >
           <svg
             width="18"
@@ -71,6 +82,10 @@ export default function BottomNav() {
         <Link
           href="/people"
           className="flex flex-col items-center h-[49px] w-[86px] justify-between cursor-pointer"
+          onClick={() => {
+            setActiveTab("people");
+            setTargetYear(currentYear);
+          }}
         >
           <svg
             width="22"

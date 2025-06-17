@@ -57,7 +57,7 @@ export async function uploadImagesToSupabase(
     }
 
     const category = mapFolderToCategory(storageFolder);
-    
+
     if (!category) {
       console.error(
         "Invalid category derived from storageFolder:",
@@ -73,6 +73,7 @@ export async function uploadImagesToSupabase(
 
     dbEntries.push({
       year: currentYear,
+      path: filePath,
       category: category,
       name: file.name,
       is_deleted: false,
@@ -104,40 +105,50 @@ export async function fetchUserImagesByMonth(
     return [];
   }
 
-  const folderPath = `users/${user.id}/photos/${targetYear}/month/${month}`;
+  const category = "date";
 
-  const { data: files, error: listError } = await supabase.storage
+  // const folderPath = `users/${user.id}/photos/${targetYear}/month/${month}`;
+
+  const { data: imageRows, error: dbError } = await supabase
     .from("images")
-    .list(folderPath, {
-      limit: 100,
-      offset: 0,
-      sortBy: { column: "name", order: "asc" },
-    });
+    .select("id, path, name")
+    .eq("user_id", user.id)
+    .eq("category", category)
+    .eq("year", parseInt(targetYear))
+    .eq("is_deleted", false)
+    .ilike("path", `%/photos/${targetYear}/month/${month}/%`);
 
-  if (listError) {
-    console.error("Error listing files:", listError.message);
+  if (dbError) {
+    console.error("Error fetching image metadata:", dbError.message);
     return [];
   }
 
-  const filePaths = (files || []).map((file) => `${folderPath}/${file.name}`);
-
-  if (filePaths.length === 0) {
+  if (!imageRows || imageRows.length === 0) {
     return [];
   }
 
   const { data: signedUrls, error: urlError } = await supabase.storage
     .from("images")
-    .createSignedUrls(filePaths, 60 * 60);
+    .createSignedUrls(
+      imageRows.map((img) => img.path),
+      60 * 60
+    );
 
   if (urlError) {
-    console.error("Error creating batch signed URLs:", urlError.message);
+    console.error("Error listing files:", urlError.message);
     return [];
   }
 
-  const images = signedUrls.map(({ path, signedUrl }) => ({
-    name: path?.split("/").pop() || path,
-    src: signedUrl,
-  }));
+  const images = imageRows
+    .map((img) => {
+      const signed = signedUrls.find((s) => s.path === img.path);
+      return {
+        id: img.id,
+        name: img.name,
+        src: signed?.signedUrl || "",
+      };
+    })
+    .filter((img) => img.src);
 
   return images;
 }
@@ -153,72 +164,65 @@ export async function fetchUserImagesByPersonYear(targetYear: string) {
     return {};
   }
 
-  const baseFolder = `users/${user.id}/photos/${targetYear}/people`;
+  const category = "person";
 
-  const { data: peopleFolders, error: folderError } = await supabase.storage
+  const { data: imageRows, error: dbError } = await supabase
     .from("images")
-    .list(baseFolder, {
-      limit: 100,
-      sortBy: { column: "name", order: "asc" },
-    });
+    .select("id, name, path")
+    .eq("user_id", user.id)
+    .eq("year", targetYear)
+    .eq("category", category)
+    .eq("is_deleted", false);
 
-  if (folderError) {
-    console.error("Error listing people folders:", folderError.message);
+  if (dbError) {
+    console.error("Error fetching image records:", dbError.message);
     return {};
   }
+
+  if (!imageRows || imageRows.length === 0) {
+    return {};
+  }
+
+  const { data: signedUrls, error: urlError } = await supabase.storage
+    .from("images")
+    .createSignedUrls(
+      imageRows.map((img) => img.path),
+      60 * 60
+    );
+
+  if (urlError) {
+    console.error("Error creating signed URLs:", urlError.message);
+    return {};
+  }
+
+  const signedUrlMap = new Map(
+    signedUrls.map((item) => [item.path, item.signedUrl])
+  );
 
   const imagesByPerson: Record<
     string,
     { id: string; name: string; src: string }[]
   > = {};
 
-  for (const folder of peopleFolders || []) {
-    const isFolder = !folder.name.includes(".");
+  for (const img of imageRows) {
+    const signedUrl = signedUrlMap.get(img.path);
+    if (!signedUrl) continue;
 
-    if (!isFolder) {
-      console.log(`Skipping file: ${folder.name}`);
-      continue;
+    const pathParts = img.path.split("/");
+    const personIndex = pathParts.indexOf("people") + 1;
+    const personName = pathParts[personIndex];
+
+    if (!personName) continue;
+
+    if (!imagesByPerson[personName]) {
+      imagesByPerson[personName] = [];
     }
 
-    const personName = folder.name;
-    const personFolderPath = `${baseFolder}/${personName}`;
-    const { data: personFiles, error: fileError } = await supabase.storage
-      .from("images")
-      .list(personFolderPath, { limit: 100 });
-
-    if (fileError) {
-      console.error(`Error listing files in ${personName}:`, fileError.message);
-      continue;
-    }
-
-    const filePaths = (personFiles || [])
-      .filter((file) => file.metadata?.type !== "folder")
-      .map((file) => `${personFolderPath}/${file.name}`);
-
-    const { data: signedUrls, error: urlError } = await supabase.storage
-      .from("images")
-      .createSignedUrls(filePaths, 60 * 60);
-
-    if (urlError) {
-      console.error("Error creating batch signed URLs:", urlError.message);
-      continue;
-    }
-
-    const images = signedUrls
-      .map(({ path, signedUrl }) => {
-        const fileName = path?.split("/").pop();
-        return {
-          id: fileName || path,
-          name: fileName || path,
-          src: signedUrl,
-        };
-      })
-      .filter(
-        (image): image is { id: string; name: string; src: string } =>
-          image.id !== null && image.name !== null
-      );
-
-    imagesByPerson[personName] = images;
+    imagesByPerson[personName].push({
+      id: img.id,
+      name: img.name,
+      src: signedUrl,
+    });
   }
 
   return imagesByPerson;
@@ -235,73 +239,179 @@ export async function fetchUserImagesByPlaceYear(targetYear: string) {
     return {};
   }
 
-  const baseFolder = `users/${user.id}/photos/${targetYear}/places`;
+  const category = "place";
 
-  const { data: placesFolders, error: folderError } = await supabase.storage
+  const { data: imageRows, error: dbError } = await supabase
     .from("images")
-    .list(baseFolder, {
-      limit: 100,
-      sortBy: { column: "name", order: "asc" },
-    });
+    .select("id, name, path")
+    .eq("user_id", user.id)
+    .eq("year", targetYear)
+    .eq("category", category)
+    .eq("is_deleted", false);
 
-  if (folderError) {
-    console.error("Error listing people folders:", folderError.message);
+  if (dbError) {
+    console.error("Error fetching image records:", dbError.message);
     return {};
   }
 
-  const imagesByPlaces: Record<
+  if (!imageRows || imageRows.length === 0) {
+    return {};
+  }
+
+  const { data: signedUrls, error: urlError } = await supabase.storage
+    .from("images")
+    .createSignedUrls(
+      imageRows.map((img) => img.path),
+      60 * 60
+    );
+
+  if (urlError) {
+    console.error("Error creating signed URLs:", urlError.message);
+    return {};
+  }
+
+  const signedUrlMap = new Map(
+    signedUrls.map((item) => [item.path, item.signedUrl])
+  );
+
+  const imagesByPlace: Record<
     string,
     { id: string; name: string; src: string }[]
   > = {};
 
-  for (const folder of placesFolders || []) {
-    const isFolder = !folder.name.includes(".");
+  for (const img of imageRows) {
+    const signedUrl = signedUrlMap.get(img.path);
+    if (!signedUrl) continue;
 
-    if (!isFolder) {
-      console.log(`Skipping file: ${folder.name}`);
-      continue;
+    const pathParts = img.path.split("/");
+    const placeIndex = pathParts.indexOf("places") + 1;
+    const placeName = pathParts[placeIndex];
+
+    if (!placeName) continue;
+
+    if (!imagesByPlace[placeName]) {
+      imagesByPlace[placeName] = [];
     }
 
-    const placeName = folder.name;
-    const placeFolderPath = `${baseFolder}/${placeName}`;
-    const { data: placeFiles, error: fileError } = await supabase.storage
-      .from("images")
-      .list(placeFolderPath, { limit: 100 });
-
-    if (fileError) {
-      console.error(`Error listing files in ${placeName}:`, fileError.message);
-      continue;
-    }
-
-    const filePaths = (placeFiles || [])
-      .filter((file) => file.metadata?.type !== "folder")
-      .map((file) => `${placeFolderPath}/${file.name}`);
-
-    const { data: signedUrls, error: urlError } = await supabase.storage
-      .from("images")
-      .createSignedUrls(filePaths, 60 * 60);
-
-    if (urlError) {
-      console.error("Error creating batch signed URLs:", urlError.message);
-      continue;
-    }
-
-    const images = signedUrls
-      .map(({ path, signedUrl }) => {
-        const fileName = path?.split("/").pop();
-        return {
-          id: fileName || path,
-          name: fileName || path,
-          src: signedUrl,
-        };
-      })
-      .filter(
-        (image): image is { id: string; name: string; src: string } =>
-          image.id !== null && image.name !== null
-      );
-
-    imagesByPlaces[placeName] = images;
+    imagesByPlace[placeName].push({
+      id: img.id,
+      name: img.name,
+      src: signedUrl,
+    });
   }
 
-  return imagesByPlaces;
+  return imagesByPlace;
 }
+
+export async function softDeleteImage(imageId: string) {
+  const { error } = await supabase
+    .from("images")
+    .update({ is_deleted: true })
+    .eq("id", imageId);
+
+  if (error) {
+    console.error("Soft delete failed:", error.message);
+    return false;
+  }
+
+  return true;
+}
+export async function fetchSavedYears(tab: string) {
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user?.id) {
+      return { success: false, error: "User not authenticated" };
+    }
+
+    const { data, error } = await supabase
+      .from("saved_years")
+      .select("year")
+      .eq("user_id", user.id)
+      .eq("tab", tab);
+
+    if (error) {
+      console.error("Error fetching saved years:", error.message);
+      return { success: false, error: error.message };
+    }
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
+  }
+}
+
+export const addYearToDB = async (year: number, tab: string) => {
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user?.id) {
+      return { success: false, error: "User not authenticated" };
+    }
+
+    const { error } = await supabase.from("saved_years").insert({
+      user_id: user.id,
+      year,
+      tab,
+    });
+
+    if (error) {
+      console.error("Error adding year:", error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
+  }
+};
+
+export const confirmDeletionFromDb = async (
+  yearToRemove: number,
+  tab: string
+) => {
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user?.id || !yearToRemove) {
+      return { success: false, error: "Invalid parameters or unauthenticated" };
+    }
+
+    const { error } = await supabase
+      .from("saved_years")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("year", yearToRemove)
+      .eq("tab", tab);
+
+    if (error) {
+      console.error("Error deleting year:", error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
+  }
+};
