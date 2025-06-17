@@ -66,6 +66,7 @@ export default function PhotoGrid({ images }: PhotoGridProps) {
               className="max-w-full max-h-full object-contain"
               onClick={(e) => e.stopPropagation()}
               priority
+              unoptimized
             />
           </div>
         </>
