@@ -4,15 +4,16 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useSupabaseSession } from "./SupabaseProvider";
 import { fetchUser } from "@/lib/authentication";
 import Profile from "@/components/Profile";
-
-type UserContextType = {
-  id: string;
-  name: string;
-  email: string;
-  subscription: boolean;
+interface UserContextType {
   isProfileOpen: boolean;
   toggleProfile: () => void;
-};
+  userProfile: {
+    id: string;
+    name: string;
+    email: string;
+    subscription: boolean;
+  };
+}
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -38,14 +39,16 @@ export default function UserProvider({
     if (!session) return;
 
     try {
-      const { data } = await fetchUser(session);
+      const response = await fetchUser();
 
-      if (!data) return;
+      if (!response?.success || !response.data) return;
+
+      const { data } = response;
 
       setUserProfile({
         id: data.id,
         name: data.user_metadata.display_name,
-        email: data.email,
+        email: data.email ?? "",
         subscription: false,
       });
     } catch (err) {

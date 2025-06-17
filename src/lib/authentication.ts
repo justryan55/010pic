@@ -1,9 +1,7 @@
-import { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase/createSupabaseClient";
 import { redirect } from "next/navigation";
-import { email } from "zod/v4-mini";
 
-export const fetchUser = async (session: Session) => {
+export const fetchUser = async () => {
   try {
     const {
       data: { user },
