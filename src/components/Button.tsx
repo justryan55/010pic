@@ -22,7 +22,8 @@ export default function Button({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onTouchStart={onClick}
+      // onClick={onClick}
       disabled={disabled}
       className={`w-full bg-black ${textSize} text-normal ${
         uppercase && "uppercase"
