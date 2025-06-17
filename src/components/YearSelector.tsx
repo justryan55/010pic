@@ -13,6 +13,7 @@ import {
 const years = Array.from({ length: 75 }, (_, i) => 2025 - i);
 
 export default function YearSelector() {
+  const [isLoading, setIsLoading] = useState(false);
   const [savedYearsByTab, setSavedYearsByTab] = useState<
     Record<string, number[]>
   >({
@@ -107,6 +108,7 @@ export default function YearSelector() {
   const remainingYears = years.filter((year) => !savedYears.includes(year));
 
   useEffect(() => {
+    setIsLoading(true);
     const fetchYears = async () => {
       const res = await fetchSavedYears(activeTab);
 
@@ -125,6 +127,8 @@ export default function YearSelector() {
         ...prev,
         [activeTab]: yearsFromDb.sort((a, b) => b - a),
       }));
+
+      setIsLoading(false);
     };
 
     fetchYears();
@@ -136,19 +140,26 @@ export default function YearSelector() {
         <div className=" flex flex-row mt-6 items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
           <div className="flex flex-row items-center gap-5">
             <ul className="flex flex-row items-center gap-5">
-              {savedYears.map((year, index) => {
-                return (
+              {isLoading ? (
+                <Image
+                  src="/images/text-loader.svg"
+                  width={20}
+                  height={20}
+                  alt="Text loading animation"
+                />
+              ) : (
+                savedYears.map((year, index) => (
                   <li
                     key={year}
                     onClick={() => selectOrRemoveYear(year)}
                     className={`relative cursor-pointer whitespace-nowrap select-none flex-shrink-0 text-sm 
-                      ${isOpen && "text-black"}
-                      ${index !== 0 ? "pl-3" : ""}
-                    ${
-                      Number(targetYear) === year
-                        ? "text-black"
-                        : "text-[var(--brand-inactive)]"
-                    }`}
+        ${isOpen ? "text-black" : ""}
+        ${index !== 0 ? "pl-3" : ""}
+        ${
+          Number(targetYear) === year
+            ? "text-black"
+            : "text-[var(--brand-inactive)]"
+        }`}
                   >
                     {isOpen && currentYear !== year && (
                       <Image
@@ -161,8 +172,8 @@ export default function YearSelector() {
                     )}
                     {year}
                   </li>
-                );
-              })}
+                ))
+              )}
             </ul>
 
             <div
