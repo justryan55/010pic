@@ -288,7 +288,8 @@ export default function AuthForm() {
           <Button
             type="submit"
             text={isRegister ? "Sign Up" : "Sign In"}
-            disabled={isLoading}
+            // disabled={isLoading}
+            isLoading={isLoading}
           />
         </div>
 
