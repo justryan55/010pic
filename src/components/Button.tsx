@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 
 interface ButtonProps {
-  type: "button" | "submit" | "reset";
+  type?: "button" | "submit" | "reset";
   text: string;
   disabled?: boolean;
   onClick?: () => void;
