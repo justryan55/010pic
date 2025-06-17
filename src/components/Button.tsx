@@ -1,6 +1,5 @@
 import React from "react";
 import Image from "next/image";
-import spinner from "/images/spinner.svg";
 
 interface ButtonProps {
   type: "button" | "submit" | "reset";
@@ -28,7 +27,7 @@ export default function Button({
   return (
     <button
       type={type}
-      onTouchStart={onClick}
+      onClick={onClick}
       // onClick={onClick}
       disabled={disabled}
       className={`w-full bg-black ${textSize} text-normal 
