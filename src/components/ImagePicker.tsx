@@ -9,7 +9,7 @@ import Button from "./Button";
 interface SelectedImage {
   id: string;
   src: string;
-  file: File;
+  // file: File;
   name: string;
 }
 
@@ -72,7 +72,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
           const newImage = {
             id: nanoid(),
             src: e.target?.result as string,
-            file: file,
+            // file: file,
             name: file.name,
           };
 

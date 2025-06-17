@@ -9,7 +9,7 @@ type PhotoPickerType = "date" | "people" | "places" | null;
 interface SelectedImage {
   id: string;
   src: string;
-  file: File;
+  // file: File;
   name: string;
 }
 

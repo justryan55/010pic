@@ -7,7 +7,7 @@ import ImagePicker from "./ImagePicker";
 interface SelectedImage {
   id: string;
   src: string;
-  file: File;
+  // file: File;
   name: string;
 }
 
@@ -45,7 +45,6 @@ export default function PeoplePhotoPicker() {
       setTargetPerson(personKey);
     } catch (err) {
       console.log(err);
-      onClose();
     }
   };
 

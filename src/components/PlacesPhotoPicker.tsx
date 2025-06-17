@@ -7,7 +7,7 @@ import ImagePicker from "./ImagePicker";
 interface SelectedImage {
   id: string;
   src: string;
-  file: File;
+  // file: File;
   name: string;
 }
 
@@ -31,17 +31,21 @@ export default function PlacesPhotoPicker() {
   const placesImages = imagesByPlace[targetPlace ?? ""] || [];
 
   const handleSave = (images: SelectedImage[]) => {
-    const key = `photoFlow-${placesKey}`;
-    const serialized = JSON.stringify(images);
+    try {
+      const key = `photoFlow-${placesKey}`;
+      const serialized = JSON.stringify(images);
 
-    localStorage.setItem(key, serialized);
+      localStorage.setItem(key, serialized);
 
-    setImagesByPlace((prev) => ({
-      ...prev,
-      [placesKey]: [...images],
-    }));
+      setImagesByPlace((prev) => ({
+        ...prev,
+        [placesKey]: [...images],
+      }));
 
-    setTargetPlace(placesKey);
+      setTargetPlace(placesKey);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const onClose = () => {
