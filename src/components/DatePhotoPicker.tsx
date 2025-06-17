@@ -22,13 +22,13 @@ export default function DatePhotoPicker() {
   const monthKey = `${targetYear}-${targetMonth}`;
   const monthImages = imagesByMonth[monthKey] || [];
 
-  const handleSave = (images: SelectedImage[]) => {
+  const handleSave = async (images: SelectedImage[]) => {
     try {
-      const serialized = JSON.stringify(images);
+      // const serialized = JSON.stringify(images);
 
-      const storageKey = `photoFlow-${targetYear}-${targetMonth}`;
+      // const storageKey = `photoFlow-${targetYear}-${targetMonth}`;
 
-      localStorage.setItem(storageKey, serialized);
+      // localStorage.setItem(storageKey, serialized);
 
       setImagesByMonth((prev) => ({
         ...prev,

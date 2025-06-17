@@ -5,6 +5,7 @@ import Image from "next/image";
 import { nanoid } from "nanoid";
 import Input from "@/components/Input";
 import Button from "./Button";
+import { uploadImagesToSupabase } from "@/lib/imagesDB";
 
 interface SelectedImage {
   id: string;
@@ -43,6 +44,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [mainImage, setMainImage] = useState<SelectedImage | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -60,25 +62,23 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const processFiles = (files: File[]) => {
     try {
       const remainingSlots =
-        maxImages - existingImages.length - selectedImages.length;
-
+        maxImages - existingImages.length - pendingFiles.length;
       const validFiles = files
         .filter((file) => file.type.startsWith("image/"))
         .slice(0, remainingSlots);
 
-      validFiles.forEach((file: File) => {
+      setPendingFiles((prev) => [...prev, ...validFiles]);
+
+      validFiles.forEach((file) => {
         const reader = new FileReader();
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-          const newImage = {
+        reader.onload = (e) => {
+          const newImage: SelectedImage = {
             id: nanoid(),
             src: e.target?.result as string,
-            // file: file,
             name: file.name,
           };
 
           setSelectedImages((prev) => [...prev, newImage]);
-
-          setMainImage(newImage);
         };
         reader.readAsDataURL(file);
       });
@@ -121,13 +121,19 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     }
   };
 
-  const handleSave = () => {
-    const allImages = [...selectedImages, ...existingImages];
-    if (allImages.length > 0) {
-      onSave(allImages);
-      setSelectedImages([]);
-      setMainImage(null);
-    }
+  const handleSave = async () => {
+    if (pendingFiles.length === 0) return;
+
+    const uploadedImages = await uploadImagesToSupabase(
+      pendingFiles,
+      `photos/${title.replace(/\s+/g, "_")}`
+    );
+
+    const allImages = [...existingImages, ...uploadedImages];
+
+    onSave(allImages); 
+    setPendingFiles([]);
+    setMainImage(null);
     onClose();
   };
 

@@ -3,7 +3,7 @@
 import DatePhotoPicker from "@/components/DatePhotoPicker";
 import PeoplePhotoPicker from "@/components/PeoplePhotoPicker";
 import PlacesPhotoPicker from "@/components/PlacesPhotoPicker";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 type PhotoPickerType = "date" | "people" | "places" | null;
 interface SelectedImage {
@@ -101,35 +101,35 @@ export default function PhotoFlowProvider({
     setActivePicker((current) => (current === picker ? null : picker));
   };
 
-  useEffect(() => {
-    const monthImages: Record<string, SelectedImage[]> = {};
-    const placeImages: Record<string, SelectedImage[]> = {};
-    const personImages: Record<string, SelectedImage[]> = {};
+  // useEffect(() => {
+  //   const monthImages: Record<string, SelectedImage[]> = {};
+  //   const placeImages: Record<string, SelectedImage[]> = {};
+  //   const personImages: Record<string, SelectedImage[]> = {};
 
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key?.startsWith("photoFlow-")) continue;
+  //   for (let i = 0; i < localStorage.length; i++) {
+  //     const key = localStorage.key(i);
+  //     if (!key?.startsWith("photoFlow-")) continue;
 
-      try {
-        const data = JSON.parse(localStorage.getItem(key)!);
-        const cleanedKey = key.replace("photoFlow-", "");
+  //     try {
+  //       const data = JSON.parse(localStorage.getItem(key)!);
+  //       const cleanedKey = key.replace("photoFlow-", "");
 
-        if (cleanedKey.includes("-place-")) {
-          placeImages[cleanedKey] = data;
-        } else if (cleanedKey.includes("-person-")) {
-          personImages[cleanedKey] = data;
-        } else {
-          monthImages[cleanedKey] = data;
-        }
-      } catch (e) {
-        console.error("Failed to parse stored images", e);
-      }
-    }
+  //       if (cleanedKey.includes("-place-")) {
+  //         placeImages[cleanedKey] = data;
+  //       } else if (cleanedKey.includes("-person-")) {
+  //         personImages[cleanedKey] = data;
+  //       } else {
+  //         monthImages[cleanedKey] = data;
+  //       }
+  //     } catch (e) {
+  //       console.error("Failed to parse stored images", e);
+  //     }
+  //   }
 
-    setImagesByMonth(monthImages);
-    setImagesByPlace(placeImages);
-    setImagesByPerson(personImages);
-  }, []);
+  //   setImagesByMonth(monthImages);
+  //   setImagesByPlace(placeImages);
+  //   setImagesByPerson(personImages);
+  // }, []);
 
   const togglePhotoPicker = () => {
     setIsPhotoPickerOpen((prev) => !prev);
