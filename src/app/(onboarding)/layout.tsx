@@ -15,9 +15,9 @@ export default async function OnboardingLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // if (!user) {
-  //   redirect("/auth/login");
-  // }
+  if (!user) {
+    redirect("/auth/login");
+  }
 
   return (
     <SupabaseProvider>

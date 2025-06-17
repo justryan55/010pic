@@ -1,6 +1,7 @@
 import React from "react";
 
 interface ButtonProps {
+  type: 'button' | 'submit' | 'reset';
   text: string;
   disabled?: boolean;
   onClick?: () => void;
@@ -11,6 +12,7 @@ interface ButtonProps {
 }
 
 export default function Button({
+  type = "button",
   text,
   disabled,
   onClick,
@@ -21,7 +23,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
-      type="button"
+      type={type}
       onTouchStart={onClick}
       // onClick={onClick}
       disabled={disabled}

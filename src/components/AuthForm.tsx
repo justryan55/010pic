@@ -5,32 +5,156 @@ import Input from "@/components/Input";
 import Label from "@/components/Label";
 import SocialLoginButton from "@/components/SocialLoginButton";
 import { useGetPathname } from "@/helpers/getPathname";
+import { supabase } from "@/lib/supabase/createSupabaseClient";
 import Image from "next/image";
 import Link from "next/link";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+const registerSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, "Name is required.")
+      .min(2, "Full name must be at least 2 characters.")
+      .max(100, "Name is too long."),
+    email: z.string().trim().email({ message: "Please enter a valid email." }),
+    password: z
+      .string()
+      .min(4, "Password must be at least 4 characters.")
+      .regex(/[a-zA-Z]/, { message: "Must contain at least one letter." })
+      .regex(/[0-9]/, { message: "Must contain at least one number." })
+      .regex(/[^a-zA-Z0-9]/, {
+        message: "Must contain at least one special character.",
+      }),
+    confirmPassword: z.string().min(1, "Please confirm your password."),
+  })
+  .superRefine((val, ctx) => {
+    if (val.password !== val.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Password fields do not match.",
+        path: ["confirmPassword"],
+      });
+    }
+  });
+
+const loginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required.")
+    .email({ message: "Please enter a valid email." }),
+  password: z.string().min(1, "Password is required."),
+});
+
+type RegisterFormData = z.infer<typeof registerSchema>;
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function AuthForm() {
+  const [authError, setAuthError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const pathname = useGetPathname();
+
+  const isRegister = pathname === "/auth/register";
+
+  const registerForm = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onRegisterSubmit = async (values: RegisterFormData) => {
+    setIsLoading(true);
+    setAuthError("");
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            display_name: values.name,
+          },
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        return;
+      }
+
+      router.push("/auth/login");
+    } catch (err) {
+      console.error("Registration error:", err);
+      setAuthError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onLoginSubmit = async (values: LoginFormData) => {
+    setIsLoading(true);
+    setAuthError("");
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        return;
+      }
+
+      router.push("/date");
+    } catch (err) {
+      console.error("Login error:", err);
+      setAuthError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <main
       className={`flex-1 flex flex-col items-center px-6 ${
-        useGetPathname() === "/auth/register"
-          ? "justify-center"
-          : "justify-evenly"
+        isRegister ? "justify-center" : "justify-evenly"
       }`}
     >
       <div
         className={`text-center w-full flex ${
-          useGetPathname() === "/auth/register"
+          isRegister
             ? "justify-between max-w-[300px] py-2"
-            : "justify-center  mb-12"
+            : "justify-center mb-12"
         }`}
       >
-        {/* <div className="text-center  w-full flex justify-center "> */}
-        {useGetPathname() === "/auth/register" ? (
-          <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px] ">
+        {isRegister ? (
+          <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">
             Create account
           </h1>
         ) : (
-          <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px] ">
+          <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">
             Remember{" "}
             <span
               className="font-normal italic"
@@ -42,7 +166,7 @@ export default function AuthForm() {
           </h1>
         )}
 
-        {useGetPathname() === "/auth/register" && (
+        {isRegister && (
           <Link href="/auth/login" className="flex justify-center items-center">
             <Image
               src="/images/X.svg"
@@ -53,39 +177,94 @@ export default function AuthForm() {
           </Link>
         )}
       </div>
-      <form className="space-y-4">
-        {useGetPathname() === "/auth/register" && (
+
+      <form
+        onSubmit={
+          isRegister
+            ? registerForm.handleSubmit(onRegisterSubmit)
+            : loginForm.handleSubmit(onLoginSubmit)
+        }
+        className="space-y-4"
+      >
+        {isRegister && (
           <div>
             <Label text="Name" htmlFor="name" />
-            <Input id="name" type="name" placeholder="ex: john smith" />
+            <Input
+              {...registerForm.register("name")}
+              id="name"
+              type="text"
+              placeholder="ex: john smith"
+            />
+            {registerForm.formState.errors.name && (
+              <p className="text-destructive text-sm mt-1">
+                {registerForm.formState.errors.name.message}
+              </p>
+            )}
           </div>
         )}
+
         <div>
           <Label text="Email" htmlFor="email" />
           <Input
+            {...(isRegister
+              ? registerForm.register("email")
+              : loginForm.register("email"))}
             id="email"
             type="email"
             placeholder="ex: jon.smith@email.com"
           />
+          {isRegister && registerForm.formState.errors.email && (
+            <p className="text-destructive text-sm mt-1">
+              {registerForm.formState.errors.email.message}
+            </p>
+          )}
+          {!isRegister && loginForm.formState.errors.email && (
+            <p className="text-destructive text-sm mt-1">
+              {loginForm.formState.errors.email.message}
+            </p>
+          )}
         </div>
 
         <div>
           <Label text="Password" htmlFor="password" />
-          <Input id="password" type="password" placeholder="*********" />
+          <Input
+            {...(isRegister
+              ? registerForm.register("password")
+              : loginForm.register("password"))}
+            id="password"
+            type="password"
+            placeholder="*********"
+          />
+          {isRegister && registerForm.formState.errors.password && (
+            <p className="text-destructive text-sm mt-1">
+              {registerForm.formState.errors.password.message}
+            </p>
+          )}
+          {!isRegister && loginForm.formState.errors.password && (
+            <p className="text-destructive text-sm mt-1">
+              {loginForm.formState.errors.password.message}
+            </p>
+          )}
         </div>
 
-        {useGetPathname() === "/auth/register" && (
+        {isRegister && (
           <div>
             <Label text="Confirm Password" htmlFor="confirmPassword" />
             <Input
+              {...registerForm.register("confirmPassword")}
               id="confirmPassword"
               type="password"
               placeholder="*********"
             />
+            {registerForm.formState.errors.confirmPassword && (
+              <p className="text-destructive text-sm mt-1">
+                {registerForm.formState.errors.confirmPassword.message}
+              </p>
+            )}
           </div>
         )}
 
-        {useGetPathname() === "/auth/register" && (
+        {isRegister && (
           <div className="flex items-center mb-4">
             <input
               type="checkbox"
@@ -101,11 +280,15 @@ export default function AuthForm() {
           </div>
         )}
 
+        {authError && (
+          <p className="text-destructive text-sm p-2">{authError}</p>
+        )}
+
         <div>
           <Button
-            text={`${
-              useGetPathname() === "/auth/register" ? "Sign Up" : "Sign In"
-            }`}
+            type="submit"
+            text={isRegister ? "Sign Up" : "Sign In"}
+            disabled={isLoading}
           />
         </div>
 
@@ -113,9 +296,7 @@ export default function AuthForm() {
           <div className="flex items-center mb-6">
             <div className="flex-1 h-px bg-gray-300"></div>
             <p className="text-black text-sm font-normal mx-4">
-              {useGetPathname() === "/auth/register"
-                ? "or sign up with"
-                : "or sign in with"}
+              {isRegister ? "or sign up with" : "or sign in with"}
             </p>
             <div className="flex-1 h-px bg-gray-300"></div>
           </div>
@@ -133,20 +314,13 @@ export default function AuthForm() {
 
       <div className="text-center">
         <p className="text-black text-sm font-normal mb-2">
-          {useGetPathname() === "/auth/register"
-            ? "Have an account?"
-            : "Don't have an account"}
+          {isRegister ? "Have an account?" : "Don't have an account?"}
         </p>
         <Link
-          // href="/auth/login"
-          href={`${
-            useGetPathname() === "/auth/register"
-              ? "/onboarding/welcome"
-              : "/auth/register"
-          }`}
+          href={isRegister ? "/auth/login" : "/auth/register"}
           className="text-black text-sm font-bold underline hover:no-underline cursor-pointer"
         >
-          {useGetPathname() === "/auth/register" ? "Login" : "Register"}
+          {isRegister ? "Login" : "Register"}
         </Link>
       </div>
     </main>

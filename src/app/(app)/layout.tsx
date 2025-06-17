@@ -18,13 +18,12 @@ export default async function OnboardingLayout({
   const supabase = await createSupabaseServer();
 
   const {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     data: { user },
   } = await supabase.auth.getUser();
 
-  // if (!user) {
-  //   redirect("/auth/login");
-  // }
+  if (!user) {
+    redirect("/auth/login");
+  }
   return (
     <SupabaseProvider>
       <SubscriptionProvider>
