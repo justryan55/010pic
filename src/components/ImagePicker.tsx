@@ -46,38 +46,48 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    processFiles(files);
+    try {
+      const files = Array.from(event.target.files || []);
+      processFiles(files);
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (err) {
+      console.log(err);
+      onClose();
     }
   };
 
   const processFiles = (files: File[]) => {
-    const remainingSlots =
-      maxImages - existingImages.length - selectedImages.length;
+    try {
+      const remainingSlots =
+        maxImages - existingImages.length - selectedImages.length;
 
-    const validFiles = files
-      .filter((file) => file.type.startsWith("image/"))
-      .slice(0, remainingSlots);
+      const validFiles = files
+        .filter((file) => file.type.startsWith("image/"))
+        .slice(0, remainingSlots);
 
-    validFiles.forEach((file: File) => {
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        const newImage = {
-          id: nanoid(),
-          src: e.target?.result as string,
-          file: file,
-          name: file.name,
+      validFiles.forEach((file: File) => {
+        const reader = new FileReader();
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+          const newImage = {
+            id: nanoid(),
+            src: e.target?.result as string,
+            file: file,
+            name: file.name,
+          };
+
+          setSelectedImages((prev) => [...prev, newImage]);
+
+          setMainImage(newImage);
         };
-
-        setSelectedImages((prev) => [...prev, newImage]);
-
-        setMainImage(newImage);
-      };
-      reader.readAsDataURL(file);
-    });
+        reader.readAsDataURL(file);
+      });
+    } catch (err) {
+      console.log(err);
+      onClose();
+    }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -144,6 +154,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
   return (
     <div
+      // className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around transition-transform duration-300 min-h-screen } `}
       className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around transition-transform duration-300 min-h-screen } `}
     >
       {/* ${isOpen ? "translate-y-0" : "translate-y-[150%]"}  */}
@@ -270,19 +281,11 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
         </div>
       </div>
 
-      {/* <Button
+      <Button
         text="NEXT"
         onClick={handleSave}
         disabled={existingImages.length === 0 && selectedImages.length === 0}
-      /> */}
-
-      <button
-        // text="NEXT"
-        onClick={handleSave}
-        // disabled={existingImages.length === 0 && selectedImages.length === 0}
-      >
-        Next
-      </button>
+      />
 
       <label htmlFor="file-upload" className="hidden">
         Upload Images
