@@ -15,6 +15,7 @@ export default function Places() {
     setTargetPlace,
     setImagesByPlace,
     setIsLoadingImages,
+    refreshToggle,
   } = usePhotoFlow();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,7 +56,7 @@ export default function Places() {
 
     loadPeopleForYear();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetYear]);
+  }, [targetYear, refreshToggle]);
 
   if (isLoading) {
     return (

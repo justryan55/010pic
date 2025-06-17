@@ -53,6 +53,8 @@ type PhotoFlowContext = {
   setIsLoadingImages: React.Dispatch<React.SetStateAction<boolean>>;
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+  refreshToggle: boolean;
+  triggerRefresh: () => void;
 };
 
 const PhotoFlowContext = createContext<PhotoFlowContext>({
@@ -79,6 +81,8 @@ const PhotoFlowContext = createContext<PhotoFlowContext>({
   setIsLoadingImages: () => {},
   activeTab: "",
   setActiveTab: () => {},
+  refreshToggle: false,
+  triggerRefresh: () => {},
 });
 
 export default function PhotoFlowProvider({
@@ -112,10 +116,15 @@ export default function PhotoFlowProvider({
   const [targetPerson, setTargetPerson] = useState<string | null>(null);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("date");
+  const [refreshToggle, setRefreshToggle] = useState(false);
 
   const togglePicker = (picker: PhotoPickerType) => {
     setActivePicker((current) => (current === picker ? null : picker));
   };
+
+  function triggerRefresh() {
+    setRefreshToggle((prev) => !prev);
+  }
 
   useEffect(() => {
     const loadImages = async () => {
@@ -208,6 +217,8 @@ export default function PhotoFlowProvider({
         setIsLoadingImages,
         activeTab,
         setActiveTab,
+        refreshToggle,
+        triggerRefresh,
       }}
     >
       {children}

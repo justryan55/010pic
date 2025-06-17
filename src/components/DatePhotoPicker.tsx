@@ -18,6 +18,7 @@ export default function DatePhotoPicker() {
     imagesByMonth,
     setImagesByMonth,
     togglePhotoPicker,
+    triggerRefresh,
   } = usePhotoFlow();
 
   const monthIndex = targetMonth ? monthNameToNumber(targetMonth) : "";
@@ -30,6 +31,7 @@ export default function DatePhotoPicker() {
         ...prev,
         [monthKey]: images,
       }));
+      triggerRefresh();
     } catch (err) {
       console.log(err);
     }

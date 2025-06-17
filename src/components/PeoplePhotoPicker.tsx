@@ -20,6 +20,7 @@ export default function PeoplePhotoPicker() {
     setImagesByPerson,
     activePicker,
     togglePhotoPicker,
+    triggerRefresh,
   } = usePhotoFlow();
 
   const initialTitle =
@@ -42,6 +43,7 @@ export default function PeoplePhotoPicker() {
         [personKey]: [...images],
       }));
 
+      triggerRefresh();
       setTargetPerson(personKey);
     } catch (err) {
       console.log(err);

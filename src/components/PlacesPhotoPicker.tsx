@@ -20,6 +20,7 @@ export default function PlacesPhotoPicker() {
     togglePhotoPicker,
     targetPlace,
     setTargetPlace,
+    triggerRefresh,
   } = usePhotoFlow();
 
   const initialTitle =
@@ -41,6 +42,8 @@ export default function PlacesPhotoPicker() {
         ...prev,
         [placesKey]: [...images],
       }));
+
+      triggerRefresh();
 
       setTargetPlace(placesKey);
     } catch (err) {

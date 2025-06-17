@@ -23,8 +23,13 @@ const allMonths = [
 ];
 
 export default function Home() {
-  const { setTargetMonth, targetYear, imagesByMonth, setImagesByMonth } =
-    usePhotoFlow();
+  const {
+    setTargetMonth,
+    targetYear,
+    imagesByMonth,
+    setImagesByMonth,
+    refreshToggle,
+  } = usePhotoFlow();
 
   const [isLoading, setIsLoading] = useState(false);
   const now = new Date();
@@ -39,44 +44,93 @@ export default function Home() {
         })
       : allMonths;
 
+  // useEffect(() => {
+  //   const loadAllMonthImages = async () => {
+  //     setIsLoading(true);
+  //     if (!targetYear) return;
+
+  //     const loadPromises = filteredMonths.map(async (month) => {
+  //       const monthNumber = monthNameToNumber(month);
+  //       const monthKey = `${targetYear}-${monthNumber}`;
+
+  //       if (!imagesByMonth[monthKey]) {
+  //         const images = await fetchUserImagesByMonth(
+  //           targetYear.toString(),
+  //           monthNumber
+  //         );
+
+  //         const filteredImages = images.filter(
+  //           (img): img is { id: string; src: string; name: string } =>
+  //             img !== null
+  //         );
+
+  //         return { monthKey, images: filteredImages };
+  //       }
+  //       return null;
+  //     });
+
+  //     const results = await Promise.all(loadPromises);
+
+  //     const newImagesByMonth: Record<
+  //       string,
+  //       { id: string; src: string; name: string }[]
+  //     > = {};
+  //     results.forEach((result) => {
+  //       if (result) {
+  //         newImagesByMonth[result.monthKey] = result.images;
+  //       }
+  //     });
+
+  //     if (Object.keys(newImagesByMonth).length > 0) {
+  //       setImagesByMonth((prev) => ({
+  //         ...prev,
+  //         ...newImagesByMonth,
+  //       }));
+  //     }
+
+  //     setIsLoading(false);
+  //   };
+
+  //   loadAllMonthImages();
+  // }, [
+  //   targetYear,
+  //   filteredMonths,
+  //   imagesByMonth,
+  //   setImagesByMonth,
+  //   refreshToggle,
+  // ]);
+
   useEffect(() => {
     const loadAllMonthImages = async () => {
-      setIsLoading(true);
       if (!targetYear) return;
+      setIsLoading(true);
 
-      const loadPromises = filteredMonths.map(async (month) => {
+      const monthsToLoad = filteredMonths;
+
+      const loadPromises = monthsToLoad.map(async (month) => {
         const monthNumber = monthNameToNumber(month);
-        const monthKey = `${targetYear}-${monthNumber}`;
-
-        if (!imagesByMonth[monthKey]) {
-          const images = await fetchUserImagesByMonth(
-            targetYear.toString(),
-            monthNumber
-          );
-
-          const filteredImages = images.filter(
-            (img): img is { id: string; src: string; name: string } =>
-              img !== null
-          );
-
-          return { monthKey, images: filteredImages };
-        }
-        return null;
+        const images = await fetchUserImagesByMonth(
+          targetYear.toString(),
+          monthNumber
+        );
+        const filteredImages = images.filter(
+          (img): img is { id: string; src: string; name: string } =>
+            img !== null
+        );
+        return {
+          monthKey: `${targetYear}-${monthNumber}`,
+          images: filteredImages,
+        };
       });
 
       const results = await Promise.all(loadPromises);
 
-      const newImagesByMonth: Record<
-        string,
-        { id: string; src: string; name: string }[]
-      > = {};
-      results.forEach((result) => {
-        if (result) {
-          newImagesByMonth[result.monthKey] = result.images;
-        }
-      });
+      if (results.length > 0) {
+        const newImagesByMonth = results.reduce((acc, { monthKey, images }) => {
+          acc[monthKey] = images;
+          return acc;
+        }, {} as Record<string, { id: string; src: string; name: string }[]>);
 
-      if (Object.keys(newImagesByMonth).length > 0) {
         setImagesByMonth((prev) => ({
           ...prev,
           ...newImagesByMonth,
@@ -87,7 +141,8 @@ export default function Home() {
     };
 
     loadAllMonthImages();
-  }, [targetYear, filteredMonths, imagesByMonth, setImagesByMonth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetYear, refreshToggle]);
 
   function MonthPhotoGrid({ month }: { month: string }) {
     const monthNumber = monthNameToNumber(month);
