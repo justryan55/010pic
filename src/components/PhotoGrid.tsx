@@ -42,6 +42,7 @@ export default function PhotoGrid({ images }: PhotoGridProps) {
                   width={50}
                   className="w-full h-full object-cover"
                   onClick={() => openFullScreen(image)}
+                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full"></div>
