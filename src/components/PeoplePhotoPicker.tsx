@@ -31,17 +31,22 @@ export default function PeoplePhotoPicker() {
   const peopleImages = imagesByPerson[targetPerson ?? ""] || [];
 
   const handleSave = (images: SelectedImage[]) => {
-    const key = `photoFlow-${personKey}`;
-    const serialized = JSON.stringify(images);
+    try {
+      const key = `photoFlow-${personKey}`;
+      const serialized = JSON.stringify(images);
 
-    localStorage.setItem(key, serialized);
+      localStorage.setItem(key, serialized);
 
-    setImagesByPerson((prev) => ({
-      ...prev,
-      [personKey]: [...images],
-    }));
+      setImagesByPerson((prev) => ({
+        ...prev,
+        [personKey]: [...images],
+      }));
 
-    setTargetPerson(personKey);
+      setTargetPerson(personKey);
+    } catch (err) {
+      console.log(err);
+      onClose();
+    }
   };
 
   const onClose = () => {
