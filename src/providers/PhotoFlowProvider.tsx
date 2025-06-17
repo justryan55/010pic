@@ -126,19 +126,44 @@ export default function PhotoFlowProvider({
     setRefreshToggle((prev) => !prev);
   }
 
+  // useEffect(() => {
+  //   const loadImages = async () => {
+  //     if (!targetMonth || !targetYear) return;
+
+  //     const monthIndex = monthNameToNumber(targetMonth);
+  //     const monthKey = `${targetYear}-${monthIndex}`;
+
+  //     const images = await fetchUserImagesByMonth(
+  //       targetYear.toString(),
+  //       monthIndex
+  //     );
+
+  //     const filteredImages = images.filter(
+  //       (img): img is SelectedImage => img !== null && typeof img === 'object'
+  //     );
+
+  //     setImagesByMonth((prev) => ({
+  //       ...prev,
+  //       [monthKey]: filteredImages,
+  //     }));
+  //   };
+
+  //   loadImages();
+  // }, [targetMonth, targetYear]);
+
   useEffect(() => {
     const loadImages = async () => {
       if (!targetMonth || !targetYear) return;
-
       const monthIndex = monthNameToNumber(targetMonth);
       const monthKey = `${targetYear}-${monthIndex}`;
-
-      const images = await fetchUserImagesByMonth(
+      const imagesByMonth = await fetchUserImagesByMonth(
         targetYear.toString(),
-        monthIndex
+        [monthIndex]
       );
 
-      const filteredImages = images.filter(
+      const imagesForMonth = imagesByMonth[monthKey] || [];
+
+      const filteredImages = imagesForMonth.filter(
         (img): img is SelectedImage => img !== null
       );
 
@@ -147,7 +172,6 @@ export default function PhotoFlowProvider({
         [monthKey]: filteredImages,
       }));
     };
-
     loadImages();
   }, [targetMonth, targetYear]);
 

@@ -91,9 +91,71 @@ export async function uploadImagesToSupabase(
   return uploadedImages;
 }
 
+// export async function fetchUserImagesByMonth(
+//   targetYear: string,
+//   month: string
+// ) {
+//   const {
+//     data: { user },
+//     error: userError,
+//   } = await supabase.auth.getUser();
+
+//   if (userError || !user?.id) {
+//     console.error("Not authenticated:", userError);
+//     return [];
+//   }
+
+//   const category = "date";
+
+//   // const folderPath = `users/${user.id}/photos/${targetYear}/month/${month}`;
+
+//   const { data: imageRows, error: dbError } = await supabase
+//     .from("images")
+//     .select("id, path, name")
+//     .eq("user_id", user.id)
+//     .eq("category", category)
+//     .eq("year", parseInt(targetYear))
+//     .eq("is_deleted", false)
+//     .ilike("path", `%/photos/${targetYear}/month/${month}/%`);
+
+//   if (dbError) {
+//     console.error("Error fetching image metadata:", dbError.message);
+//     return [];
+//   }
+
+//   if (!imageRows || imageRows.length === 0) {
+//     return [];
+//   }
+
+//   const { data: signedUrls, error: urlError } = await supabase.storage
+//     .from("images")
+//     .createSignedUrls(
+//       imageRows.map((img) => img.path),
+//       60 * 60
+//     );
+
+//   if (urlError) {
+//     console.error("Error listing files:", urlError.message);
+//     return [];
+//   }
+
+//   const images = imageRows
+//     .map((img) => {
+//       const signed = signedUrls.find((s) => s.path === img.path);
+//       return {
+//         id: img.id,
+//         name: img.name,
+//         src: signed?.signedUrl || "",
+//       };
+//     })
+//     .filter((img) => img.src);
+
+//   return images;
+// }
+
 export async function fetchUserImagesByMonth(
   targetYear: string,
-  month: string
+  months: string[]
 ) {
   const {
     data: { user },
@@ -102,13 +164,12 @@ export async function fetchUserImagesByMonth(
 
   if (userError || !user?.id) {
     console.error("Not authenticated:", userError);
-    return [];
+    return {};
   }
 
   const category = "date";
 
-  // const folderPath = `users/${user.id}/photos/${targetYear}/month/${month}`;
-
+  // Fetch all date images for the year at once
   const { data: imageRows, error: dbError } = await supabase
     .from("images")
     .select("id, path, name")
@@ -116,43 +177,78 @@ export async function fetchUserImagesByMonth(
     .eq("category", category)
     .eq("year", parseInt(targetYear))
     .eq("is_deleted", false)
-    .ilike("path", `%/photos/${targetYear}/month/${month}/%`);
+    .ilike("path", `%/photos/${targetYear}/month/%`); // Get all months for the year
 
   if (dbError) {
     console.error("Error fetching image metadata:", dbError.message);
-    return [];
+    return {};
   }
 
   if (!imageRows || imageRows.length === 0) {
-    return [];
+    return {};
+  }
+
+  // Filter for only the months we want
+  const monthsSet = new Set(months);
+  const filteredRows = imageRows.filter((img) => {
+    const pathParts = img.path.split("/");
+    const monthIndex = pathParts.indexOf("month") + 1;
+    const month = pathParts[monthIndex];
+    return month && monthsSet.has(month);
+  });
+
+  if (filteredRows.length === 0) {
+    return {};
   }
 
   const { data: signedUrls, error: urlError } = await supabase.storage
     .from("images")
     .createSignedUrls(
-      imageRows.map((img) => img.path),
+      filteredRows.map((img) => img.path),
       60 * 60
     );
 
   if (urlError) {
-    console.error("Error listing files:", urlError.message);
-    return [];
+    console.error("Error creating signed URLs:", urlError.message);
+    return {};
   }
 
-  const images = imageRows
-    .map((img) => {
-      const signed = signedUrls.find((s) => s.path === img.path);
-      return {
-        id: img.id,
-        name: img.name,
-        src: signed?.signedUrl || "",
-      };
-    })
-    .filter((img) => img.src);
+  const signedUrlMap = new Map(
+    signedUrls.map((item) => [item.path, item.signedUrl])
+  );
 
-  return images;
+  // Group images by month
+  const imagesByMonth: Record<
+    string,
+    { id: string; name: string; src: string }[]
+  > = {};
+
+  for (const img of filteredRows) {
+    const signedUrl = signedUrlMap.get(img.path);
+    if (!signedUrl) continue;
+
+    // Extract month from path
+    const pathParts = img.path.split("/");
+    const monthIndex = pathParts.indexOf("month") + 1;
+    const month = pathParts[monthIndex];
+
+    if (!month) continue;
+
+    const monthKey = `${targetYear}-${month}`;
+
+    if (!imagesByMonth[monthKey]) {
+      imagesByMonth[monthKey] = [];
+    }
+
+    imagesByMonth[monthKey].push({
+      id: img.id,
+      name: img.name,
+      src: signedUrl,
+    });
+  }
+
+  return imagesByMonth;
 }
-
 export async function fetchUserImagesByPersonYear(targetYear: string) {
   const {
     data: { user },

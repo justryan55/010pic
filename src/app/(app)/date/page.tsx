@@ -105,32 +105,25 @@ export default function Home() {
       if (!targetYear) return;
       setIsLoading(true);
 
-      const monthsToLoad = filteredMonths;
-
-      const loadPromises = monthsToLoad.map(async (month) => {
+      const monthsToLoad = filteredMonths.filter((month) => {
         const monthNumber = monthNameToNumber(month);
-        const images = await fetchUserImagesByMonth(
-          targetYear.toString(),
-          monthNumber
-        );
-        const filteredImages = images.filter(
-          (img): img is { id: string; src: string; name: string } =>
-            img !== null
-        );
-        return {
-          monthKey: `${targetYear}-${monthNumber}`,
-          images: filteredImages,
-        };
+        const monthKey = `${targetYear}-${monthNumber}`;
+        return !imagesByMonth[monthKey];
       });
 
-      const results = await Promise.all(loadPromises);
+      if (monthsToLoad.length === 0) {
+        setIsLoading(false);
+        return;
+      }
 
-      if (results.length > 0) {
-        const newImagesByMonth = results.reduce((acc, { monthKey, images }) => {
-          acc[monthKey] = images;
-          return acc;
-        }, {} as Record<string, { id: string; src: string; name: string }[]>);
+      const monthNumbers = monthsToLoad.map(monthNameToNumber);
 
+      const newImagesByMonth = await fetchUserImagesByMonth(
+        targetYear.toString(),
+        monthNumbers
+      );
+
+      if (Object.keys(newImagesByMonth).length > 0) {
         setImagesByMonth((prev) => ({
           ...prev,
           ...newImagesByMonth,
