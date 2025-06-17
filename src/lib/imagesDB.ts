@@ -7,9 +7,21 @@ export async function uploadImagesToSupabase(
 ): Promise<{ id: string; src: string; name: string }[]> {
   const uploadedImages = [];
 
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user?.id) {
+    console.error("User not authenticated:", userError);
+    return [];
+  }
+
+  const userId = user.id;
+
   for (const file of files) {
     const uniqueId = nanoid();
-    const filePath = `${storageFolder}/${uniqueId}-${file.name}`;
+    const filePath = `users/${userId}/${storageFolder}/${uniqueId}-${file.name}`;
     const contentType = file.type || "application/octet-stream";
 
     console.log(`Uploading to: ${filePath}`);
@@ -28,14 +40,12 @@ export async function uploadImagesToSupabase(
 
     const { data: signedUrlData, error: urlError } = await supabase.storage
       .from("images")
-      .createSignedUrl(filePath, 60 * 60); 
+      .createSignedUrl(filePath, 60 * 60);
 
     if (urlError || !signedUrlData?.signedUrl) {
       console.error("Signed URL generation failed:", urlError);
       continue;
     }
-
-    console.log("Signed URL:", signedUrlData.signedUrl);
 
     uploadedImages.push({
       id: uniqueId,
