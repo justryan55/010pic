@@ -66,6 +66,8 @@ export default function PlacesPhotoPicker() {
     onSave: handleSave,
     existingImages: placesImages,
     needsTitleInput: initialTitle === "",
+    targetYear: targetYear ?? 0,
+    folderType: "places",
   };
 
   return (

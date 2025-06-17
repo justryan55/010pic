@@ -66,6 +66,8 @@ export default function PeoplePhotoPicker() {
     onSave: handleSave,
     existingImages: peopleImages,
     needsTitleInput: initialTitle === "",
+    targetYear: targetYear ?? 0,
+    folderType: "people",
   };
 
   return <ImagePicker config={config} />;

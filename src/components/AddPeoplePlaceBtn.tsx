@@ -5,18 +5,14 @@ import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React from "react";
 
 export default function AddPeoplePlaceBtn() {
-  const { togglePicker, imagesByPlace, targetYear, imagesByPerson } =
-    usePhotoFlow();
+  const {
+    togglePicker,
+    imagesByPlace,
+    imagesByPerson,
+    isLoadingImages,
+  } = usePhotoFlow();
 
   const pathname = useGetPathname();
-
-  const placeKeys = Object.keys(imagesByPlace).filter((key) =>
-    key.startsWith(`${targetYear}-place-`)
-  );
-
-  const peopleKeys = Object.keys(imagesByPerson).filter((key) =>
-    key.startsWith(`${targetYear}-person-`)
-  );
 
   const handleClick = () => {
     if (pathname === "/people") {
@@ -31,8 +27,10 @@ export default function AddPeoplePlaceBtn() {
   };
 
   const shouldShow =
-    (pathname === "/people" && peopleKeys.length > 0) ||
-    (pathname === "/places" && placeKeys.length > 0);
+    (pathname === "/people" && Object.keys(imagesByPerson).length > 0) ||
+    (pathname === "/places" && Object.keys(imagesByPlace).length > 0);
+
+  if (isLoadingImages) return null;
 
   return (
     <>

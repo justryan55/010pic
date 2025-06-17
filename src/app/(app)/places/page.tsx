@@ -3,26 +3,27 @@
 import AddBtn from "@/components/AddBtn";
 import CollectionHeader from "@/components/CollectionHeader";
 import PhotoGrid from "@/components/PhotoGrid";
+import { fetchUserImagesByPlaceYear } from "@/lib/imagesDB";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import React from "react";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
 
 export default function Places() {
-  const { targetYear, imagesByPlace, setTargetPlace } = usePhotoFlow();
+  const {
+    targetYear,
+    imagesByPlace,
+    setTargetPlace,
+    setImagesByPlace,
+    setIsLoadingImages,
+  } = usePhotoFlow();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const placeKeys = Object.keys(imagesByPlace).filter((key) =>
-    key.startsWith(`${targetYear}-place-`)
-  );
+  const placeKeys = Object.keys(imagesByPlace);
 
   function getPlaceNameFromKey(key: string, year: number | null) {
     if (!year) return key;
 
     return key.replace(`${year}-place-`, "").replace(/_/g, " ");
-  }
-
-  function PlacesPhotoGrid({ place }: { place: string }) {
-    const images = imagesByPlace[place] || [];
-
-    return <PhotoGrid images={images} />;
   }
 
   function PlacesHeader({ place }: { place: string }) {
@@ -31,6 +32,44 @@ export default function Places() {
     const imageCount = images.length;
     return <CollectionHeader header={placeName} imageCount={imageCount} />;
   }
+
+  function PlacesPhotoGrid({ place }: { place: string }) {
+    const images = imagesByPlace[place] || [];
+    return <PhotoGrid images={images} />;
+  }
+
+  useEffect(() => {
+    const loadPeopleForYear = async () => {
+      if (!targetYear) return;
+      setIsLoading(true);
+      setIsLoadingImages(true);
+
+      const placesImages = await fetchUserImagesByPlaceYear(
+        targetYear.toString()
+      );
+
+      setImagesByPlace(placesImages);
+      setIsLoading(false);
+      setIsLoadingImages(false);
+    };
+
+    loadPeopleForYear();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetYear]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[70vh]">
+        <Image
+          src="/images/spinner-black.svg"
+          width={20}
+          height={20}
+          alt="Loading spinner"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className={`flex flex-col ${

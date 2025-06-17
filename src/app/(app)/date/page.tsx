@@ -1,9 +1,11 @@
 "use client";
-
 import CollectionHeader from "@/components/CollectionHeader";
 import PhotoGrid from "@/components/PhotoGrid";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import { fetchUserImagesByMonth } from "@/lib/imagesDB";
+import monthNameToNumber from "@/components/MonthNameToIndex";
 
 const allMonths = [
   "December",
@@ -21,8 +23,10 @@ const allMonths = [
 ];
 
 export default function Home() {
-  const { setTargetMonth, targetYear, imagesByMonth } = usePhotoFlow();
+  const { setTargetMonth, targetYear, imagesByMonth, setImagesByMonth } =
+    usePhotoFlow();
 
+  const [isLoading, setIsLoading] = useState(false);
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonthIndex = now.getMonth();
@@ -35,20 +39,83 @@ export default function Home() {
         })
       : allMonths;
 
-  function MonthPhotoGrid({ month }: { month: string }) {
-    const monthKey = `${targetYear}-${month}`;
-    const images = imagesByMonth[monthKey] || [];
+  useEffect(() => {
+    const loadAllMonthImages = async () => {
+      setIsLoading(true);
+      if (!targetYear) return;
 
+      const loadPromises = filteredMonths.map(async (month) => {
+        const monthNumber = monthNameToNumber(month);
+        const monthKey = `${targetYear}-${monthNumber}`;
+
+        if (!imagesByMonth[monthKey]) {
+          const images = await fetchUserImagesByMonth(
+            targetYear.toString(),
+            monthNumber
+          );
+
+          const filteredImages = images.filter(
+            (img): img is { id: string; src: string; name: string } =>
+              img !== null
+          );
+
+          return { monthKey, images: filteredImages };
+        }
+        return null;
+      });
+
+      const results = await Promise.all(loadPromises);
+
+      const newImagesByMonth: Record<
+        string,
+        { id: string; src: string; name: string }[]
+      > = {};
+      results.forEach((result) => {
+        if (result) {
+          newImagesByMonth[result.monthKey] = result.images;
+        }
+      });
+
+      if (Object.keys(newImagesByMonth).length > 0) {
+        setImagesByMonth((prev) => ({
+          ...prev,
+          ...newImagesByMonth,
+        }));
+      }
+
+      setIsLoading(false);
+    };
+
+    loadAllMonthImages();
+  }, [targetYear, filteredMonths, imagesByMonth, setImagesByMonth]);
+
+  function MonthPhotoGrid({ month }: { month: string }) {
+    const monthNumber = monthNameToNumber(month);
+    const monthKey = `${targetYear}-${monthNumber}`;
+    const images = imagesByMonth[monthKey] || [];
     return <PhotoGrid images={images} />;
   }
 
   function MonthHeader({ month }: { month: string }) {
     const displayYear = targetYear || new Date().getFullYear();
-    const monthKey = `${displayYear}-${month}`;
-
+    const monthNumber = monthNameToNumber(month);
+    const monthKey = `${displayYear}-${monthNumber}`;
     const monthImages = imagesByMonth[monthKey] || [];
     const imageCount = monthImages.length;
     return <CollectionHeader header={month} imageCount={imageCount} />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[70vh]">
+        <Image
+          src="/images/spinner-black.svg"
+          width={20}
+          height={20}
+          alt="Loading spinner"
+        />
+      </div>
+    );
   }
 
   return (

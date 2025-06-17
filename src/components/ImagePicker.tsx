@@ -21,8 +21,11 @@ interface ImagePickerConfig {
   isOpen: boolean;
   onClose: () => void;
   onSave: (images: SelectedImage[]) => void;
+  targetYear: number;
   existingImages?: SelectedImage[];
   needsTitleInput?: boolean;
+  monthIndex?: string;
+  folderType?: string;
 }
 
 interface ImagePickerProps {
@@ -37,8 +40,11 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     isOpen,
     onClose,
     onSave,
+    targetYear,
     existingImages = [],
     needsTitleInput = false,
+    monthIndex,
+    folderType,
   } = config;
 
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
@@ -124,14 +130,19 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const handleSave = async () => {
     if (pendingFiles.length === 0) return;
 
+    const storagePath =
+      monthIndex !== undefined
+        ? `photos/${targetYear}/${folderType}/${monthIndex}`
+        : `photos/${targetYear}/${folderType}/${title.replace(/\s+/g, "_")}`;
+
     const uploadedImages = await uploadImagesToSupabase(
       pendingFiles,
-      `photos/${title.replace(/\s+/g, "_")}`
+      storagePath
     );
 
     const allImages = [...existingImages, ...uploadedImages];
 
-    onSave(allImages); 
+    onSave(allImages);
     setPendingFiles([]);
     setMainImage(null);
     onClose();
