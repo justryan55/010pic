@@ -5,12 +5,8 @@ import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React from "react";
 
 export default function AddPeoplePlaceBtn() {
-  const {
-    togglePicker,
-    imagesByPlace,
-    imagesByPerson,
-    isLoadingImages,
-  } = usePhotoFlow();
+  const { togglePicker, imagesByPlace, imagesByPerson, isLoadingImages } =
+    usePhotoFlow();
 
   const pathname = useGetPathname();
 
@@ -33,7 +29,7 @@ export default function AddPeoplePlaceBtn() {
   if (isLoadingImages) return null;
 
   return (
-    <>
+    <div className="pb-4">
       {shouldShow && (
         <div onClick={() => handleClick()}>
           <p className="text-[13px] leading-[120%] font-normal underline text-left cursor-pointer">
@@ -41,6 +37,6 @@ export default function AddPeoplePlaceBtn() {
           </p>
         </div>
       )}
-    </>
+    </div>
   );
 }
