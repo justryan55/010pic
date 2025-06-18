@@ -11,15 +11,15 @@ export default function BottomNav() {
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
-    if (pathname === "places") {
+    if (pathname === "/places") {
       setActiveTab("places");
       return;
     }
-    if (pathname === "people") {
+    if (pathname === "/people") {
       setActiveTab("people");
       return;
     }
-    if (pathname === "date") {
+    if (pathname === "/date") {
       setActiveTab("date");
       return;
     }
