@@ -51,6 +51,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const [mainImage, setMainImage] = useState<SelectedImage | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -134,6 +135,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   };
 
   const handleSave = async () => {
+    setIsLoading(true);
     if (pendingFiles.length === 0) return;
 
     const cleanTitle = title?.trim() || "untitled";
@@ -157,6 +159,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     setPendingFiles([]);
     setMainImage(null);
     onClose();
+    setIsLoading(false);
   };
 
   const handleClose = () => {
@@ -309,6 +312,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
         text="NEXT"
         onClick={handleSave}
         disabled={existingImages.length === 0 && selectedImages.length === 0}
+        isLoading={isLoading}
       />
 
       <label htmlFor="file-upload" className="hidden">
