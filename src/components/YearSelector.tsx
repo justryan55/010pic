@@ -108,6 +108,7 @@ export default function YearSelector() {
   const remainingYears = years.filter((year) => !savedYears.includes(year));
 
   useEffect(() => {
+    if (!activeTab) return;
     setIsLoading(true);
     const fetchYears = async () => {
       const res = await fetchSavedYears(activeTab);

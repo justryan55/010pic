@@ -3,12 +3,28 @@
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 
 export default function BottomNav() {
   const pathname = usePathname();
   const { setActiveTab, setTargetYear } = usePhotoFlow();
   const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    if (pathname === "places") {
+      setActiveTab("places");
+      return;
+    }
+    if (pathname === "people") {
+      setActiveTab("people");
+      return;
+    }
+    if (pathname === "date") {
+      setActiveTab("date");
+      return;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   return (
     <nav
