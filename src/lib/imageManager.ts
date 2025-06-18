@@ -1,164 +1,63 @@
-import { nanoid } from "nanoid";
 import { supabase } from "./supabase/createSupabaseClient";
 
 export async function uploadImagesToSupabase(
   files: File[],
   storageFolder: string
 ): Promise<{ id: string; src: string; name: string }[]> {
-  const uploadedImages = [];
-
   const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
 
-  if (userError || !user?.id) {
-    console.error("User not authenticated:", userError);
+  if (sessionError || !session?.access_token) {
+    console.error("User not authenticated:", sessionError);
     return [];
   }
 
-  const userId = user.id;
+  try {
+    const formData = new FormData();
+    formData.append("storageFolder", storageFolder);
 
-  const folderYearMatch = storageFolder.match(/(\d{4})/);
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
 
-  const extractedYear = folderYearMatch
-    ? parseInt(folderYearMatch[1])
-    : new Date().getFullYear();
+    const response = await fetch("/api/upload-images", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: formData,
+    });
 
-  const dbEntries = [];
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("API Error Response:", errorText);
 
-  for (const file of files) {
-    const uniqueId = nanoid();
-    const sanitizedFolder = storageFolder.replace(/\/+$/, "");
-    const filePath = `users/${userId}/${sanitizedFolder}/${uniqueId}-${file.name}`;
-    const contentType = file.type || "application/octet-stream";
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { error: `${errorText} (Parse error: ${e})` };
+      }
 
-    const { error: uploadError } = await supabase.storage
-      .from("images")
-      .upload(filePath, file, {
-        upsert: true,
-        contentType,
-      });
-
-    if (uploadError) {
-      console.error("Upload failed:", uploadError.message);
-      continue;
-    }
-
-    const { data: signedUrlData, error: urlError } = await supabase.storage
-      .from("images")
-      .createSignedUrl(filePath, 60 * 60);
-
-    if (urlError || !signedUrlData?.signedUrl) {
-      console.error("Signed URL generation failed:", urlError);
-      continue;
-    }
-
-    function mapFolderToCategory(
-      storageFolder: string
-    ): "person" | "place" | "date" | null {
-      if (storageFolder.includes("people")) return "person";
-      if (storageFolder.includes("places")) return "place";
-      if (storageFolder.includes("month")) return "date";
-      return null;
-    }
-
-    const category = mapFolderToCategory(storageFolder);
-
-    if (!category) {
-      console.error(
-        "Invalid category derived from storageFolder:",
-        "undefined"
+      throw new Error(
+        errorData.error || `HTTP ${response.status}: ${errorText}`
       );
     }
 
-    uploadedImages.push({
-      id: uniqueId,
-      src: signedUrlData.signedUrl,
-      name: file.name,
-    });
+    const result = await response.json();
+    return result.images || [];
+  } catch (error) {
+    console.error("Upload failed with detailed error:", error);
 
-    dbEntries.push({
-      year: extractedYear,
-      path: filePath,
-      category: category,
-      name: file.name,
-      is_deleted: false,
-    });
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      console.error("Network error - check if server is running");
+    }
+
+    throw error;
   }
-
-  if (dbEntries.length > 0) {
-    const { error: dbError } = await supabase.from("images").insert(dbEntries);
-
-    if (!dbError) return [];
-
-    console.error("Database insert failed:", dbError.message);
-  }
-
-  return uploadedImages;
 }
-
-// export async function fetchUserImagesByMonth(
-//   targetYear: string,
-//   month: string
-// ) {
-//   const {
-//     data: { user },
-//     error: userError,
-//   } = await supabase.auth.getUser();
-
-//   if (userError || !user?.id) {
-//     console.error("Not authenticated:", userError);
-//     return [];
-//   }
-
-//   const category = "date";
-
-//   // const folderPath = `users/${user.id}/photos/${targetYear}/month/${month}`;
-
-//   const { data: imageRows, error: dbError } = await supabase
-//     .from("images")
-//     .select("id, path, name")
-//     .eq("user_id", user.id)
-//     .eq("category", category)
-//     .eq("year", parseInt(targetYear))
-//     .eq("is_deleted", false)
-//     .ilike("path", `%/photos/${targetYear}/month/${month}/%`);
-
-//   if (dbError) {
-//     console.error("Error fetching image metadata:", dbError.message);
-//     return [];
-//   }
-
-//   if (!imageRows || imageRows.length === 0) {
-//     return [];
-//   }
-
-//   const { data: signedUrls, error: urlError } = await supabase.storage
-//     .from("images")
-//     .createSignedUrls(
-//       imageRows.map((img) => img.path),
-//       60 * 60
-//     );
-
-//   if (urlError) {
-//     console.error("Error listing files:", urlError.message);
-//     return [];
-//   }
-
-//   const images = imageRows
-//     .map((img) => {
-//       const signed = signedUrls.find((s) => s.path === img.path);
-//       return {
-//         id: img.id,
-//         name: img.name,
-//         src: signed?.signedUrl || "",
-//       };
-//     })
-//     .filter((img) => img.src);
-
-//   return images;
-// }
 
 export async function fetchUserImagesByMonth(
   targetYear: string,
@@ -206,51 +105,60 @@ export async function fetchUserImagesByMonth(
     return {};
   }
 
-  const { data: signedUrls, error: urlError } = await supabase.storage
-    .from("images")
-    .createSignedUrls(
-      filteredRows.map((img) => img.path),
-      60 * 60
-    );
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.access_token) return {};
 
-  if (urlError) {
-    console.error("Error creating signed URLs:", urlError.message);
-    return {};
-  }
 
-  const signedUrlMap = new Map(
-    signedUrls.map((item) => [item.path, item.signedUrl])
-  );
+  try {
+    const response = await fetch("/api/generate-urls", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        paths: filteredRows.map((img) => img.path),
+      }),
+    });
 
-  const imagesByMonth: Record<
-    string,
-    { id: string; name: string; src: string }[]
-  > = {};
+    const urlData = await response.json();
+    const signedUrlMap = new Map<string, string>(Object.entries(urlData.urls));
 
-  for (const img of filteredRows) {
-    const signedUrl = signedUrlMap.get(img.path);
-    if (!signedUrl) continue;
+    const imagesByMonth: Record<
+      string,
+      { id: string; name: string; src: string }[]
+    > = {};
 
-    const pathParts = img.path.split("/");
-    const monthIndex = pathParts.indexOf("month") + 1;
-    const month = pathParts[monthIndex];
+    for (const img of filteredRows) {
+      const signedUrl = signedUrlMap.get(img.path);
+      if (!signedUrl) continue;
 
-    if (!month) continue;
+      const pathParts = img.path.split("/");
+      const monthIndex = pathParts.indexOf("month") + 1;
+      const month = pathParts[monthIndex];
 
-    const monthKey = `${targetYear}-${month}`;
+      if (!month) continue;
 
-    if (!imagesByMonth[monthKey]) {
-      imagesByMonth[monthKey] = [];
+      const monthKey = `${targetYear}-${month}`;
+
+      if (!imagesByMonth[monthKey]) {
+        imagesByMonth[monthKey] = [];
+      }
+
+      imagesByMonth[monthKey].push({
+        id: img.id,
+        name: img.name,
+        src: signedUrl,
+      });
     }
 
-    imagesByMonth[monthKey].push({
-      id: img.id,
-      name: img.name,
-      src: signedUrl,
-    });
+    return imagesByMonth;
+  } catch (error) {
+    console.error("Failed to generate URLs:", error);
+    return {};
   }
-
-  return imagesByMonth;
 }
 
 export async function fetchUserImagesByPersonYear(targetYear: string) {
@@ -274,58 +182,63 @@ export async function fetchUserImagesByPersonYear(targetYear: string) {
     .eq("category", category)
     .eq("is_deleted", false);
 
-  if (dbError) {
-    console.error("Error fetching image records:", dbError.message);
+  if (dbError || !imageRows || imageRows.length === 0) {
+    console.error("Error fetching image records:", dbError?.message);
     return {};
   }
 
-  if (!imageRows || imageRows.length === 0) {
-    return {};
-  }
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  const { data: signedUrls, error: urlError } = await supabase.storage
-    .from("images")
-    .createSignedUrls(
-      imageRows.map((img) => img.path),
-      60 * 60
-    );
+  if (!session?.access_token) return {};
 
-  if (urlError) {
-    console.error("Error creating signed URLs:", urlError.message);
-    return {};
-  }
+  try {
+    const response = await fetch("/api/generate-urls", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        paths: imageRows.map((img) => img.path),
+      }),
+    });
 
-  const signedUrlMap = new Map(
-    signedUrls.map((item) => [item.path, item.signedUrl])
-  );
+    const urlData = await response.json();
+    const signedUrlMap = new Map<string, string>(Object.entries(urlData.urls));
 
-  const imagesByPerson: Record<
-    string,
-    { id: string; name: string; src: string }[]
-  > = {};
+    const imagesByPerson: Record<
+      string,
+      { id: string; name: string; src: string }[]
+    > = {};
 
-  for (const img of imageRows) {
-    const signedUrl = signedUrlMap.get(img.path);
-    if (!signedUrl) continue;
+    for (const img of imageRows) {
+      const signedUrl = signedUrlMap.get(img.path);
+      if (!signedUrl) continue;
 
-    const pathParts = img.path.split("/");
-    const personIndex = pathParts.indexOf("people") + 1;
-    const personName = pathParts[personIndex];
+      const pathParts = img.path.split("/");
+      const personIndex = pathParts.indexOf("people") + 1;
+      const personName = pathParts[personIndex];
 
-    if (!personName) continue;
+      if (!personName) continue;
 
-    if (!imagesByPerson[personName]) {
-      imagesByPerson[personName] = [];
+      if (!imagesByPerson[personName]) {
+        imagesByPerson[personName] = [];
+      }
+
+      imagesByPerson[personName].push({
+        id: img.id,
+        name: img.name,
+        src: signedUrl,
+      });
     }
 
-    imagesByPerson[personName].push({
-      id: img.id,
-      name: img.name,
-      src: signedUrl,
-    });
+    return imagesByPerson;
+  } catch (error) {
+    console.error("Failed to generate URLs:", error);
+    return {};
   }
-
-  return imagesByPerson;
 }
 
 export async function fetchUserImagesByPlaceYear(targetYear: string) {
@@ -349,58 +262,63 @@ export async function fetchUserImagesByPlaceYear(targetYear: string) {
     .eq("category", category)
     .eq("is_deleted", false);
 
-  if (dbError) {
-    console.error("Error fetching image records:", dbError.message);
+  if (dbError || !imageRows || imageRows.length === 0) {
+    console.error("Error fetching image records:", dbError?.message);
     return {};
   }
 
-  if (!imageRows || imageRows.length === 0) {
-    return {};
-  }
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  const { data: signedUrls, error: urlError } = await supabase.storage
-    .from("images")
-    .createSignedUrls(
-      imageRows.map((img) => img.path),
-      60 * 60
-    );
+  if (!session?.access_token) return {};
 
-  if (urlError) {
-    console.error("Error creating signed URLs:", urlError.message);
-    return {};
-  }
+  try {
+    const response = await fetch("/api/generate-urls", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        paths: imageRows.map((img) => img.path),
+      }),
+    });
 
-  const signedUrlMap = new Map(
-    signedUrls.map((item) => [item.path, item.signedUrl])
-  );
+    const urlData = await response.json();
+    const signedUrlMap = new Map(Object.entries(urlData.urls));
 
-  const imagesByPlace: Record<
-    string,
-    { id: string; name: string; src: string }[]
-  > = {};
+    const imagesByPlace: Record<
+      string,
+      { id: string; name: string; src: string }[]
+    > = {};
 
-  for (const img of imageRows) {
-    const signedUrl = signedUrlMap.get(img.path);
-    if (!signedUrl) continue;
+    for (const img of imageRows) {
+      const signedUrl = signedUrlMap.get(img.path);
+      if (!signedUrl || typeof signedUrl !== "string") continue;
 
-    const pathParts = img.path.split("/");
-    const placeIndex = pathParts.indexOf("places") + 1;
-    const placeName = pathParts[placeIndex];
+      const pathParts = img.path.split("/");
+      const placeIndex = pathParts.indexOf("places") + 1;
+      const placeName = pathParts[placeIndex];
 
-    if (!placeName) continue;
+      if (!placeName) continue;
 
-    if (!imagesByPlace[placeName]) {
-      imagesByPlace[placeName] = [];
+      if (!imagesByPlace[placeName]) {
+        imagesByPlace[placeName] = [];
+      }
+
+      imagesByPlace[placeName].push({
+        id: img.id,
+        name: img.name,
+        src: signedUrl,
+      });
     }
 
-    imagesByPlace[placeName].push({
-      id: img.id,
-      name: img.name,
-      src: signedUrl,
-    });
+    return imagesByPlace;
+  } catch (error) {
+    console.error("Failed to generate URLs:", error);
+    return {};
   }
-
-  return imagesByPlace;
 }
 
 export async function softDeleteImage(imageId: string) {

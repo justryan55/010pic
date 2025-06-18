@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
   },
   images: {
     domains: ["mkjgtonapkqolvaccphs.supabase.co"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.r2.cloudflarestorage.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
   },
 };
 
