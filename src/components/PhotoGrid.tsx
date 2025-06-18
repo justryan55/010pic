@@ -42,7 +42,6 @@ export default function PhotoGrid({ images }: PhotoGridProps) {
                   width={50}
                   className="w-full h-full object-cover"
                   onClick={() => openFullScreen(image)}
-                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full"></div>
@@ -66,7 +65,6 @@ export default function PhotoGrid({ images }: PhotoGridProps) {
               className="max-w-full max-h-full object-contain"
               onClick={(e) => e.stopPropagation()}
               priority
-              unoptimized
             />
           </div>
         </>
