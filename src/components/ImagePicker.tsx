@@ -132,14 +132,19 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
       setMainImage(allImages.length > 0 ? allImages[0] : null);
     }
   };
-  
+
   const handleSave = async () => {
     if (pendingFiles.length === 0) return;
+
+    const cleanTitle = title?.trim() || "untitled";
 
     const storagePath =
       monthIndex !== undefined
         ? `photos/${targetYear}/${folderType}/${monthIndex}`
-        : `photos/${targetYear}/${folderType}/${title.replace(/\s+/g, "_")}`;
+        : `photos/${targetYear}/${folderType}/${cleanTitle.replace(
+            /\s+/g,
+            "_"
+          )}`;
 
     const uploadedImages = await uploadImagesToSupabase(
       pendingFiles,

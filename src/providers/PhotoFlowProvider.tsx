@@ -163,6 +163,7 @@ export default function PhotoFlowProvider({
 
       const imagesForMonth = imagesByMonth[monthKey] || [];
 
+
       const filteredImages = imagesForMonth.filter(
         (img): img is SelectedImage => img !== null
       );

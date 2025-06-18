@@ -18,12 +18,19 @@ export async function uploadImagesToSupabase(
   }
 
   const userId = user.id;
-  const currentYear = new Date().getFullYear();
+
+  const folderYearMatch = storageFolder.match(/(\d{4})/);
+
+  const extractedYear = folderYearMatch
+    ? parseInt(folderYearMatch[1])
+    : new Date().getFullYear();
+
   const dbEntries = [];
 
   for (const file of files) {
     const uniqueId = nanoid();
-    const filePath = `users/${userId}/${storageFolder}/${uniqueId}-${file.name}`;
+    const sanitizedFolder = storageFolder.replace(/\/+$/, "");
+    const filePath = `users/${userId}/${sanitizedFolder}/${uniqueId}-${file.name}`;
     const contentType = file.type || "application/octet-stream";
 
     const { error: uploadError } = await supabase.storage
@@ -72,7 +79,7 @@ export async function uploadImagesToSupabase(
     });
 
     dbEntries.push({
-      year: currentYear,
+      year: extractedYear,
       path: filePath,
       category: category,
       name: file.name,
@@ -169,7 +176,6 @@ export async function fetchUserImagesByMonth(
 
   const category = "date";
 
-  // Fetch all date images for the year at once
   const { data: imageRows, error: dbError } = await supabase
     .from("images")
     .select("id, path, name")
@@ -177,7 +183,9 @@ export async function fetchUserImagesByMonth(
     .eq("category", category)
     .eq("year", parseInt(targetYear))
     .eq("is_deleted", false)
-    .ilike("path", `%/photos/${targetYear}/month/%`); // Get all months for the year
+    .ilike("path", `%/photos/${targetYear}/month/%`);
+
+  console.log(imageRows);
 
   if (dbError) {
     console.error("Error fetching image metadata:", dbError.message);
@@ -188,7 +196,6 @@ export async function fetchUserImagesByMonth(
     return {};
   }
 
-  // Filter for only the months we want
   const monthsSet = new Set(months);
   const filteredRows = imageRows.filter((img) => {
     const pathParts = img.path.split("/");
@@ -217,7 +224,6 @@ export async function fetchUserImagesByMonth(
     signedUrls.map((item) => [item.path, item.signedUrl])
   );
 
-  // Group images by month
   const imagesByMonth: Record<
     string,
     { id: string; name: string; src: string }[]
@@ -227,7 +233,6 @@ export async function fetchUserImagesByMonth(
     const signedUrl = signedUrlMap.get(img.path);
     if (!signedUrl) continue;
 
-    // Extract month from path
     const pathParts = img.path.split("/");
     const monthIndex = pathParts.indexOf("month") + 1;
     const month = pathParts[monthIndex];
@@ -249,6 +254,7 @@ export async function fetchUserImagesByMonth(
 
   return imagesByMonth;
 }
+
 export async function fetchUserImagesByPersonYear(targetYear: string) {
   const {
     data: { user },
