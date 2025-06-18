@@ -44,91 +44,22 @@ export default function Home() {
         })
       : allMonths;
 
-  // useEffect(() => {
-  //   const loadAllMonthImages = async () => {
-  //     setIsLoading(true);
-  //     if (!targetYear) return;
-
-  //     const loadPromises = filteredMonths.map(async (month) => {
-  //       const monthNumber = monthNameToNumber(month);
-  //       const monthKey = `${targetYear}-${monthNumber}`;
-
-  //       if (!imagesByMonth[monthKey]) {
-  //         const images = await fetchUserImagesByMonth(
-  //           targetYear.toString(),
-  //           monthNumber
-  //         );
-
-  //         const filteredImages = images.filter(
-  //           (img): img is { id: string; src: string; name: string } =>
-  //             img !== null
-  //         );
-
-  //         return { monthKey, images: filteredImages };
-  //       }
-  //       return null;
-  //     });
-
-  //     const results = await Promise.all(loadPromises);
-
-  //     const newImagesByMonth: Record<
-  //       string,
-  //       { id: string; src: string; name: string }[]
-  //     > = {};
-  //     results.forEach((result) => {
-  //       if (result) {
-  //         newImagesByMonth[result.monthKey] = result.images;
-  //       }
-  //     });
-
-  //     if (Object.keys(newImagesByMonth).length > 0) {
-  //       setImagesByMonth((prev) => ({
-  //         ...prev,
-  //         ...newImagesByMonth,
-  //       }));
-  //     }
-
-  //     setIsLoading(false);
-  //   };
-
-  //   loadAllMonthImages();
-  // }, [
-  //   targetYear,
-  //   filteredMonths,
-  //   imagesByMonth,
-  //   setImagesByMonth,
-  //   refreshToggle,
-  // ]);
-
   useEffect(() => {
     const loadAllMonthImages = async () => {
       if (!targetYear) return;
       setIsLoading(true);
 
-      const monthsToLoad = filteredMonths.filter((month) => {
-        const monthNumber = monthNameToNumber(month);
-        const monthKey = `${targetYear}-${monthNumber}`;
-        return !imagesByMonth[monthKey];
-      });
-
-      if (monthsToLoad.length === 0) {
-        setIsLoading(false);
-        return;
-      }
-
-      const monthNumbers = monthsToLoad.map(monthNameToNumber);
+      const monthNumbers = filteredMonths.map(monthNameToNumber);
 
       const newImagesByMonth = await fetchUserImagesByMonth(
         targetYear.toString(),
         monthNumbers
       );
 
-      if (Object.keys(newImagesByMonth).length > 0) {
-        setImagesByMonth((prev) => ({
-          ...prev,
-          ...newImagesByMonth,
-        }));
-      }
+      setImagesByMonth((prev) => ({
+        ...prev,
+        ...newImagesByMonth,
+      }));
 
       setIsLoading(false);
     };
