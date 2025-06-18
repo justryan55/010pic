@@ -185,8 +185,6 @@ export async function fetchUserImagesByMonth(
     .eq("is_deleted", false)
     .ilike("path", `%/photos/${targetYear}/month/%`);
 
-  console.log(imageRows);
-
   if (dbError) {
     console.error("Error fetching image metadata:", dbError.message);
     return {};
