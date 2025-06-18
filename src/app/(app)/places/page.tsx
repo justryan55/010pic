@@ -3,7 +3,7 @@
 import AddBtn from "@/components/AddBtn";
 import CollectionHeader from "@/components/CollectionHeader";
 import PhotoGrid from "@/components/PhotoGrid";
-import { fetchUserImagesByPlaceYear } from "@/lib/imagesDB";
+import { fetchUserImagesByPlaceYear } from "@/lib/imageManager";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";

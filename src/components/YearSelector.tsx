@@ -8,7 +8,7 @@ import {
   addYearToDB,
   confirmDeletionFromDb,
   fetchSavedYears,
-} from "@/lib/imagesDB";
+} from "@/lib/imageManager";
 
 const years = Array.from({ length: 75 }, (_, i) => 2025 - i);
 

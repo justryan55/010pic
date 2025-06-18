@@ -5,7 +5,7 @@ import Image from "next/image";
 import { nanoid } from "nanoid";
 import Input from "@/components/Input";
 import Button from "./Button";
-import { softDeleteImage, uploadImagesToSupabase } from "@/lib/imagesDB";
+import { softDeleteImage, uploadImagesToSupabase } from "@/lib/imageManager";
 
 interface SelectedImage {
   id: string;

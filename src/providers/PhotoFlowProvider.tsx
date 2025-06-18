@@ -8,7 +8,7 @@ import {
   fetchUserImagesByMonth,
   fetchUserImagesByPersonYear,
   fetchUserImagesByPlaceYear,
-} from "@/lib/imagesDB";
+} from "@/lib/imageManager";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type PhotoPickerType = "date" | "people" | "places" | null;
@@ -162,7 +162,6 @@ export default function PhotoFlowProvider({
       );
 
       const imagesForMonth = imagesByMonth[monthKey] || [];
-
 
       const filteredImages = imagesForMonth.filter(
         (img): img is SelectedImage => img !== null

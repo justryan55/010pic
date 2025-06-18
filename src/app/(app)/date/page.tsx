@@ -4,7 +4,7 @@ import PhotoGrid from "@/components/PhotoGrid";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { fetchUserImagesByMonth } from "@/lib/imagesDB";
+import { fetchUserImagesByMonth } from "@/lib/imageManager";
 import monthNameToNumber from "@/components/MonthNameToIndex";
 
 const allMonths = [

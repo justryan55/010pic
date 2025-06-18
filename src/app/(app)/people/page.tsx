@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import CollectionHeader from "@/components/CollectionHeader";
 import PhotoGrid from "@/components/PhotoGrid";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import { fetchUserImagesByPersonYear } from "@/lib/imagesDB";
+import { fetchUserImagesByPersonYear } from "@/lib/imageManager";
 import Image from "next/image";
 
 export default function People() {
@@ -15,7 +15,7 @@ export default function People() {
     setTargetPerson,
     setImagesByPerson,
     setIsLoadingImages,
-    refreshToggle
+    refreshToggle,
   } = usePhotoFlow();
   const [isLoading, setIsLoading] = useState(false);
 
