@@ -99,7 +99,7 @@ export default function Home() {
 
   return (
     <div>
-      <div className="mb-14">
+      <div className="mb-30">
         {filteredMonths.map((month) => (
           <div key={month} onClick={() => setTargetMonth(month)}>
             <MonthHeader month={month} />
