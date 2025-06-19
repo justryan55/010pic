@@ -186,7 +186,6 @@ export async function fetchUserImagesByMonth(
   }
 }
 export async function fetchUserImagesByPersonYear(targetYear: string) {
-
   const {
     data: { user },
     error: userError,
@@ -211,7 +210,6 @@ export async function fetchUserImagesByPersonYear(targetYear: string) {
     console.error("Error fetching image records:", dbError.message);
     return {};
   }
-
 
   if (!imageRows || imageRows.length === 0) {
     console.log("No person images found for the specified year");
@@ -269,7 +267,7 @@ export async function fetchUserImagesByPersonYear(targetYear: string) {
       try {
         parsedError = JSON.parse(errorText);
       } catch (e) {
-        parsedError = { error: errorText };
+        parsedError = { error: `${errorText} (Parse error: ${e})` };
       }
 
       throw new Error(
@@ -420,7 +418,7 @@ export async function fetchUserImagesByPlaceYear(targetYear: string) {
       try {
         parsedError = JSON.parse(errorText);
       } catch (e) {
-        parsedError = { error: errorText };
+        parsedError = { error: `${errorText} (Parse error: ${e})` };
       }
 
       throw new Error(
