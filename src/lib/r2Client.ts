@@ -1,4 +1,4 @@
-import { S3Client } from "https://esm.sh/@aws-sdk/client-s3@3.496.0";
+import { S3Client } from "@aws-sdk/client-s3";
 
 const r2Client = new S3Client({
   region: "auto",
