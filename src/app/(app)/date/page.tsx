@@ -78,7 +78,7 @@ export default function Home() {
     const monthNumber = monthNameToNumber(month);
     const monthKey = `${targetYear}-${monthNumber}`;
     const images = imagesByMonth[monthKey] || [];
-    return <PhotoGrid images={images} />;
+    return <PhotoGrid images={images} title={month} />;
   }
 
   function MonthHeader({ month }: { month: string }) {
