@@ -210,7 +210,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
             <Input
               id="places"
               type="text"
-              placeholder="Enter place title"
+              placeholder="Enter collection title"
               value={title}
               onChange={(e) => setTitle?.(e.target.value)}
             />

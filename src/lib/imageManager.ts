@@ -1,67 +1,87 @@
 import { supabase } from "./supabase/createSupabaseClient";
+import imageCompression from "browser-image-compression";
 
+type UploadedImage = { id: string; src: string; name: string };
 export async function uploadImagesToSupabase(
   files: File[],
-  storageFolder: string
-): Promise<{ id: string; src: string; name: string }[]> {
+  folder: string
+): Promise<UploadedImage[]> {
   const {
     data: { session },
-    error: sessionError,
   } = await supabase.auth.getSession();
 
-  if (sessionError || !session?.access_token) {
-    console.error("User not authenticated:", sessionError);
+  if (!session?.access_token) {
+    console.error("User not authenticated.");
     return [];
   }
 
+  const compressedFiles: File[] = [];
+
+  for (const file of files) {
+    try {
+      const compressed =
+        file.size > 500_000
+          ? await imageCompression(file, {
+              maxSizeMB: 0.8,
+              maxWidthOrHeight: 1440,
+              useWebWorker: true,
+              initialQuality: 0.8,
+              alwaysKeepResolution: false,
+            })
+          : file;
+
+      compressedFiles.push(compressed);
+    } catch (err) {
+      console.warn("Compression error for", file.name, err);
+      compressedFiles.push(file);
+    }
+  }
+
+  const formData = new FormData();
+  formData.append("storageFolder", folder);
+
+  compressedFiles.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
   try {
-    const formData = new FormData();
-    formData.append("storageFolder", storageFolder);
-
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    const response = await fetch(
-      "https://mkjgtonapkqolvaccphs.supabase.co/functions/v1/upload-images",
+    const res = await fetch(
+      "https://supabase-r2-handler.app010pic.workers.dev/api/upload",
       {
         method: "POST",
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
         body: formData,
+        signal: controller.signal,
       }
     );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("API Error Response:", errorText);
+    clearTimeout(timeoutId);
 
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (e) {
-        errorData = { error: `${errorText} (Parse error: ${e})` };
-      }
-
-      throw new Error(
-        errorData.error || `HTTP ${response.status}: ${errorText}`
-      );
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Upload failed:", errorText);
+      throw new Error(`Upload failed: ${res.status} ${errorText}`);
     }
 
-    const result = await response.json();
-    return result.images || [];
+    const { images }: { images: UploadedImage[] } = await res.json();
+    return images;
   } catch (error) {
-    console.error("Upload failed with detailed error:", error);
+    clearTimeout(timeoutId);
 
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      console.error("Network error - check if server is running");
+    if (error && typeof error === 'object' && 'name' in error && error.name === "AbortError") {
+      console.error("Upload timed out");
+    } else {
+      console.error("Upload error:", error);
     }
 
-    throw error;
+    return [];
   }
 }
-
 export async function fetchUserImagesByMonth(
   targetYear: string,
   months: string[]
@@ -115,7 +135,7 @@ export async function fetchUserImagesByMonth(
 
   try {
     const response = await fetch(
-      "https://mkjgtonapkqolvaccphs.supabase.co/functions/v1/generate-urls",
+      "https://supabase-r2-handler.app010pic.workers.dev/api/get-signed-urls",
       {
         method: "POST",
         headers: {
@@ -212,7 +232,6 @@ export async function fetchUserImagesByPersonYear(targetYear: string) {
   }
 
   if (!imageRows || imageRows.length === 0) {
-    console.log("No person images found for the specified year");
     return {};
   }
 
@@ -231,7 +250,7 @@ export async function fetchUserImagesByPersonYear(targetYear: string) {
     };
 
     const response = await fetch(
-      "https://mkjgtonapkqolvaccphs.supabase.co/functions/v1/generate-urls",
+      "https://supabase-r2-handler.app010pic.workers.dev/api/get-signed-urls",
       {
         method: "POST",
         headers: {
@@ -382,7 +401,7 @@ export async function fetchUserImagesByPlaceYear(targetYear: string) {
     };
 
     const response = await fetch(
-      "https://mkjgtonapkqolvaccphs.supabase.co/functions/v1/generate-urls",
+      "https://supabase-r2-handler.app010pic.workers.dev/api/get-signed-urls",
       {
         method: "POST",
         headers: {

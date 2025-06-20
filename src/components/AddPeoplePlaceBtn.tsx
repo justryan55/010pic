@@ -1,30 +1,29 @@
 "use client";
 
-import { useGetPathname } from "@/helpers/getPathname";
+import { useCurrentPage } from "@/providers/PageProvider";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React from "react";
 
 export default function AddPeoplePlaceBtn() {
   const { togglePicker, imagesByPlace, imagesByPerson, isLoadingImages } =
     usePhotoFlow();
-
-  const pathname = useGetPathname();
+  const { currentPage } = useCurrentPage();
 
   const handleClick = () => {
-    if (pathname === "/people") {
+    if (currentPage === "people") {
       togglePicker("people");
       return;
     }
 
-    if (pathname === "/places") {
+    if (currentPage === "places") {
       togglePicker("places");
       return;
     }
   };
 
   const shouldShow =
-    (pathname === "/people" && Object.keys(imagesByPerson).length > 0) ||
-    (pathname === "/places" && Object.keys(imagesByPlace).length > 0);
+    (currentPage === "people" && Object.keys(imagesByPerson).length > 0) ||
+    (currentPage === "places" && Object.keys(imagesByPlace).length > 0);
 
   if (isLoadingImages) return null;
 
@@ -33,7 +32,7 @@ export default function AddPeoplePlaceBtn() {
       {shouldShow && (
         <div onClick={() => handleClick()}>
           <p className="text-[13px] leading-[120%] font-normal underline text-left cursor-pointer">
-            Add {pathname === "/places" ? "Place" : "People"}
+            Add {currentPage === "places" ? "Place" : "People"}
           </p>
         </div>
       )}

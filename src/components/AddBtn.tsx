@@ -4,13 +4,12 @@ import React from "react";
 import Image from "next/image";
 import { useSubscription } from "@/providers/SubscriptionProvider";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
-import { useGetPathname } from "@/helpers/getPathname";
+import { useCurrentPage } from "@/providers/PageProvider";
 
 export default function AddBtn({ subscribed }: { subscribed: boolean }) {
   const { toggleSubscription } = useSubscription();
   const { togglePicker } = usePhotoFlow();
-
-  const pathname = useGetPathname();
+  const { currentPage } = useCurrentPage();
 
   const handleClick = () => {
     if (!subscribed) {
@@ -18,17 +17,17 @@ export default function AddBtn({ subscribed }: { subscribed: boolean }) {
       return;
     }
 
-    if (pathname === "/date") {
+    if (currentPage === "date") {
       togglePicker("date");
       return;
     }
 
-    if (pathname === "/people") {
+    if (currentPage === "people") {
       togglePicker("people");
       return;
     }
 
-    if (pathname === "/places") {
+    if (currentPage === "places") {
       togglePicker("places");
       return;
     }

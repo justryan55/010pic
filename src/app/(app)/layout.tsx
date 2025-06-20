@@ -1,29 +1,71 @@
+"use client";
+
 import BottomNav from "@/components/BottomNav";
 import "../globals.css";
 import Header from "@/components/Header";
 import YearSelector from "@/components/YearSelector";
 import SubscriptionProvider from "@/providers/SubscriptionProvider";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
-import { createSupabaseServer } from "@/lib/supabase/createSupabaseServer";
-import { redirect } from "next/navigation";
 import PhotoFlowProvider from "@/providers/PhotoFlowProvider";
 import AddPeoplePlaceBtn from "@/components/AddPeoplePlaceBtn";
 import UserProvider from "@/providers/UserProvider";
+import { createBrowserClient } from "@supabase/ssr";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-export default async function OnboardingLayout({
+export default function OnboardingLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createSupabaseServer();
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-  if (!user) {
-    redirect("/auth/login");
+      if (!session) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      setIsLoading(false);
+    };
+
+    checkAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        router.replace("/auth/login");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[70vh]">
+        <Image
+          src="/images/spinner-black.svg"
+          width={20}
+          height={20}
+          alt="Loading spinner"
+        />
+      </div>
+    );
   }
+
   return (
     <SupabaseProvider>
       <UserProvider>

@@ -1,16 +1,10 @@
 "use client";
-import "../globals.css";
-import { SupabaseProvider } from "@/providers/SupabaseProvider";
+import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-export default function OnboardingLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootPage() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const supabase = createBrowserClient(
@@ -26,11 +20,11 @@ export default function OnboardingLayout({
 
       if (!session) {
         router.replace("/auth/login");
-        return;
+      } else {
+        router.replace("/date");
       }
-
-      setIsLoading(false);
     };
+    setIsLoading(false);
 
     checkAuth();
 
@@ -58,11 +52,5 @@ export default function OnboardingLayout({
     );
   }
 
-  return (
-    <SupabaseProvider>
-      <div className="flex flex-col min-h-screen bg-[var(--brand-bg)] px-6 ">
-        {children}
-      </div>
-    </SupabaseProvider>
-  );
+  return null;
 }

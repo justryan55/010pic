@@ -4,6 +4,7 @@ import AddBtn from "@/components/AddBtn";
 import CollectionHeader from "@/components/CollectionHeader";
 import PhotoGrid from "@/components/PhotoGrid";
 import { fetchUserImagesByPlaceYear } from "@/lib/imageManager";
+import { useCurrentPage } from "@/providers/PageProvider";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -18,6 +19,11 @@ export default function Places() {
     refreshToggle,
   } = usePhotoFlow();
   const [isLoading, setIsLoading] = useState(false);
+  const { setCurrentPage } = useCurrentPage();
+
+  useEffect(() => {
+    setCurrentPage("places");
+  }, [setCurrentPage]);
 
   const placeKeys = Object.keys(imagesByPlace);
 

@@ -7,6 +7,7 @@ import PhotoGrid from "@/components/PhotoGrid";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import { fetchUserImagesByPersonYear } from "@/lib/imageManager";
 import Image from "next/image";
+import { useCurrentPage } from "@/providers/PageProvider";
 
 export default function People() {
   const {
@@ -18,6 +19,11 @@ export default function People() {
     refreshToggle,
   } = usePhotoFlow();
   const [isLoading, setIsLoading] = useState(false);
+  const { setCurrentPage } = useCurrentPage();
+
+  useEffect(() => {
+    setCurrentPage("people");
+  }, [setCurrentPage]);
 
   const personKeys = Object.keys(imagesByPerson);
 

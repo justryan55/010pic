@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { fetchUserImagesByMonth } from "@/lib/imageManager";
 import monthNameToNumber from "@/components/MonthNameToIndex";
+import { useCurrentPage } from "@/providers/PageProvider";
 
 const allMonths = [
   "December",
@@ -35,6 +36,11 @@ export default function Home() {
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonthIndex = now.getMonth();
+  const { setCurrentPage } = useCurrentPage();
+
+  useEffect(() => {
+    setCurrentPage("date");
+  }, [setCurrentPage]);
 
   const filteredMonths =
     targetYear === currentYear
@@ -81,6 +87,7 @@ export default function Home() {
     const monthKey = `${displayYear}-${monthNumber}`;
     const monthImages = imagesByMonth[monthKey] || [];
     const imageCount = monthImages.length;
+
     return <CollectionHeader header={month} imageCount={imageCount} />;
   }
 

@@ -4,14 +4,13 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Label from "@/components/Label";
 import SocialLoginButton from "@/components/SocialLoginButton";
-import { useGetPathname } from "@/helpers/getPathname";
 import { supabase } from "@/lib/supabase/createSupabaseClient";
 import Image from "next/image";
-import Link from "next/link";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { useCurrentPage } from "@/providers/PageProvider";
 import { useRouter } from "next/navigation";
 
 const registerSchema = z
@@ -58,10 +57,11 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function AuthForm() {
   const [authError, setAuthError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { currentPage, setCurrentPage } = useCurrentPage();
   const router = useRouter();
-  const pathname = useGetPathname();
 
-  const isRegister = pathname === "/auth/register";
+  const isRegister =
+    currentPage === "register" || currentPage === "auth/register";
 
   const registerForm = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -103,7 +103,8 @@ export default function AuthForm() {
         return;
       }
 
-      router.push("/auth/login");
+      router.push("/login");
+      setCurrentPage("login");
     } catch (err) {
       console.error("Registration error:", err);
       setAuthError("An unexpected error occurred. Please try again.");
@@ -128,12 +129,17 @@ export default function AuthForm() {
       }
 
       router.push("/date");
+      setCurrentPage("date");
     } catch (err) {
       console.error("Login error:", err);
       setAuthError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleNavigation = (targetPage: string) => {
+    setCurrentPage(targetPage);
   };
 
   return (
@@ -167,14 +173,19 @@ export default function AuthForm() {
         )}
 
         {isRegister && (
-          <Link href="/auth/login" className="flex justify-center items-center">
+          <button
+            onClick={() => handleNavigation("login")}
+            className="flex justify-center items-center cursor-pointer"
+            title="Cancel registration"
+            aria-label="Cancel registration"
+          >
             <Image
               src="/images/X.svg"
               alt="Cancel Button"
               width={14}
               height={14}
             />
-          </Link>
+          </button>
         )}
       </div>
 
@@ -288,7 +299,6 @@ export default function AuthForm() {
           <Button
             type="submit"
             text={isRegister ? "Sign Up" : "Sign In"}
-            // disabled={isLoading}
             isLoading={isLoading}
           />
         </div>
@@ -317,12 +327,12 @@ export default function AuthForm() {
         <p className="text-black text-sm font-normal mb-2">
           {isRegister ? "Have an account?" : "Don't have an account?"}
         </p>
-        <Link
-          href={isRegister ? "/auth/login" : "/auth/register"}
-          className="text-black text-sm font-bold underline hover:no-underline cursor-pointer"
+        <button
+          onClick={() => handleNavigation(isRegister ? "login" : "register")}
+          className="text-black text-sm font-bold underline hover:no-underline cursor-pointer bg-transparent border-none"
         >
           {isRegister ? "Login" : "Register"}
-        </Link>
+        </button>
       </div>
     </main>
   );
