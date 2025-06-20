@@ -5,35 +5,17 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/createSupabaseClient";
-import { Camera, PermissionStatus } from "@capacitor/camera";
-import { Capacitor } from "@capacitor/core";
 
 export default function Permissions() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const isNative = () => {
-    return Capacitor.isNativePlatform();
-  };
-
   const completeOnboarding = async () => {
     setIsLoading(true);
     setError("");
 
     try {
-      if (isNative()) {
-        const status: PermissionStatus = await Camera.requestPermissions({
-          permissions: ["photos"],
-        });
-
-        if (status.photos !== "granted") {
-          setError("Photo access is required to continue.");
-          setIsLoading(false);
-          return;
-        }
-      }
-
       const {
         data: { user },
       } = await supabase.auth.getUser();
