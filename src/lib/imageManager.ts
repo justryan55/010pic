@@ -73,7 +73,12 @@ export async function uploadImagesToSupabase(
   } catch (error) {
     clearTimeout(timeoutId);
 
-    if (error && typeof error === 'object' && 'name' in error && error.name === "AbortError") {
+    if (
+      error &&
+      typeof error === "object" &&
+      "name" in error &&
+      error.name === "AbortError"
+    ) {
       console.error("Upload timed out");
     } else {
       console.error("Upload error:", error);
@@ -597,16 +602,27 @@ export const confirmDeletionFromDb = async (
       return { success: false, error: "Invalid parameters or unauthenticated" };
     }
 
-    const { error } = await supabase
+    const { error: deleteError } = await supabase
       .from("saved_years")
       .delete()
       .eq("user_id", user.id)
       .eq("year", yearToRemove)
       .eq("tab", tab);
 
-    if (error) {
-      console.error("Error deleting year:", error.message);
-      return { success: false, error: error.message };
+    if (deleteError) {
+      console.error("Error deleting year:", deleteError.message);
+      return { success: false, error: deleteError.message };
+    }
+
+    const { error: updateError } = await supabase
+      .from("images")
+      .update({ is_deleted: true })
+      .eq("user_id", user.id)
+      .eq("category", tab);
+
+    if (updateError) {
+      console.error("Error soft-deleting photos:", updateError.message);
+      return { success: false, error: updateError.message };
     }
 
     return { success: true };
