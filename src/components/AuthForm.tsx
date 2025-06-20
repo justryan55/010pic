@@ -88,7 +88,7 @@ export default function AuthForm() {
     setAuthError("");
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -103,7 +103,24 @@ export default function AuthForm() {
         return;
       }
 
-      router.push("/login");
+      if (data.user) {
+        const { user } = data;
+
+        const { error: profileError } = await supabase.from("profiles").insert({
+          id: user.id,
+          full_name: values.name,
+          subscription_status: false,
+          onboarding_complete: false,
+        });
+
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+          setAuthError("Failed to create user profile.");
+          return;
+        }
+      }
+
+      router.push("/auth/login");
       setCurrentPage("login");
     } catch (err) {
       console.error("Registration error:", err);
@@ -125,6 +142,33 @@ export default function AuthForm() {
 
       if (error) {
         setAuthError(error.message);
+        return;
+      }
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setAuthError("User not found");
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("onboarding_complete")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Profile fetch error:", profileError);
+        setAuthError("Failed to retrieve profile information.");
+        return;
+      }
+
+      if (!profile?.onboarding_complete) {
+        router.push("/onboarding/welcome");
+        setCurrentPage("onboarding/welcome");
         return;
       }
 
