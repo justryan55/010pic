@@ -241,7 +241,9 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
     onSave(allImages);
     setPendingFiles([]);
+    setSelectedImages([]);
     setMainImage(null);
+
     onClose();
     setIsLoading(false);
   };
