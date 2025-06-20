@@ -23,6 +23,7 @@
     "browser-image-compression": "^2.0.2",
     "dotenv": "^16.5.0",
     "formidable": "^3.5.4",
+    "framer-motion": "^12.18.1",
     "nanoid": "^5.1.5",
     "next": "15.3.3",
     "react": "^19.0.0",

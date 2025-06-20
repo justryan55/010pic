@@ -13,6 +13,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Profile from "@/components/Profile";
 
 export default function OnboardingLayout({
   children,
@@ -79,6 +80,7 @@ export default function OnboardingLayout({
               </div>
               <div className="flex-1 px-6">{children}</div>
               <BottomNav />
+              <Profile />
             </div>
           </PhotoFlowProvider>
         </SubscriptionProvider>

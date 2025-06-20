@@ -246,9 +246,9 @@ export default function PhotoFlowProvider({
       }}
     >
       {children}
-      {activePicker === "date" && <DatePhotoPicker />}
-      {activePicker === "people" && <PeoplePhotoPicker />}
-      {activePicker === "places" && <PlacesPhotoPicker />}
+      <DatePhotoPicker />
+      <PeoplePhotoPicker />
+      <PlacesPhotoPicker />
     </PhotoFlowContext.Provider>
   );
 }

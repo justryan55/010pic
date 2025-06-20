@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useSupabaseSession } from "./SupabaseProvider";
 import { fetchUser } from "@/lib/authentication";
-import Profile from "@/components/Profile";
 interface UserContextType {
   isProfileOpen: boolean;
   toggleProfile: () => void;
@@ -65,7 +64,6 @@ export default function UserProvider({
   return (
     <UserContext.Provider value={{ userProfile, isProfileOpen, toggleProfile }}>
       {children}
-      <Profile />
     </UserContext.Provider>
   );
 }
