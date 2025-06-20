@@ -42,7 +42,7 @@ export default function Places() {
 
   function PlacesPhotoGrid({ place }: { place: string }) {
     const images = imagesByPlace[place] || [];
-    return <PhotoGrid images={images} />;
+    return <PhotoGrid images={images} title={place} />;
   }
 
   useEffect(() => {

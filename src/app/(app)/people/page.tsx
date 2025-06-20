@@ -41,7 +41,7 @@ export default function People() {
 
   function PeoplePhotoGrid({ person }: { person: string }) {
     const images = imagesByPerson[person] || [];
-    return <PhotoGrid images={images} />;
+    return <PhotoGrid images={images} title={person} />;
   }
 
   useEffect(() => {
