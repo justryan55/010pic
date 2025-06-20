@@ -6,11 +6,12 @@ import { nanoid } from "nanoid";
 import Input from "@/components/Input";
 import Button from "./Button";
 import { softDeleteImage, uploadImagesToSupabase } from "@/lib/imageManager";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 
 interface SelectedImage {
   id: string;
   src: string;
-  // file: File;
   name: string;
 }
 
@@ -52,6 +53,83 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const isMobile = () => {
+    return Capacitor.isNativePlatform();
+  };
+
+  const isCapacitorAvailable = () => {
+    return Capacitor.isPluginAvailable("Camera");
+  };
+
+  const pickImages = async () => {
+    if (isMobile() && isCapacitorAvailable()) {
+      try {
+        if (Camera.pickImages) {
+          const result = await Camera.pickImages({
+            quality: 90,
+            limit: maxImages - existingImages.length - pendingFiles.length,
+          });
+
+          const files: File[] = [];
+
+          for (const photo of result.photos) {
+            const response = await fetch(photo.webPath!);
+            const blob = await response.blob();
+            const file = new File([blob], `image_${nanoid()}.jpeg`, {
+              type: blob.type,
+            });
+            files.push(file);
+          }
+
+          processFiles(files);
+        } else {
+          const remainingSlots =
+            maxImages - existingImages.length - pendingFiles.length;
+          const promises = [];
+
+          for (let i = 0; i < Math.min(remainingSlots, 5); i++) {
+            promises.push(
+              Camera.getPhoto({
+                quality: 90,
+                allowEditing: false,
+                resultType: CameraResultType.Uri,
+                source: CameraSource.Photos,
+              })
+            );
+          }
+
+          try {
+            const results = await Promise.allSettled(promises);
+            const files: File[] = [];
+
+            for (const result of results) {
+              if (result.status === "fulfilled" && result.value.webPath) {
+                const response = await fetch(result.value.webPath);
+                const blob = await response.blob();
+                const file = new File([blob], `image_${nanoid()}.jpeg`, {
+                  type: blob.type,
+                });
+                files.push(file);
+              }
+            }
+
+            if (files.length > 0) {
+              processFiles(files);
+            }
+          } catch (error) {
+            console.error("Error with fallback method:", error);
+            fileInputRef.current?.click();
+          }
+        }
+      } catch (error) {
+        console.error("Error picking images:", error);
+        fileInputRef.current?.click();
+      }
+    } else {
+      fileInputRef.current?.click();
+    }
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -240,7 +318,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
               className="w-full h-100 border rounded-lg border-[#DFDFDF] flex flex-col items-center justify-center mb-4 cursor-pointer  "
               onDrop={handleDrop}
               onDragOver={handleDragOver}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={pickImages}
             >
               <Image
                 src="/images/file-add.svg"
@@ -291,7 +369,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
               }).map((_, i) => (
                 <button
                   key={`add-btn-${i}`}
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={pickImages}
                   className="flex-none w-20 h-28 rounded-lg border border-[#DFDFDF] flex items-center justify-center"
                   aria-label="Add image"
                 >
