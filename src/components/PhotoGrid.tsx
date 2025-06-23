@@ -111,12 +111,12 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <h1 className="absolute top-4 left-4 z-60 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors">
+            <h1 className="absolute top-8 left-4 z-60 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors">
               {title}
             </h1>
             <button
               onClick={closeFullScreen}
-              className="absolute top-4 right-4 z-60 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors"
+              className="absolute top-8 right-4 z-60 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors"
               title="Close fullscreen view"
             >
               <svg
