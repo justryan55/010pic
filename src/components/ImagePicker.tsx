@@ -9,10 +9,12 @@ import { softDeleteImage, uploadImagesToSupabase } from "@/lib/imageManager";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
 import { AnimatePresence, motion } from "framer-motion";
+
 interface SelectedImage {
   id: string;
   src: string;
   name: string;
+  isUploading?: boolean;
 }
 
 interface ImagePickerConfig {
@@ -71,6 +73,25 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const pickImages = async () => {
     if (isMobile() && isCapacitorAvailable()) {
       try {
+        const permissions = await Camera.checkPermissions();
+
+        if (
+          permissions.photos !== "granted" &&
+          permissions.photos !== "limited"
+        ) {
+          const requested = await Camera.requestPermissions({
+            permissions: ["photos"],
+          });
+
+          if (
+            requested.photos !== "granted" &&
+            requested.photos !== "limited"
+          ) {
+            console.warn("Photo access not granted");
+            return;
+          }
+        }
+
         if (Camera.pickImages) {
           const result = await Camera.pickImages({
             quality: 90,
@@ -150,7 +171,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     }
   };
 
-  const processFiles = (files: File[]) => {
+  const processFiles = async (files: File[]) => {
     try {
       const remainingSlots =
         maxImages - existingImages.length - pendingFiles.length;
@@ -160,19 +181,34 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
       setPendingFiles((prev) => [...prev, ...validFiles]);
 
-      validFiles.forEach((file) => {
+      for (const file of validFiles) {
+        const tempId = nanoid();
+
+        const tempImage: SelectedImage = {
+          id: tempId,
+          src: "",
+          name: file.name,
+          isUploading: true,
+        };
+
+        setSelectedImages((prev) => [...prev, tempImage]);
+
         const reader = new FileReader();
         reader.onload = (e) => {
-          const newImage: SelectedImage = {
-            id: nanoid(),
-            src: e.target?.result as string,
-            name: file.name,
-          };
-
-          setSelectedImages((prev) => [...prev, newImage]);
+          setSelectedImages((prev) =>
+            prev.map((img) =>
+              img.id === tempId
+                ? {
+                    ...img,
+                    src: e.target?.result as string,
+                    isUploading: false,
+                  }
+                : img
+            )
+          );
         };
         reader.readAsDataURL(file);
-      });
+      }
     } catch (err) {
       console.log(err);
     }
@@ -189,7 +225,9 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   };
 
   const selectMainImage = (image: SelectedImage) => {
-    setMainImage(image);
+    if (!image.isUploading) {
+      setMainImage(image);
+    }
   };
 
   const removeImage = async (imageId: string) => {
@@ -197,6 +235,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
     if (isExistingImage) {
       const success = await softDeleteImage(imageId);
+
       if (!success) {
         console.error("Failed to soft delete image");
         return;
@@ -220,32 +259,40 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
   const handleSave = async () => {
     setIsLoading(true);
-    if (pendingFiles.length === 0) return;
 
-    const cleanTitle = title?.trim() || "untitled";
+    try {
+      if (pendingFiles.length > 0) {
+        const cleanTitle = title?.trim() || "untitled";
 
-    const storagePath =
-      monthIndex !== undefined
-        ? `photos/${targetYear}/${folderType}/${monthIndex}`
-        : `photos/${targetYear}/${folderType}/${cleanTitle.replace(
-            /\s+/g,
-            "_"
-          )}`;
+        const storagePath =
+          monthIndex !== undefined
+            ? `photos/${targetYear}/${folderType}/${monthIndex}`
+            : `photos/${targetYear}/${folderType}/${cleanTitle.replace(
+                /\s+/g,
+                "_"
+              )}`;
 
-    const uploadedImages = await uploadImagesToSupabase(
-      pendingFiles,
-      storagePath
-    );
+        const uploadedImages = await uploadImagesToSupabase(
+          pendingFiles,
+          storagePath
+        );
 
-    const allImages = [...existingImages, ...uploadedImages];
+        const allImages = [...existingImages, ...uploadedImages];
+        onSave(allImages);
+      } else {
+        onSave(existingImages);
+      }
 
-    onSave(allImages);
-    setPendingFiles([]);
-    setSelectedImages([]);
-    setMainImage(null);
-
-    onClose();
-    setIsLoading(false);
+      setPendingFiles([]);
+      setSelectedImages([]);
+      setMainImage(null);
+      setTitle?.("");
+    } catch (error) {
+      console.error("Error saving images:", error);
+    } finally {
+      setIsLoading(false);
+      onClose();
+    }
   };
 
   const handleClose = () => {
@@ -257,14 +304,16 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   useEffect(() => {
     if (isOpen && !mainImage) {
       const allImages = [...existingImages, ...selectedImages];
-      if (allImages.length > 0) {
-        setMainImage(allImages[0]);
+      const availableImages = allImages.filter((img) => !img.isUploading);
+      if (availableImages.length > 0) {
+        setMainImage(availableImages[0]);
       }
     }
   }, [isOpen, mainImage, existingImages, selectedImages]);
 
   const allImages = [...existingImages, ...selectedImages];
   const totalCount = allImages.length;
+  const hasUploadingImages = selectedImages.some((img) => img.isUploading);
 
   return (
     <AnimatePresence mode="wait">
@@ -278,9 +327,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
           className="fixed inset-0 z-50 flex items-end"
         >
           <div
-            className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around min-h-screen } `}
+            className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around min-h-screen`}
           >
-            {/* ${isOpen ? "translate-y-0" : "translate-y-[150%]"}  */}
             <div>
               <div className="flex flex-row justify-between items-center">
                 {needsTitleInput ? (
@@ -332,10 +380,21 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
                       width={100}
                       height={100}
                     />
+                    {mainImage.isUploading && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Image
+                          src="/images/spinner-black.svg"
+                          height={32}
+                          width={32}
+                          alt="Uploading..."
+                          className="animate-spin"
+                        />
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div
-                    className="w-full h-100 border rounded-lg border-[#DFDFDF] flex flex-col items-center justify-center mb-4 cursor-pointer  "
+                    className="w-full h-100 border rounded-lg border-[#DFDFDF] flex flex-col items-center justify-center mb-4 cursor-pointer"
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
                     onClick={pickImages}
@@ -361,27 +420,42 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
                         }`}
                         onClick={() => selectMainImage(image)}
                       >
-                        <Image
-                          src={image.src}
-                          alt="Thumbnail"
-                          className="w-full h-28 object-cover "
-                          fill
-                        />
-                        <button
-                          aria-label="Remove image"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeImage(image.id);
-                          }}
-                          className="absolute top-1 right-0 bg-white rounded-full p-1"
-                        >
+                        {image.src && (
                           <Image
-                            src="/images/X.svg"
-                            alt="Cancel Button"
-                            width={14}
-                            height={14}
+                            src={image.src}
+                            alt="Thumbnail"
+                            className="w-full h-28 object-cover"
+                            fill
                           />
-                        </button>
+                        )}
+
+                        {image.isUploading ? (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Image
+                              src="/images/spinner-black.svg"
+                              height={20}
+                              width={20}
+                              alt="Uploading..."
+                              className="animate-spin"
+                            />
+                          </div>
+                        ) : (
+                          <button
+                            aria-label="Remove image"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeImage(image.id);
+                            }}
+                            className="absolute top-1 right-0 bg-white rounded-full p-1"
+                          >
+                            <Image
+                              src="/images/X.svg"
+                              alt="Cancel Button"
+                              width={14}
+                              height={14}
+                            />
+                          </button>
+                        )}
                       </div>
                     ))}
                     {Array.from({
@@ -392,12 +466,14 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
                         onClick={pickImages}
                         className="flex-none w-20 h-28 rounded-lg border border-[#DFDFDF] flex items-center justify-center"
                         aria-label="Add image"
+                        disabled={hasUploadingImages}
                       >
                         <Image
                           src="/images/file-add.svg"
                           height={20}
                           width={20}
                           alt="Plus icon"
+                          className={hasUploadingImages ? "opacity-50" : ""}
                         />
                       </button>
                     ))}
@@ -410,7 +486,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
               text="NEXT"
               onClick={handleSave}
               disabled={
-                existingImages.length === 0 && selectedImages.length === 0
+                (existingImages.length === 0 && selectedImages.length === 0) ||
+                hasUploadingImages
               }
               isLoading={isLoading}
             />
@@ -429,7 +506,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
               aria-label="Upload Images"
               title="Upload Images"
             />
-          </div>{" "}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -31,21 +31,14 @@ export default function PlacesPhotoPicker() {
   const placesKey = `${targetYear}-place-${formattedTitle}`;
   const placesImages = imagesByPlace[targetPlace ?? ""] || [];
 
-  const handleSave = (images: SelectedImage[]) => {
+  const handleSave = async (images: SelectedImage[]) => {
     try {
-      const key = `photoFlow-${placesKey}`;
-      const serialized = JSON.stringify(images);
-
-      localStorage.setItem(key, serialized);
-
       setImagesByPlace((prev) => ({
         ...prev,
         [placesKey]: [...images],
       }));
 
       triggerRefresh();
-
-      setTargetPlace(placesKey);
     } catch (err) {
       console.log(err);
     }

@@ -31,20 +31,14 @@ export default function PeoplePhotoPicker() {
   const personKey = `${targetYear}-person-${formattedTitle}`;
   const peopleImages = imagesByPerson[targetPerson ?? ""] || [];
 
-  const handleSave = (images: SelectedImage[]) => {
+  const handleSave = async (images: SelectedImage[]) => {
     try {
-      const key = `photoFlow-${personKey}`;
-      const serialized = JSON.stringify(images);
-
-      localStorage.setItem(key, serialized);
-
       setImagesByPerson((prev) => ({
         ...prev,
         [personKey]: [...images],
       }));
 
       triggerRefresh();
-      setTargetPerson(personKey);
     } catch (err) {
       console.log(err);
     }

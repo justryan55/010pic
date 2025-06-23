@@ -37,6 +37,15 @@ export default function DatePhotoPicker() {
     }
   };
 
+  //   const handleImageDelete = async (imageId: string) => {
+  //   // Handle the deletion without triggering refresh
+  //   setImagesByMonth((prev) => ({
+  //     ...prev,
+  //     [monthKey]: prev[monthKey]?.filter(img => img.id !== imageId) || [],
+  //   }));
+  //   // Don't call triggerRefresh() here
+  // };
+
   const config = {
     title: targetMonth || "Select Month",
     maxImages: 10,
