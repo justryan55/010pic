@@ -55,6 +55,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const slideVariants = {
     hidden: { y: "100%", opacity: 1 },
@@ -73,21 +74,24 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const pickImages = async () => {
     if (isMobile() && isCapacitorAvailable()) {
       try {
-        const permissions = await Camera.checkPermissions();
+        const currentStatus = await Camera.checkPermissions();
+        const needsPhotoPermission =
+          currentStatus.photos !== "granted" &&
+          currentStatus.photos !== "limited";
 
-        if (
-          permissions.photos !== "granted" &&
-          permissions.photos !== "limited"
-        ) {
-          const requested = await Camera.requestPermissions({
+        if (needsPhotoPermission) {
+          await Camera.requestPermissions({
             permissions: ["photos"],
           });
 
+          const finalStatus = await Camera.checkPermissions();
           if (
-            requested.photos !== "granted" &&
-            requested.photos !== "limited"
+            finalStatus.photos !== "granted" &&
+            finalStatus.photos !== "limited"
           ) {
-            console.warn("Photo access not granted");
+            setError("Photo access is required to continue.");
+            console.log(error);
+            setIsLoading(false);
             return;
           }
         }

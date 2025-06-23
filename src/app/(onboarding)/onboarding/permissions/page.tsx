@@ -20,18 +20,21 @@ export default function Permissions() {
     try {
       if (isNative) {
         const currentStatus = await Camera.checkPermissions();
+        const needsPhotoPermission =
+          currentStatus.photos !== "granted" &&
+          currentStatus.photos !== "limited";
+        const needsCameraPermission = currentStatus.camera !== "granted";
 
-        const needsPermissions =
-          currentStatus.photos !== "granted" ||
-          currentStatus.camera !== "granted";
+        if (needsPhotoPermission || needsCameraPermission) {
+          const permissionsToRequest: ("camera" | "photos")[] = [];
+          if (needsPhotoPermission) permissionsToRequest.push("photos");
+          if (needsCameraPermission) permissionsToRequest.push("camera");
 
-        if (needsPermissions) {
           await Camera.requestPermissions({
-            permissions: ["camera", "photos"],
+            permissions: permissionsToRequest,
           });
 
           const finalStatus = await Camera.checkPermissions();
-
           console.log(
             "Final permission status:",
             JSON.stringify(finalStatus, null, 2)
@@ -41,13 +44,17 @@ export default function Permissions() {
             finalStatus.photos !== "granted" &&
             finalStatus.photos !== "limited"
           ) {
-            setError("Photo access is required to continue.");
+            setError(
+              "Photo access is required. Please enable it in app settings."
+            );
             setIsLoading(false);
             return;
           }
 
           if (finalStatus.camera !== "granted") {
-            setError("Camera access is required to continue.");
+            setError(
+              "Camera access is required. Please enable it in app settings."
+            );
             setIsLoading(false);
             return;
           }
@@ -55,6 +62,7 @@ export default function Permissions() {
           console.log("All permissions already granted");
         }
       }
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
