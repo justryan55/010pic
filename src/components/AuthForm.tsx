@@ -156,13 +156,20 @@ export default function AuthForm() {
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("onboarding_complete")
+        .select("onboarding_complete, is_deleted")
         .eq("id", user.id)
         .single();
 
       if (profileError) {
         console.error("Profile fetch error:", profileError);
         setAuthError("Failed to retrieve profile information.");
+        return;
+      }
+
+      if (profile?.is_deleted) {
+        await supabase.auth.signOut();
+
+        setAuthError("This account has been deleted.");
         return;
       }
 

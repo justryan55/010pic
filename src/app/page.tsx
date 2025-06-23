@@ -20,13 +20,29 @@ export default function RootPage() {
 
       if (!session) {
         router.replace("/auth/login");
-      } else {
-        router.replace("/date");
+        setIsLoading(false);
+        return;
       }
-    };
-    setIsLoading(false);
 
-    checkAuth();
+      const userId = session.user.id;
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_deleted")
+        .eq("id", userId)
+        .single();
+
+      if (profileError || profile?.is_deleted) {
+        await supabase.auth.signOut();
+        router.replace("/auth/login");
+        setIsLoading(false);
+        return;
+      }
+
+      router.replace("/date");
+      setIsLoading(false);
+    };
+
+    checkAuth(); 
 
     const {
       data: { subscription },

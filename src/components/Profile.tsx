@@ -1,15 +1,20 @@
 "use client";
 
-import { logOut } from "@/lib/authentication";
+import { deleteAccount, logOut } from "@/lib/authentication";
 import { useUserContext } from "@/providers/UserProvider";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSubscription } from "@/providers/SubscriptionProvider";
+import Button from "./Button";
+import { useRouter } from "next/navigation";
 
 export default function Profile() {
   const { isProfileOpen, toggleProfile, userProfile } = useUserContext();
   const { toggleSubscription } = useSubscription();
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const slideVariants = {
     hidden: { y: "100%", opacity: 1 },
@@ -20,19 +25,32 @@ export default function Profile() {
   const items = [
     {
       heading: userProfile.name,
+      alt: "User profile icon",
       svg: "/images/user.svg",
     },
     {
       heading: "Subscription",
+      alt: "Subscription icon",
       svg: "/images/subscription.svg",
     },
 
     {
       heading: "Sign Out",
+      alt: "Sign out icon icon",
       svg: "/images/logout.svg",
     },
   ];
 
+  const triggerAccountDeletion = async (userId: string, email: string) => {
+    const res = await deleteAccount(userId, email);
+
+    if (!res?.success) {
+      setError(res?.message ?? null);
+      return;
+    }
+
+    router.push("/");
+  };
   return (
     <AnimatePresence mode="wait">
       {isProfileOpen && (
@@ -77,9 +95,9 @@ export default function Profile() {
                   >
                     <Image
                       src={item.svg}
-                      alt="Cancel Button"
-                      width={30}
-                      height={30}
+                      alt={item.alt}
+                      width={20}
+                      height={20}
                     />
 
                     <div className="flex flex-col">
@@ -89,8 +107,64 @@ export default function Profile() {
                     </div>
                   </div>
                 ))}
+                <p
+                  className="w-full mt-8 cursor-pointer text-[#E55A5A] font-semibold text-lg"
+                  onClick={() => {
+                    setOpenDeleteModal(true);
+                  }}
+                >
+                  Delete Account
+                </p>
               </div>
             </div>
+
+            {openDeleteModal && (
+              <div
+                className="fixed inset-0 z-50 w-full bg-black/75 flex flex-col justify-center items-center"
+                onClick={() => setOpenDeleteModal(false)}
+              >
+                <div
+                  className={`opacity-100 h-[163px] z-60 bg-[var(--brand-bg)] relative w-[90%]  border border-black flex flex-col items-center justify-evenly transition duration-200 ease-in-out`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    aria-label="Cancel deletion"
+                    className="absolute top-3 right-3 cursor-pointer"
+                    onClick={() => setOpenDeleteModal(false)}
+                  >
+                    <Image
+                      src="/images/X.svg"
+                      alt="Cancel Button"
+                      width={14}
+                      height={14}
+                    />
+                  </button>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm font-bold leading-[120%] text-center w-[178px]">
+                      Are you sure?
+                    </p>
+                    <p className="text-sm font-normal leading-[120%] text-center w-[178px]">
+                      All pictures will be deleted
+                    </p>
+                    {error && (
+                      <p className="text-sm font-normal leading-[120%] text-center w-[178px]">
+                        {error}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    text="Confirm & Delete"
+                    uppercase={false}
+                    padding="[15px]"
+                    textSize="text-[13px]"
+                    maxWidth="max-w-[159px]"
+                    onClick={() =>
+                      triggerAccountDeletion(userProfile.id, userProfile.email)
+                    }
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-col justify-center items-center">
               <p className="text-sm font-normal text-[#919191] text-center">

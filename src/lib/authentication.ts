@@ -36,3 +36,50 @@ export const logOut = async () => {
     console.log(err);
   }
 };
+
+export const deleteAccount = async (userId: string, email: string) => {
+  try {
+
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_deleted: true })
+      .eq("id", userId);
+
+    if (error) {
+      return {
+        success: false,
+        message: "Error deleting account. Please try again later.",
+      };
+    }
+
+    const res = await fetch(
+      "https://supabase-r2-handler.app010pic.workers.dev/api/delete-auth-email",
+      {
+        method: "POST",
+     
+        body: JSON.stringify({ user_id: userId, email }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data.error || "Failed to update auth email",
+      };
+    }
+
+    return {
+      success: true,
+      message: "User account deleted successfully",
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      success: false,
+      message: "Error deleting account. Please try again later.",
+    };
+  }
+};
