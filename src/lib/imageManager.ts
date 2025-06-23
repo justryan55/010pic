@@ -387,7 +387,6 @@ export async function fetchUserImagesByPlaceYear(targetYear: string) {
   }
 
   if (!imageRows || imageRows.length === 0) {
-    console.log("No place images found for the specified year");
     return {};
   }
 
