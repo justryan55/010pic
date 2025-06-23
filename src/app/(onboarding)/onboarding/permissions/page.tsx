@@ -1,10 +1,11 @@
 "use client";
-
 import Button from "@/components/Button";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/createSupabaseClient";
+import { Camera } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 
 export default function Permissions() {
   const router = useRouter();
@@ -14,8 +15,46 @@ export default function Permissions() {
   const completeOnboarding = async () => {
     setIsLoading(true);
     setError("");
+    const isNative = Capacitor.isNativePlatform();
 
     try {
+      if (isNative) {
+        const currentStatus = await Camera.checkPermissions();
+
+        const needsPermissions =
+          currentStatus.photos !== "granted" ||
+          currentStatus.camera !== "granted";
+
+        if (needsPermissions) {
+          await Camera.requestPermissions({
+            permissions: ["camera", "photos"],
+          });
+
+          const finalStatus = await Camera.checkPermissions();
+
+          console.log(
+            "Final permission status:",
+            JSON.stringify(finalStatus, null, 2)
+          );
+
+          if (
+            finalStatus.photos !== "granted" &&
+            finalStatus.photos !== "limited"
+          ) {
+            setError("Photo access is required to continue.");
+            setIsLoading(false);
+            return;
+          }
+
+          if (finalStatus.camera !== "granted") {
+            setError("Camera access is required to continue.");
+            setIsLoading(false);
+            return;
+          }
+        } else {
+          console.log("All permissions already granted");
+        }
+      }
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -66,7 +105,6 @@ export default function Permissions() {
           </p>
           {error && <p className="text-destructive">{error}</p>}
         </div>
-
         <Button
           text="Next"
           onClick={completeOnboarding}
