@@ -3,7 +3,7 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Zoom } from "swiper/modules";
+import { Pagination, Zoom } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/zoom";
 
@@ -22,8 +22,6 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(
     null
   );
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const openFullScreen = (image: SelectedImage) => {
     const index = images.findIndex((img) => img.id === image.id);
@@ -32,38 +30,6 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
 
   const closeFullScreen = () => {
     setCurrentImageIndex(null);
-  };
-
-  const goToPrevious = () => {
-    if (currentImageIndex !== null && currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1);
-    }
-  };
-
-  const goToNext = () => {
-    if (currentImageIndex !== null && currentImageIndex < images.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1);
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe) goToNext();
-    if (isRightSwipe) goToPrevious();
   };
 
   const currentImage =
@@ -137,8 +103,13 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
             </button>
 
             <Swiper
-              modules={[Zoom]}
+              modules={[Zoom, Pagination]}
               zoom={{ maxRatio: 3 }}
+              pagination={{
+                clickable: true,
+                renderBullet: (index, className) =>
+                  `<span class="${className} custom-dot">${index + 1}</span>`,
+              }}
               initialSlide={currentImageIndex ?? 0}
               onSlideChange={(swiper) =>
                 setCurrentImageIndex(swiper.activeIndex)
@@ -163,24 +134,6 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
                 </SwiperSlide>
               ))}
             </Swiper>
-
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-60 flex gap-2">
-              {images.map((image, index) => (
-                <button
-                  key={image.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCurrentImageIndex(index);
-                  }}
-                  className={`w-1 h-1 rounded-full transition-all duration-200 ${
-                    index === currentImageIndex
-                      ? "bg-white scale-125"
-                      : "bg-white/50 hover:bg-white/80"
-                  }`}
-                  aria-label={`Go to image ${index + 1}`}
-                />
-              ))}
-            </div>
           </div>
         </>
       )}
