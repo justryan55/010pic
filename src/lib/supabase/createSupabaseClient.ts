@@ -14,21 +14,34 @@ const supabase = createBrowserClient(
   }
 );
 
+function safeSetItem(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn(`Failed to set localStorage item "${key}":`, error);
+  }
+}
+
+function safeRemoveItem(key: string) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    console.warn(`Failed to remove localStorage item "${key}":`, error);
+  }
+}
+
 supabase.auth.onAuthStateChange((event, session) => {
   if (session?.provider_token) {
-    window.localStorage.setItem("oauth_provider_token", session.provider_token);
+    safeSetItem("oauth_provider_token", session.provider_token);
   }
 
   if (session?.provider_refresh_token) {
-    window.localStorage.setItem(
-      "oauth_provider_refresh_token",
-      session.provider_refresh_token
-    );
+    safeSetItem("oauth_provider_refresh_token", session.provider_refresh_token);
   }
 
   if (event === "SIGNED_OUT") {
-    window.localStorage.removeItem("oauth_provider_token");
-    window.localStorage.removeItem("oauth_provider_refresh_token");
+    safeRemoveItem("oauth_provider_token");
+    safeRemoveItem("oauth_provider_refresh_token");
   }
 });
 
