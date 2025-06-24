@@ -16,7 +16,7 @@ export default function CollectionHeader({
           {imageCount.toString().padStart(2, "0")}/10
         </p>
       </div>
-      <AddBtn subscribed={true} />
+      <AddBtn subscribed={true} imageCount={imageCount} />
     </div>
   );
 }

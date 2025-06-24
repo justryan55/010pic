@@ -6,7 +6,12 @@ import { useSubscription } from "@/providers/SubscriptionProvider";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import { useCurrentPage } from "@/providers/PageProvider";
 
-export default function AddBtn({ subscribed }: { subscribed: boolean }) {
+export default function AddBtn({
+  subscribed,
+  imageCount,
+}: {
+  subscribed: boolean;
+}) {
   const { toggleSubscription } = useSubscription();
   const { togglePicker } = usePhotoFlow();
   const { currentPage } = useCurrentPage();
@@ -41,7 +46,8 @@ export default function AddBtn({ subscribed }: { subscribed: boolean }) {
       className="flex justify-center items-center bg-black text-white w-[28px] h-[28px] rounded-full cursor-pointer"
     >
       <Image
-        src="/images/plus.svg"
+        // src="/images/plus.svg"
+        src={imageCount === 0 ? "/images/plus.svg" : "/images/edit.svg"}
         height={14.5}
         width={14.5}
         alt="Plus icon"
