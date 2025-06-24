@@ -108,7 +108,7 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
               pagination={{
                 clickable: true,
                 renderBullet: (index, className) =>
-                  `<span class="${className} custom-dot">${index + 1}</span>`,
+                  `<span class="${className} custom-dot"></span>`,
               }}
               initialSlide={currentImageIndex ?? 0}
               onSlideChange={(swiper) =>
