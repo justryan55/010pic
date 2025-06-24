@@ -18,6 +18,7 @@
     "@capacitor/core": "^7.4.0",
     "@capacitor/ios": "^7.4.0",
     "@hookform/resolvers": "^5.1.1",
+    "@revenuecat/purchases-capacitor": "^10.3.5",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.0",
     "browser-image-compression": "^2.0.2",
