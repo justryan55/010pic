@@ -2,6 +2,10 @@
 
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Zoom } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/zoom";
 
 interface SelectedImage {
   id: string;
@@ -106,10 +110,10 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
         <>
           <div
             className="fixed inset-0 z-50 w-full bg-black/90 flex flex-col justify-center items-center"
-            onClick={closeFullScreen}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
+            onClick={(e) => {
+              if ((e.target as HTMLElement).closest(".swiper-slide")) return;
+              closeFullScreen();
+            }}
           >
             <h1 className="absolute top-8 left-4 z-60 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors">
               {title}
@@ -131,15 +135,35 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </button>
-            <Image
-              src={currentImage.src}
-              alt={currentImage.name}
-              width={800}
-              height={600}
-              className="max-w-full max-h-full object-contain select-none"
-              onClick={(e) => e.stopPropagation()}
-              priority
-            />
+
+            <Swiper
+              modules={[Zoom]}
+              zoom={{ maxRatio: 3 }}
+              initialSlide={currentImageIndex ?? 0}
+              onSlideChange={(swiper) =>
+                setCurrentImageIndex(swiper.activeIndex)
+              }
+              className="w-full h-full"
+            >
+              {images.map((image) => (
+                <SwiperSlide key={image.id}>
+                  <div
+                    className="swiper-zoom-container flex justify-center items-center h-full"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Image
+                      src={image.src}
+                      alt={image.name}
+                      width={800}
+                      height={600}
+                      className="max-w-full max-h-full object-contain select-none"
+                      priority
+                    />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+
             <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-60 flex gap-2">
               {images.map((image, index) => (
                 <button
