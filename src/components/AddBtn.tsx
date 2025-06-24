@@ -11,6 +11,7 @@ export default function AddBtn({
   imageCount,
 }: {
   subscribed: boolean;
+  imageCount: number;
 }) {
   const { toggleSubscription } = useSubscription();
   const { togglePicker } = usePhotoFlow();
@@ -50,7 +51,7 @@ export default function AddBtn({
         src={imageCount === 0 ? "/images/plus.svg" : "/images/edit.svg"}
         height={14.5}
         width={14.5}
-        alt="Plus icon"
+        alt={imageCount === 0 ? "Plus icon" : "Edit icon"}
       />
     </button>
   );

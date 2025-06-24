@@ -84,7 +84,7 @@ export default function People() {
     >
       {personKeys.length === 0 && (
         <>
-          <AddBtn subscribed={true} />
+          <AddBtn subscribed={true} imageCount={personKeys.length} />
           <div className="flex flex-row gap-x-2 mt-2">
             <p className="text-sm leading-[120%] font-normal text-[#6F6F6F]">
               Add Person

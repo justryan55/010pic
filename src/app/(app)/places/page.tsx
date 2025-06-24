@@ -85,7 +85,7 @@ export default function Places() {
     >
       {placeKeys.length === 0 && (
         <>
-          <AddBtn subscribed={true} />
+          <AddBtn subscribed={true} imageCount={placeKeys.length} />
           <div className="flex flex-row gap-x-2 mt-2">
             {/* <Image
           src="/images/lock.svg"
