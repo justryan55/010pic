@@ -108,6 +108,7 @@ import React, { useEffect, useState } from "react";
 import Button from "./Button";
 import { useSubscription } from "@/providers/SubscriptionProvider";
 import { useRevenueCat } from "@/hooks/useRevenueCat";
+import { Capacitor } from "@capacitor/core";
 
 const items = [
   {
@@ -137,13 +138,14 @@ export default function Subscription() {
   const {
     isInitialized,
     subscriptionStatus,
-    
+
     loading,
     error,
     initialize,
     purchaseMonthlyPlan,
     restorePurchases,
   } = useRevenueCat();
+  const isNative = Capacitor.isNativePlatform();
 
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -287,7 +289,7 @@ export default function Subscription() {
         </div>
 
         {/* Show initialization or error states */}
-        {!isInitialized && !error && (
+        {!isInitialized && !error && isNative && (
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <p className="text-blue-700 text-center">
               Initializing subscription service...
@@ -342,7 +344,6 @@ export default function Subscription() {
           />
         </div>
 
-        {/* Add restore purchases button */}
         <div className="flex flex-row justify-center items-center mt-4">
           <button
             onClick={handleRestorePurchases}
@@ -352,6 +353,7 @@ export default function Subscription() {
             Restore Purchases
           </button>
         </div>
+        {/* Add restore purchases button */}
 
         <div className="flex flex-row items-center justify-center gap-1 my-10">
           <p className="text-black font-semibold text-sm leading-[120%]">

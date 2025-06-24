@@ -158,6 +158,41 @@ export class RevenueCatService {
     }
   }
 
+  // async getSubscriptionStatus(): Promise<SubscriptionStatus> {
+  //   try {
+  //     const customerInfo = await this.getCustomerInfo();
+
+  //     if (!customerInfo) {
+  //       return { isSubscribed: false };
+  //     }
+
+  //     const activeSubscriptions = customerInfo.activeSubscriptions;
+  //     const isSubscribed = activeSubscriptions.length > 0;
+
+  //     if (isSubscribed) {
+  //       const monthlyPlanInfo =
+  //         customerInfo.entitlements.active["monthly-plan"] ||
+  //         customerInfo.entitlements.active[
+  //           Object.keys(customerInfo.entitlements.active)[0]
+  //         ];
+
+  //       if (monthlyPlanInfo) {
+  //         return {
+  //           isSubscribed: true,
+  //           expirationDate: monthlyPlanInfo.expirationDate ?? undefined,
+  //           productIdentifier: monthlyPlanInfo.productIdentifier,
+  //           isActive: monthlyPlanInfo.isActive,
+  //         };
+  //       }
+  //     }
+
+  //     return { isSubscribed: false };
+  //   } catch (error) {
+  //     console.error("Failed to get subscription status:", error);
+  //     return { isSubscribed: false };
+  //   }
+  // }
+
   async getSubscriptionStatus(): Promise<SubscriptionStatus> {
     try {
       const customerInfo = await this.getCustomerInfo();
@@ -166,24 +201,15 @@ export class RevenueCatService {
         return { isSubscribed: false };
       }
 
-      const activeSubscriptions = customerInfo.activeSubscriptions;
-      const isSubscribed = activeSubscriptions.length > 0;
+      const premiumInfo = customerInfo.entitlements.active["premium"];
 
-      if (isSubscribed) {
-        const monthlyPlanInfo =
-          customerInfo.entitlements.active["monthly-plan"] ||
-          customerInfo.entitlements.active[
-            Object.keys(customerInfo.entitlements.active)[0]
-          ];
-
-        if (monthlyPlanInfo) {
-          return {
-            isSubscribed: true,
-            expirationDate: monthlyPlanInfo.expirationDate ?? undefined,
-            productIdentifier: monthlyPlanInfo.productIdentifier,
-            isActive: monthlyPlanInfo.isActive,
-          };
-        }
+      if (premiumInfo?.isActive) {
+        return {
+          isSubscribed: true,
+          expirationDate: premiumInfo.expirationDate ?? undefined,
+          productIdentifier: premiumInfo.productIdentifier,
+          isActive: premiumInfo.isActive,
+        };
       }
 
       return { isSubscribed: false };

@@ -8,6 +8,7 @@ import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import { fetchUserImagesByPersonYear } from "@/lib/imageManager";
 import Image from "next/image";
 import { useCurrentPage } from "@/providers/PageProvider";
+import { useRevenueCat } from "@/hooks/useRevenueCat";
 
 export default function People() {
   const {
@@ -20,6 +21,7 @@ export default function People() {
   } = usePhotoFlow();
   const [isLoading, setIsLoading] = useState(false);
   const { setCurrentPage } = useCurrentPage();
+  const { subscriptionStatus } = useRevenueCat();
 
   useEffect(() => {
     setCurrentPage("people");
@@ -84,8 +86,19 @@ export default function People() {
     >
       {personKeys.length === 0 && (
         <>
-          <AddBtn subscribed={true} imageCount={personKeys.length} />
+          <AddBtn
+            subscribed={subscriptionStatus.isSubscribed}
+            imageCount={personKeys.length}
+          />
           <div className="flex flex-row gap-x-2 mt-2">
+            {!subscriptionStatus.isSubscribed && (
+              <Image
+                src="/images/lock.svg"
+                width={11}
+                height={15}
+                alt="Image of lock"
+              />
+            )}
             <p className="text-sm leading-[120%] font-normal text-[#6F6F6F]">
               Add Person
             </p>

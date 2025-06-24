@@ -47,8 +47,8 @@ export const useRevenueCat = (): UseRevenueCatReturn => {
 
   const initialize = useCallback(async (userId?: string): Promise<boolean> => {
     if (!isNative) {
-      setLoading(false); // explicitly set loading false
-      setError("Subscriptions not supported on web yet.");
+      setLoading(false);
+      // setError("Subscriptions not supported on web yet.");
       setIsInitialized(false);
       return false;
     }
