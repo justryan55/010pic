@@ -96,7 +96,10 @@ export default function Home() {
 
   const isMonthLocked = (month: string) => {
     const monthNumber = monthNameToNumber(month);
-    const monthDate = new Date(targetYear || currentYear, monthNumber - 1);
+    const monthDate = new Date(
+      targetYear || currentYear,
+      Number(monthNumber) - 1
+    );
     const currentDate = new Date(currentYear, currentMonthIndex);
     const monthKey = `${targetYear || currentYear}-${monthNumber}`;
 
@@ -210,7 +213,7 @@ export default function Home() {
             <div
               key={month}
               className={`cursor-pointer ${locked ? "relative" : ""}`}
-              // onClick={() => handleMonthClick(month)}
+              onClick={() => setTargetMonth(month)}
             >
               <MonthHeader month={month} locked={locked} />
               <MonthPhotoGrid month={month} />
