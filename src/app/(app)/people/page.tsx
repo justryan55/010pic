@@ -86,12 +86,9 @@ export default function People() {
     >
       {personKeys.length === 0 && (
         <>
-          <AddBtn
-            subscribed={subscriptionStatus.isSubscribed}
-            imageCount={personKeys.length}
-          />
+          <AddBtn imageCount={personKeys.length} requiresSubscription />
           <div className="flex flex-row gap-x-2 mt-2">
-            {!subscriptionStatus.isSubscribed && (
+            {!subscriptionStatus?.isSubscribed && (
               <Image
                 src="/images/lock.svg"
                 width={11}

@@ -13,7 +13,7 @@ import { Capacitor } from "@capacitor/core";
 
 interface UseRevenueCatReturn {
   isInitialized: boolean;
-  subscriptionStatus: SubscriptionStatus;
+  subscriptionStatus: SubscriptionStatus | null;
   offerings: PurchasesOffering[];
   currentOffering: PurchasesOffering | null;
   customerInfo: CustomerInfo | null;
@@ -32,7 +32,8 @@ interface UseRevenueCatReturn {
 export const useRevenueCat = (): UseRevenueCatReturn => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] =
-    useState<SubscriptionStatus>({ isSubscribed: false });
+    useState<SubscriptionStatus | null>(null);
+
   const [offerings, setOfferings] = useState<PurchasesOffering[]>([]);
   const [currentOffering, setCurrentOffering] =
     useState<PurchasesOffering | null>(null);
@@ -222,7 +223,7 @@ export const useRevenueCat = (): UseRevenueCatReturn => {
 
   useEffect(() => {
     // Uncomment if you want to auto-initialize
-    // initialize();
+    initialize();
   }, []);
 
   return {

@@ -149,7 +149,6 @@ export default function Subscription() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Initialize RevenueCat when component mounts
   useEffect(() => {
     if (isSubOpen && !isInitialized) {
       initialize();
@@ -163,9 +162,7 @@ export default function Subscription() {
     try {
       const success = await purchaseMonthlyPlan();
       if (success) {
-        // Show success message
-        alert("Monthly subscription activated! 🎉");
-        // Optionally close the subscription modal
+        alert("Monthly subscription activated!");
         toggleSubscription();
       }
     } catch (error) {
@@ -202,7 +199,7 @@ export default function Subscription() {
       const success = await restorePurchases();
       if (success) {
         alert("Purchases restored successfully!");
-        if (subscriptionStatus.isSubscribed) {
+        if (subscriptionStatus?.isSubscribed) {
           toggleSubscription();
         }
       }
@@ -214,58 +211,58 @@ export default function Subscription() {
     }
   };
 
-  // If user is already subscribed, show different content
-  if (subscriptionStatus.isSubscribed) {
-    return (
-      <div
-        className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-center items-center transition-transform duration-300 min-h-screen ${
-          isSubOpen ? "translate-y-0 fixed" : "translate-y-[150%] hidden"
-        }`}
-      >
-        <div className="flex justify-between w-full pt-8 mb-10">
-          <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">
-            Subscription Active
-          </h1>
-          <Image
-            onClick={toggleSubscription}
-            src="/images/X.svg"
-            alt="Cancel Button"
-            width={14}
-            height={14}
-            className="cursor-pointer"
-          />
-        </div>
+  // // If user is already subscribed, show different content
+  // if (subscriptionStatus?.isSubscribed) {
+  //   return (
+  //     <div
+  //       className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-center items-center transition-transform duration-300 min-h-screen ${
+  //         isSubOpen ? "translate-y-0 fixed" : "translate-y-[150%] hidden"
+  //       }`}
+  //     >
+  //       <div className="flex justify-between w-full pt-8 mb-10">
+  //         <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">
+  //           Subscription Active
+  //         </h1>
+  //         <Image
+  //           onClick={toggleSubscription}
+  //           src="/images/X.svg"
+  //           alt="Cancel Button"
+  //           width={14}
+  //           height={14}
+  //           className="cursor-pointer"
+  //         />
+  //       </div>
 
-        <div className="flex flex-col items-center justify-center flex-1">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-green-600 mb-4">
-              You&#39;re All Set!
-            </h2>
-            <p className="text-gray-700 mb-2">Your subscription is active</p>
-            {subscriptionStatus.expirationDate && (
-              <p className="text-sm text-gray-500">
-                Expires:{" "}
-                {new Date(
-                  subscriptionStatus.expirationDate
-                ).toLocaleDateString()}
-              </p>
-            )}
-          </div>
+  //       <div className="flex flex-col items-center justify-center flex-1">
+  //         <div className="text-center mb-8">
+  //           <h2 className="text-2xl font-bold text-green-600 mb-4">
+  //             You&#39;re All Set!
+  //           </h2>
+  //           <p className="text-gray-700 mb-2">Your subscription is active</p>
+  //           {subscriptionStatus?.expirationDate && (
+  //             <p className="text-sm text-gray-500">
+  //               Expires:{" "}
+  //               {new Date(
+  //                 subscriptionStatus?.expirationDate
+  //               ).toLocaleDateString()}
+  //             </p>
+  //           )}
+  //         </div>
 
-          <div className="w-full max-w-sm">
-            <Button
-              text="Manage Subscription"
-              onClick={() => {
-                // You can add logic to open Google Play subscription management
-                alert("Manage your subscription in the Google Play Store");
-              }}
-              uppercase={false}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  //         <div className="w-full max-w-sm">
+  //           <Button
+  //             text="Manage Subscription"
+  //             onClick={() => {
+  //               // You can add logic to open Google Play subscription management
+  //               alert("Manage your subscription in the Google Play Store");
+  //             }}
+  //             uppercase={false}
+  //           />
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div

@@ -3,6 +3,7 @@
 import AddBtn from "@/components/AddBtn";
 import CollectionHeader from "@/components/CollectionHeader";
 import PhotoGrid from "@/components/PhotoGrid";
+import { useRevenueCat } from "@/hooks/useRevenueCat";
 import { fetchUserImagesByPlaceYear } from "@/lib/imageManager";
 import { useCurrentPage } from "@/providers/PageProvider";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
@@ -20,6 +21,7 @@ export default function Places() {
   } = usePhotoFlow();
   const [isLoading, setIsLoading] = useState(false);
   const { setCurrentPage } = useCurrentPage();
+  const { subscriptionStatus } = useRevenueCat();
 
   useEffect(() => {
     setCurrentPage("places");
@@ -85,14 +87,16 @@ export default function Places() {
     >
       {placeKeys.length === 0 && (
         <>
-          <AddBtn subscribed={true} imageCount={placeKeys.length} />
+          <AddBtn imageCount={placeKeys.length} requiresSubscription />
           <div className="flex flex-row gap-x-2 mt-2">
-            {/* <Image
-          src="/images/lock.svg"
-          width={11}
-          height={15}
-          alt="Image of lock"
-        /> */}
+            {!subscriptionStatus?.isSubscribed && (
+              <Image
+                src="/images/lock.svg"
+                width={11}
+                height={15}
+                alt="Image of lock"
+              />
+            )}
             <p className="text-sm leading-[120%] font-normal text-[#6F6F6F]">
               Add Place
             </p>

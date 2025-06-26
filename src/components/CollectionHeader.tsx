@@ -4,9 +4,11 @@ import React from "react";
 export default function CollectionHeader({
   header,
   imageCount,
+  locked = false,
 }: {
   header: string;
   imageCount: number;
+  locked?: boolean;
 }) {
   return (
     <div className="flex flex-row justify-between items-center pt-2 ">
@@ -16,7 +18,7 @@ export default function CollectionHeader({
           {imageCount.toString().padStart(2, "0")}/10
         </p>
       </div>
-      <AddBtn subscribed={true} imageCount={imageCount} />
+      <AddBtn imageCount={imageCount} requiresSubscription={locked} />
     </div>
   );
 }
