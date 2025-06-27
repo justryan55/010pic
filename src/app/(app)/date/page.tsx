@@ -9,6 +9,12 @@ import monthNameToNumber from "@/components/MonthNameToIndex";
 import { useCurrentPage } from "@/providers/PageProvider";
 import { useRevenueCat } from "@/hooks/useRevenueCat";
 
+interface SelectedImage {
+  id: string;
+  src: string;
+  name: string;
+}
+
 const allMonths = [
   "December",
   "November",
