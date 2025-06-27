@@ -23,6 +23,7 @@ interface UseRevenueCatReturn {
   initialize: (userId?: string) => Promise<boolean>;
   purchasePackage: (packageToPurchase: PurchasesPackage) => Promise<boolean>;
   purchaseMonthlyPlan: () => Promise<boolean>;
+  purchaseYearlyPlan: () => Promise<boolean>;
   restorePurchases: () => Promise<boolean>;
   refreshCustomerInfo: () => Promise<void>;
   setUserId: (userId: string) => Promise<boolean>;
@@ -157,6 +158,33 @@ export const useRevenueCat = (): UseRevenueCatReturn => {
     }
   }, [currentOffering, purchasePackage]);
 
+  const purchaseYearlyPlan = useCallback(async (): Promise<boolean> => {
+    try {
+      setLoading(true);
+      clearError();
+
+      if (currentOffering && currentOffering.availablePackages) {
+        const yearlyPackage = currentOffering.availablePackages.find(
+          (pkg) => pkg.identifier === "$rc_annual"
+        );
+
+        if (yearlyPackage) {
+          return await purchasePackage(yearlyPackage);
+        }
+      }
+
+      setError("Yearly package not found in current offering");
+      return false;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Purchase failed";
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [currentOffering, purchasePackage]);
+
   const restorePurchases = useCallback(async (): Promise<boolean> => {
     try {
       setLoading(true);
@@ -236,6 +264,7 @@ export const useRevenueCat = (): UseRevenueCatReturn => {
     initialize,
     purchasePackage,
     purchaseMonthlyPlan,
+    purchaseYearlyPlan,
     restorePurchases,
     refreshCustomerInfo,
     setUserId,
