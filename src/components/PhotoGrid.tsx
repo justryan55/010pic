@@ -62,7 +62,11 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
                   height={50}
                   width={50}
                   className="w-full h-full object-cover"
-                  onClick={() => openFullScreen(image)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openFullScreen(image);
+                  }}
                 />
               ) : (
                 <div className="w-full h-full"></div>

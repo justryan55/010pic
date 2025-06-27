@@ -162,28 +162,28 @@ export default function Home() {
     });
   }, [currentYear, currentMonthIndex]);
 
-  function MonthPhotoGrid({ month }: { month: string }) {
-    const monthNumber = monthNameToNumber(month);
-    const monthKey = `${targetYear}-${monthNumber}`;
-    const images = imagesByMonth[monthKey] || [];
-    return <PhotoGrid images={images} title={month} />;
-  }
+  // function MonthPhotoGrid({ month }: { month: string }) {
+  //   const monthNumber = monthNameToNumber(month);
+  //   const monthKey = `${targetYear}-${monthNumber}`;
+  //   const images = imagesByMonth[monthKey] || [];
+  //   return <PhotoGrid images={images} title={month} />;
+  // }
 
-  function MonthHeader({ month, locked }: { month: string; locked: boolean }) {
-    const displayYear = targetYear || new Date().getFullYear();
-    const monthNumber = monthNameToNumber(month);
-    const monthKey = `${displayYear}-${monthNumber}`;
-    const monthImages = imagesByMonth[monthKey] || [];
-    const imageCount = monthImages.length;
+  // function MonthHeader({ month, locked }: { month: string; locked: boolean }) {
+  //   const displayYear = targetYear || new Date().getFullYear();
+  //   const monthNumber = monthNameToNumber(month);
+  //   const monthKey = `${displayYear}-${monthNumber}`;
+  //   const monthImages = imagesByMonth[monthKey] || [];
+  //   const imageCount = monthImages.length;
 
-    return (
-      <CollectionHeader
-        header={month}
-        imageCount={imageCount}
-        locked={locked}
-      />
-    );
-  }
+  //   return (
+  //     <CollectionHeader
+  //       header={month}
+  //       imageCount={imageCount}
+  //       locked={locked}
+  //     />
+  //   );
+  // }
 
   if (isLoading) {
     return (
@@ -209,8 +209,17 @@ export default function Home() {
               className={`cursor-pointer ${locked ? "relative" : ""}`}
               onClick={() => setTargetMonth(month)}
             >
-              <MonthHeader month={month} locked={locked} />
-              <MonthPhotoGrid month={month} />
+              <MonthHeader
+                month={month}
+                locked={locked}
+                targetYear={targetYear || currentYear}
+                imagesByMonth={imagesByMonth}
+              />
+              <MonthPhotoGrid
+                month={month}
+                targetYear={targetYear || currentYear}
+                imagesByMonth={imagesByMonth}
+              />
             </div>
           );
         })}
@@ -218,3 +227,39 @@ export default function Home() {
     </div>
   );
 }
+
+const MonthPhotoGrid = React.memo(function MonthPhotoGrid({
+  month,
+  targetYear,
+  imagesByMonth,
+}: {
+  month: string;
+  targetYear: number;
+  imagesByMonth: Record<string, SelectedImage[]>;
+}) {
+  const monthNumber = monthNameToNumber(month);
+  const monthKey = `${targetYear}-${monthNumber}`;
+  const images = imagesByMonth[monthKey] || [];
+  return <PhotoGrid images={images} title={month} />;
+});
+
+const MonthHeader = React.memo(function MonthHeader({
+  month,
+  locked,
+  targetYear,
+  imagesByMonth,
+}: {
+  month: string;
+  locked: boolean;
+  targetYear: number;
+  imagesByMonth: Record<string, SelectedImage[]>;
+}) {
+  const monthNumber = monthNameToNumber(month);
+  const monthKey = `${targetYear}-${monthNumber}`;
+  const monthImages = imagesByMonth[monthKey] || [];
+  const imageCount = monthImages.length;
+
+  return (
+    <CollectionHeader header={month} imageCount={imageCount} locked={locked} />
+  );
+});
