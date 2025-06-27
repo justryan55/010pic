@@ -103,10 +103,8 @@ export default function Home() {
     const currentDate = new Date(currentYear, currentMonthIndex);
     const monthKey = `${targetYear || currentYear}-${monthNumber}`;
 
-    // If user has active subscription, nothing is locked
     if (hasActiveSubscription) return false;
 
-    // Current month is always unlocked
     if (
       monthDate.getFullYear() === currentDate.getFullYear() &&
       monthDate.getMonth() === currentDate.getMonth()
@@ -114,17 +112,14 @@ export default function Home() {
       return false;
     }
 
-    // Check if user has previously accessed this month (progressive access)
     if (accessHistory.includes(monthKey)) {
       return false;
     }
 
-    // Future months are locked
     if (monthDate > currentDate) {
       return true;
     }
 
-    // Past months are locked unless they were accessed when they were current
     return true;
   };
 
@@ -133,7 +128,6 @@ export default function Home() {
       if (!targetYear) return;
       setIsLoading(true);
 
-      // Only load images for unlocked months or if user has subscription
       const monthsToLoad = filteredMonths.filter(
         (month) => hasActiveSubscription || !isMonthLocked(month)
       );

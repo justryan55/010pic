@@ -207,7 +207,6 @@ export const useRevenueCat = (): UseRevenueCatReturn => {
 
       await revenueCatService.logout();
 
-      // Reset state after logout
       setCustomerInfo(null);
       setSubscriptionStatus({ isSubscribed: false });
 
@@ -222,7 +221,6 @@ export const useRevenueCat = (): UseRevenueCatReturn => {
   }, []);
 
   useEffect(() => {
-    // Uncomment if you want to auto-initialize
     initialize();
   }, []);
 
