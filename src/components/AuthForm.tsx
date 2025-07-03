@@ -195,21 +195,27 @@ export default function AuthForm() {
   };
 
   async function onGoogleAuth() {
-    // setIsGoogleLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
-      },
-    });
+    setAuthError("");
+    // setIsLoading(true);
 
-    if (error) {
-      setAuthError(error.message);
-      setIsLoading(false);
-      return;
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        // options: {
+        //   redirectTo: `${window.location.origin}/auth/callback`,
+        // },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        // setIsLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.error("Google OAuth error:", err);
+      setAuthError("Failed to sign in with Google. Please try again.");
+      // setIsLoading(false);
     }
-
-    // setIsGoogleLoading(false);
   }
 
   const handleNavigation = (targetPage: string) => {

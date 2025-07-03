@@ -43,10 +43,15 @@ export default function UserProvider({
       if (!response?.success || !response.data) return;
 
       const { data } = response;
+      const userName =
+        data.user_metadata.full_name ||
+        data.user_metadata.name ||
+        data.user_metadata.display_name ||
+        "No Name";
 
       setUserProfile({
         id: data.id,
-        name: data.user_metadata.display_name,
+        name: userName,
         email: data.email ?? "",
         subscription: false,
       });
