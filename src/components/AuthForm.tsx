@@ -193,7 +193,7 @@ export default function AuthForm() {
       setIsLoading(false);
     }
   };
-  
+
   async function onGoogleAuth() {
     setAuthError("");
     // setIsLoading(true);
@@ -394,26 +394,26 @@ export default function AuthForm() {
         </div>
 
         <div className="text-center pt-3">
-          <div className="flex items-center mb-6">
-            <div className="flex-1 h-px bg-gray-300"></div>
-            <p className="text-black text-sm font-normal mx-4">
-              {isRegister ? "or sign up with" : "or sign in with"}
-            </p>
-            <div className="flex-1 h-px bg-gray-300"></div>
-          </div>
+          {/* <div className="flex items-center mb-6"> */}
+          {/* <div className="flex-1 h-px bg-gray-300"></div> */}
+          {/* <p className="text-black text-sm font-normal mx-4"> */}
+          {/* {isRegister ? "or sign up with" : "or sign in with"} */}
+          {/* </p> */}
+          {/* <div className="flex-1 h-px bg-gray-300"></div> */}
+          {/* </div> */}
 
-          <div className="flex justify-center space-x-4 mb-6">
-            {/* <SocialLoginButton image="/images/apple.svg" provider="Apple" /> */}
-            <SocialLoginButton
-              image="/images/google.svg"
-              provider="Google"
-              onClick={onGoogleAuth}
-            />
-            {/* <SocialLoginButton
+          {/* <div className="flex justify-center space-x-4 mb-6"> */}
+          {/* <SocialLoginButton image="/images/apple.svg" provider="Apple" /> */}
+          {/* <SocialLoginButton */}
+          {/* image="/images/google.svg" */}
+          {/* provider="Google" */}
+          {/* onClick={onGoogleAuth} */}
+          {/* /> */}
+          {/* <SocialLoginButton
               image="/images/facebook.svg"
               provider="Facebook"
             /> */}
-          </div>
+          {/* </div> */}
         </div>
       </form>
 
