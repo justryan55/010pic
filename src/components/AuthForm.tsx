@@ -59,6 +59,11 @@ export default function AuthForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { currentPage, setCurrentPage } = useCurrentPage();
   const router = useRouter();
+  const [agreed, setAgreed] = useState(false);
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAgreed(event.target.checked);
+  };
 
   const isRegister =
     currentPage === "register" || currentPage === "auth/register";
@@ -188,6 +193,24 @@ export default function AuthForm() {
       setIsLoading(false);
     }
   };
+
+  async function onGoogleAuth() {
+    // setIsGoogleLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+      },
+    });
+
+    if (error) {
+      setAuthError(error.message);
+      setIsLoading(false);
+      return;
+    }
+
+    // setIsGoogleLoading(false);
+  }
 
   const handleNavigation = (targetPage: string) => {
     setCurrentPage(targetPage);
@@ -331,12 +354,19 @@ export default function AuthForm() {
             <input
               type="checkbox"
               id="terms"
+              checked={agreed}
+              onChange={handleCheckboxChange}
               className="w-4 h-4 mr-3 border border-black rounded-sm appearance-none bg-white checked:bg-white text-black checked:border-black focus:outline-none flex items-center justify-center relative checked:after:content-['✓'] checked:after:text-black checked:after:text-[11px] checked:after:absolute checked:after:font-semibold checked:after:leading-none"
             />
             <label htmlFor="terms" className="text-black text-sm">
-              I understand the{" "}
-              <a href="#" className="underline hover:no-underline">
-                terms & policy
+              I agree to the{" "}
+              <a
+                href="https://justryan55.github.io/010pic-privacy/"
+                className="underline hover:no-underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Priavcy Policy
               </a>
             </label>
           </div>
@@ -351,6 +381,9 @@ export default function AuthForm() {
             type="submit"
             text={isRegister ? "Sign Up" : "Sign In"}
             isLoading={isLoading}
+            disabled={
+              isRegister && (!agreed || !registerForm.formState.isValid)
+            }
           />
         </div>
 
@@ -364,12 +397,16 @@ export default function AuthForm() {
           </div>
 
           <div className="flex justify-center space-x-4 mb-6">
-            <SocialLoginButton image="/images/apple.svg" provider="Apple" />
-            <SocialLoginButton image="/images/google.svg" provider="Google" />
+            {/* <SocialLoginButton image="/images/apple.svg" provider="Apple" /> */}
             <SocialLoginButton
+              image="/images/google.svg"
+              provider="Google"
+              onClick={onGoogleAuth}
+            />
+            {/* <SocialLoginButton
               image="/images/facebook.svg"
               provider="Facebook"
-            />
+            /> */}
           </div>
         </div>
       </form>
@@ -380,7 +417,9 @@ export default function AuthForm() {
         </p>
         <button
           onClick={() => handleNavigation(isRegister ? "login" : "register")}
-          className="text-black text-sm font-bold underline hover:no-underline cursor-pointer bg-transparent border-none"
+          className={`text-black ${
+            isRegister && "pb-8"
+          } text-sm font-bold underline hover:no-underline cursor-pointer bg-transparent border-none`}
         >
           {isRegister ? "Login" : "Register"}
         </button>
