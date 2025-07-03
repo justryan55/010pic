@@ -194,29 +194,29 @@ export default function AuthForm() {
     }
   };
 
-  async function onGoogleAuth() {
-    setAuthError("");
-    // setIsLoading(true);
+  // async function onGoogleAuth() {
+  //   setAuthError("");
+  //   // setIsLoading(true);
 
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        // options: {
-        //   redirectTo: `${window.location.origin}/auth/callback`,
-        // },
-      });
+  //   try {
+  //     const { error } = await supabase.auth.signInWithOAuth({
+  //       provider: "google",
+  //       // options: {
+  //       //   redirectTo: `${window.location.origin}/auth/callback`,
+  //       // },
+  //     });
 
-      if (error) {
-        setAuthError(error.message);
-        // setIsLoading(false);
-        return;
-      }
-    } catch (err) {
-      console.error("Google OAuth error:", err);
-      setAuthError("Failed to sign in with Google. Please try again.");
-      // setIsLoading(false);
-    }
-  }
+  //     if (error) {
+  //       setAuthError(error.message);
+  //       // setIsLoading(false);
+  //       return;
+  //     }
+  //   } catch (err) {
+  //     console.error("Google OAuth error:", err);
+  //     setAuthError("Failed to sign in with Google. Please try again.");
+  //     // setIsLoading(false);
+  //   }
+  // }
 
   const handleNavigation = (targetPage: string) => {
     setCurrentPage(targetPage);
@@ -231,7 +231,7 @@ export default function AuthForm() {
       <div
         className={`text-center w-full flex ${
           isRegister
-            ? "justify-between max-w-[300px] py-2"
+            ? "justify-between max-w-[300px] mb-8"
             : "justify-center mb-12"
         }`}
       >
@@ -400,18 +400,14 @@ export default function AuthForm() {
           {/* <div className="flex-1 h-px bg-gray-300"></div> */}
           {/* </div> */}
 
-          {/* <div className="flex justify-center space-x-4 mb-6"> */}
-          {/* <SocialLoginButton image="/images/apple.svg" provider="Apple" /> */}
-          {/* <SocialLoginButton */}
-          {/* image="/images/google.svg" */}
-          {/* provider="Google" */}
-          {/* onClick={onGoogleAuth} */}
-          {/* /> */}
-          {/* <SocialLoginButton
+          {/* <div className="flex justify-center space-x-4 mb-6">
+            <SocialLoginButton image="/images/apple.svg" provider="Apple" />
+            <SocialLoginButton image="/images/google.svg" provider="Google" />
+            <SocialLoginButton
               image="/images/facebook.svg"
               provider="Facebook"
-            /> */}
-          {/* </div> */}
+            />
+          </div> */}
         </div>
       </form>
 

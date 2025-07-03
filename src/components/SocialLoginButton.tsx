@@ -22,7 +22,7 @@ export default function SocialLoginButton({
     <button
       type="button"
       title={`Login with ${provider}`}
-      className="w-full h-[42px] bg-white rounded-full flex items-center justify-center hover:bg-gray-50 cursor-pointer"
+      className="w-full h-[42px] bg-white rounded flex items-center justify-center hover:bg-gray-50 cursor-pointer"
       onClick={onClick}
     >
       <Image alt="" width={24} height={24} src={image} />
