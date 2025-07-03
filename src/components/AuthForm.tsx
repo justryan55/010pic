@@ -275,7 +275,7 @@ export default function AuthForm() {
             ? registerForm.handleSubmit(onRegisterSubmit)
             : loginForm.handleSubmit(onLoginSubmit)
         }
-        className="space-y-4"
+        className="space-y-4 min-w-[280px]"
       >
         {isRegister && (
           <div>
@@ -387,9 +387,7 @@ export default function AuthForm() {
             type="submit"
             text={isRegister ? "Sign Up" : "Sign In"}
             isLoading={isLoading}
-            disabled={
-              isRegister && (!agreed || !registerForm.formState.isValid)
-            }
+            disabled={isRegister && !agreed}
           />
         </div>
 
