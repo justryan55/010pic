@@ -193,7 +193,7 @@ export default function AuthForm() {
       setIsLoading(false);
     }
   };
-
+  
   async function onGoogleAuth() {
     setAuthError("");
     // setIsLoading(true);
