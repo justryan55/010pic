@@ -1,3 +1,4 @@
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { supabase } from "./supabase/createSupabaseClient";
 
 export const fetchUser = async () => {
@@ -24,7 +25,7 @@ export const fetchUser = async () => {
   }
 };
 
-export const logOut = async (router) => {
+export const logOut = async (router: AppRouterInstance) => {
   try {
     const { error } = await supabase.auth.signOut();
 
