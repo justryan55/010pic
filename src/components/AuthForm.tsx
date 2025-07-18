@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useCurrentPage } from "@/providers/PageProvider";
 import { useRouter } from "next/navigation";
+import { handlePostLogin } from "@/helpers/handlePostLogin";
 
 const registerSchema = z
   .object({
@@ -122,10 +123,33 @@ export default function AuthForm() {
           setAuthError("Failed to create user profile.");
           return;
         }
-      }
 
-      router.push("/auth/login");
-      setCurrentPage("login");
+        // Auto-login after registration
+        const { error: loginError } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        });
+
+        if (loginError) {
+          console.error("Auto-login error:", loginError);
+          setAuthError("Registration successful, but failed to log in.");
+          return;
+        }
+
+        const {
+          data: { user: loggedInUser },
+        } = await supabase.auth.getUser();
+
+        if (loggedInUser) {
+          await handlePostLogin({
+            user: loggedInUser,
+            supabase,
+            setAuthError,
+            router,
+            setCurrentPage,
+          });
+        }
+      }
     } catch (err) {
       console.error("Registration error:", err);
       setAuthError("An unexpected error occurred. Please try again.");
@@ -158,33 +182,13 @@ export default function AuthForm() {
         return;
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("onboarding_complete, is_deleted")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError) {
-        console.error("Profile fetch error:", profileError);
-        setAuthError("Failed to retrieve profile information.");
-        return;
-      }
-
-      if (profile?.is_deleted) {
-        await supabase.auth.signOut();
-
-        setAuthError("This account has been deleted.");
-        return;
-      }
-
-      if (!profile?.onboarding_complete) {
-        router.push("/onboarding/welcome");
-        setCurrentPage("onboarding/welcome");
-        return;
-      }
-
-      router.push("/date");
-      setCurrentPage("date");
+      await handlePostLogin({
+        user,
+        supabase,
+        setAuthError,
+        router,
+        setCurrentPage,
+      });
     } catch (err) {
       console.error("Login error:", err);
       setAuthError("An unexpected error occurred. Please try again.");
