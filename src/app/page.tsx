@@ -1,16 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@supabase/ssr";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase/createSupabaseClient";
 
 export default function RootPage() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -42,7 +38,7 @@ export default function RootPage() {
       setIsLoading(false);
     };
 
-    checkAuth(); 
+    checkAuth();
 
     const {
       data: { subscription },
@@ -53,7 +49,7 @@ export default function RootPage() {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, router]);
+  }, [router]);
 
   if (isLoading) {
     return (

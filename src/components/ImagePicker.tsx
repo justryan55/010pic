@@ -15,6 +15,7 @@ interface SelectedImage {
   src: string;
   name: string;
   isUploading?: boolean;
+  file?: File;
 }
 
 interface ImagePickerConfig {
@@ -193,6 +194,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
           src: "",
           name: file.name,
           isUploading: true,
+          file: file,
         };
 
         setSelectedImages((prev) => [...prev, tempImage]);
@@ -250,7 +252,17 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
       );
       onSave(updatedExisting);
     } else {
-      setSelectedImages((prev) => prev.filter((img) => img.id !== imageId));
+      const imageToRemove = selectedImages.find((img) => img.id === imageId);
+
+      if (imageToRemove) {
+        setSelectedImages((prev) => prev.filter((img) => img.id !== imageId));
+
+        if (imageToRemove.file) {
+          setPendingFiles((prev) =>
+            prev.filter((file) => file !== imageToRemove.file)
+          );
+        }
+      }
     }
 
     if (mainImage?.id === imageId) {
@@ -487,7 +499,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
             </div>
 
             <Button
-              text="NEXT"
+              text="SAVE"
               onClick={handleSave}
               disabled={
                 (existingImages.length === 0 && selectedImages.length === 0) ||

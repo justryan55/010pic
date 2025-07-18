@@ -5,7 +5,11 @@ import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import Link from "next/link";
 import React, { useEffect } from "react";
 
-export default function BottomNav() {
+interface BottomNavProps {
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function BottomNav({ setIsOpen }: BottomNavProps) {
   const { currentPage, setCurrentPage } = useCurrentPage();
   const { setActiveTab, setTargetYear } = usePhotoFlow();
   const currentYear = new Date().getFullYear();
@@ -35,6 +39,7 @@ export default function BottomNav() {
           href="/places"
           className="flex flex-col items-center h-[49px] w-[86px] justify-between cursor-pointer"
           onClick={() => {
+            setIsOpen(false);
             setCurrentPage("places");
             setActiveTab("places");
             setTargetYear(currentYear);
@@ -67,6 +72,7 @@ export default function BottomNav() {
           href="/date"
           className="flex flex-col items-center h-[49px] w-[86px] justify-between cursor-pointer"
           onClick={() => {
+            setIsOpen(false);
             setCurrentPage("date");
             setActiveTab("date");
             setTargetYear(currentYear);
@@ -101,6 +107,7 @@ export default function BottomNav() {
           href="/people"
           className="flex flex-col items-center h-[49px] w-[86px] justify-between cursor-pointer"
           onClick={() => {
+            setIsOpen(false);
             setCurrentPage("people");
             setActiveTab("people");
             setTargetYear(currentYear);

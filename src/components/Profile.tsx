@@ -87,7 +87,7 @@ export default function Profile() {
                     className="flex flex-row gap-x-5 items-center w-full mt-8 cursor-pointer"
                     onClick={() => {
                       if (item.heading === "Sign Out") {
-                        logOut();
+                        logOut(router);
                       } else if (item.heading === "Subscription") {
                         toggleSubscription();
                       }
@@ -168,7 +168,13 @@ export default function Profile() {
 
             <div className="flex flex-col justify-center items-center">
               <p className="text-sm font-normal text-[#919191] text-center">
-                We are two friends working on this app, feel free to write to us
+                We are two friends working on this app, feel free to{" "}
+                <a
+                  href="mailto:rp.app.studio@gmail.com"
+                  className="text-blue-500 underline"
+                >
+                  write to us
+                </a>{" "}
                 for any questions
               </p>
               <div className="flex flex-row items-center justify-center gap-1 my-10">

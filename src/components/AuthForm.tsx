@@ -3,7 +3,6 @@
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Label from "@/components/Label";
-import SocialLoginButton from "@/components/SocialLoginButton";
 import { supabase } from "@/lib/supabase/createSupabaseClient";
 import Image from "next/image";
 import { z } from "zod";
@@ -372,7 +371,7 @@ export default function AuthForm() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Priavcy Policy
+                Privacy Policy
               </a>
             </label>
           </div>
@@ -387,7 +386,9 @@ export default function AuthForm() {
             type="submit"
             text={isRegister ? "Sign Up" : "Sign In"}
             isLoading={isLoading}
-            disabled={isRegister && !agreed}
+            disabled={
+              isRegister && (!registerForm.formState.isValid || !agreed)
+            }
           />
         </div>
 

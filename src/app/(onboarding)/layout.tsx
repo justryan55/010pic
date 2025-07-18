@@ -1,10 +1,9 @@
 "use client";
 import "../globals.css";
-import { SupabaseProvider } from "@/providers/SupabaseProvider";
-import { createBrowserClient } from "@supabase/ssr";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase/createSupabaseClient";
 
 export default function OnboardingLayout({
   children,
@@ -13,10 +12,6 @@ export default function OnboardingLayout({
 }>) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -43,7 +38,7 @@ export default function OnboardingLayout({
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, router]);
+  }, [router]);
 
   if (isLoading) {
     return (
@@ -59,10 +54,8 @@ export default function OnboardingLayout({
   }
 
   return (
-    <SupabaseProvider>
       <div className="flex flex-col min-h-screen bg-[var(--brand-bg)] px-6 ">
         {children}
       </div>
-    </SupabaseProvider>
   );
 }

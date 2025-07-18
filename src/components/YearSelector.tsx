@@ -12,7 +12,12 @@ import {
 
 const years = Array.from({ length: 75 }, (_, i) => 2025 - i);
 
-export default function YearSelector() {
+interface YearSelectorProps {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function YearSelector({ isOpen, setIsOpen }: YearSelectorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [savedYearsByTab, setSavedYearsByTab] = useState<
     Record<string, number[]>
@@ -31,7 +36,7 @@ export default function YearSelector() {
     setImagesByMonth,
     activeTab,
   } = usePhotoFlow();
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
   const currentYear = new Date().getFullYear();
 
   const toggleYearMenu = () => {

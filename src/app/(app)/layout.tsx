@@ -5,27 +5,24 @@ import "../globals.css";
 import Header from "@/components/Header";
 import YearSelector from "@/components/YearSelector";
 import SubscriptionProvider from "@/providers/SubscriptionProvider";
-import { SupabaseProvider } from "@/providers/SupabaseProvider";
 import PhotoFlowProvider from "@/providers/PhotoFlowProvider";
 import AddPeoplePlaceBtn from "@/components/AddPeoplePlaceBtn";
 import UserProvider from "@/providers/UserProvider";
-import { createBrowserClient } from "@supabase/ssr";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Profile from "@/components/Profile";
+import { supabase } from "@/lib/supabase/createSupabaseClient";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
-export default function OnboardingLayout({
+export default function AppLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,14 +42,16 @@ export default function OnboardingLayout({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        router.replace("/auth/login");
+    } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        if (!session) {
+          router.replace("/auth/login");
+        }
       }
-    });
+    );
 
     return () => subscription.unsubscribe();
-  }, [supabase, router]);
+  }, [router]);
 
   if (isLoading) {
     return (
@@ -68,23 +67,21 @@ export default function OnboardingLayout({
   }
 
   return (
-    <SupabaseProvider>
-      <UserProvider>
-        <SubscriptionProvider>
-          <PhotoFlowProvider>
-            <div className="flex flex-col min-h-screen bg-[var(--brand-bg)]">
-              <div className={`sticky top-0 z-10 bg-[var(--brand-bg)] px-6`}>
-                <Header />
-                <YearSelector />
-                <AddPeoplePlaceBtn />
-              </div>
-              <div className="flex-1 px-6">{children}</div>
-              <BottomNav />
-              <Profile />
+    <UserProvider>
+      <SubscriptionProvider>
+        <PhotoFlowProvider>
+          <div className="flex flex-col min-h-screen bg-[var(--brand-bg)]">
+            <div className={`sticky top-0 z-10 bg-[var(--brand-bg)] px-6`}>
+              <Header />
+              <YearSelector isOpen={isOpen} setIsOpen={setIsOpen} />
+              <AddPeoplePlaceBtn />
             </div>
-          </PhotoFlowProvider>
-        </SubscriptionProvider>
-      </UserProvider>
-    </SupabaseProvider>
+            <div className="flex-1 px-6">{children}</div>
+            <BottomNav setIsOpen={setIsOpen} />
+            <Profile />
+          </div>
+        </PhotoFlowProvider>
+      </SubscriptionProvider>
+    </UserProvider>
   );
 }

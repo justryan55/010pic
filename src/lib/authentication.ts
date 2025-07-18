@@ -1,5 +1,4 @@
 import { supabase } from "./supabase/createSupabaseClient";
-import { redirect } from "next/navigation";
 
 export const fetchUser = async () => {
   try {
@@ -25,12 +24,12 @@ export const fetchUser = async () => {
   }
 };
 
-export const logOut = async () => {
+export const logOut = async (router) => {
   try {
     const { error } = await supabase.auth.signOut();
 
     if (!error) {
-      redirect("/auth/login");
+      router.push("/auth/login");
     }
   } catch (err) {
     console.log(err);
@@ -39,8 +38,6 @@ export const logOut = async () => {
 
 export const deleteAccount = async (userId: string, email: string) => {
   try {
-
-
     const { error } = await supabase
       .from("profiles")
       .update({ is_deleted: true })
@@ -57,7 +54,7 @@ export const deleteAccount = async (userId: string, email: string) => {
       "https://supabase-r2-handler.app010pic.workers.dev/api/delete-auth-email",
       {
         method: "POST",
-     
+
         body: JSON.stringify({ user_id: userId, email }),
       }
     );
