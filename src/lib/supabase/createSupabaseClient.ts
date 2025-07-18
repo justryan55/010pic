@@ -1,48 +1,51 @@
 "use client";
 
+import { createClient } from "@supabase/supabase-js";
+import { Preferences } from "@capacitor/preferences";
 import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { Capacitor } from "@capacitor/core";
 
-const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  }
-);
+const CapacitorStorage = {
+  async getItem(key: string) {
+    const { value } = await Preferences.get({ key });
+    return value ?? null;
+  },
+  async setItem(key: string, value: string) {
+    await Preferences.set({ key, value });
+  },
+  async removeItem(key: string) {
+    await Preferences.remove({ key });
+  },
+};
 
-function safeSetItem(key: string, value: string) {
-  try {
-    window.localStorage.setItem(key, value);
-  } catch (error) {
-    console.warn(`Failed to set localStorage item "${key}":`, error);
-  }
-}
+const isNative = Capacitor.isNativePlatform?.();
 
-function safeRemoveItem(key: string) {
-  try {
-    window.localStorage.removeItem(key);
-  } catch (error) {
-    console.warn(`Failed to remove localStorage item "${key}":`, error);
-  }
-}
-
-supabase.auth.onAuthStateChange((event, session) => {
-  if (session?.provider_token) {
-    safeSetItem("oauth_provider_token", session.provider_token);
-  }
-
-  if (session?.provider_refresh_token) {
-    safeSetItem("oauth_provider_refresh_token", session.provider_refresh_token);
-  }
-
-  if (event === "SIGNED_OUT") {
-    safeRemoveItem("oauth_provider_token");
-    safeRemoveItem("oauth_provider_refresh_token");
-  }
-});
+const supabase = (
+  isNative
+    ? createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          auth: {
+            storage: CapacitorStorage,
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: false,
+          },
+        }
+      )
+    : createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+          },
+        }
+      )
+) as SupabaseClient;
 
 export { supabase };

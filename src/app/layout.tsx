@@ -1,3 +1,4 @@
+import "./globals.css";
 import RootLayoutClient from "./RootLayoutClient";
 
 export const metadata = {
@@ -10,5 +11,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <RootLayoutClient>{children}</RootLayoutClient>;
+  return (
+    <html lang="en">
+      <RootLayoutClient>{children}</RootLayoutClient>
+    </html>
+  );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import BottomNav from "@/components/BottomNav";
-import "../globals.css";
 import Header from "@/components/Header";
 import YearSelector from "@/components/YearSelector";
 import SubscriptionProvider from "@/providers/SubscriptionProvider";

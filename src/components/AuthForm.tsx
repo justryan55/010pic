@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useCurrentPage } from "@/providers/PageProvider";
 import { useRouter } from "next/navigation";
 import { handlePostLogin } from "@/helpers/handlePostLogin";
+import { Capacitor } from "@capacitor/core";
 
 const registerSchema = z
   .object({
@@ -163,32 +164,49 @@ export default function AuthForm() {
     setAuthError("");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: values.email,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.email.trim().toLowerCase(),
         password: values.password,
       });
 
-      if (error) {
-        setAuthError(error.message);
+      if (error || !data?.user) {
+        setAuthError(error?.message || "Login failed");
         return;
       }
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = data.user;
 
-      if (!user) {
-        setAuthError("User not found");
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("onboarding_complete, is_deleted")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Profile fetch error:", profileError);
+        setAuthError("Failed to retrieve profile information.");
         return;
       }
 
-      await handlePostLogin({
-        user,
-        supabase,
-        setAuthError,
-        router,
-        setCurrentPage,
-      });
+      if (profile?.is_deleted) {
+        await supabase.auth.signOut();
+        setAuthError("This account has been deleted.");
+        return;
+      }
+
+      if (!profile?.onboarding_complete) {
+        router.push("/onboarding/welcome/");
+        setCurrentPage("onboarding/welcome");
+        return;
+      }
+
+      setCurrentPage("date");
+
+      if (Capacitor.getPlatform() === "ios") {
+        window.location.href = "/date/index.html";
+      } else {
+        router.replace("/date/");
+      }
     } catch (err) {
       console.error("Login error:", err);
       setAuthError("An unexpected error occurred. Please try again.");

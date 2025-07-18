@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Capacitor, PluginListenerHandle } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Keyboard, KeyboardResize } from "@capacitor/keyboard";
 import { PageProvider } from "@/providers/PageProvider";
 import { SubscriptionSync } from "@/components/SubscriptionSync";
-import { Instrument_Sans, Inria_Serif } from "next/font/google";
-import "./globals.css";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
+import { Instrument_Sans, Inria_Serif } from "next/font/google";
 
 const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
@@ -26,6 +25,12 @@ export default function RootLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
+
   useEffect(() => {
     async function setupStatusBar() {
       if (Capacitor.isNativePlatform()) {
@@ -44,7 +49,7 @@ export default function RootLayoutClient({
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
       try {
-        Keyboard.setResizeMode({ mode: "body" as KeyboardResize });
+        Keyboard.setResizeMode({ mode: "native" as KeyboardResize });
       } catch (error) {
         console.warn("Keyboard.setResizeMode not available", error);
       }
@@ -80,19 +85,19 @@ export default function RootLayoutClient({
   }, []);
 
   return (
-    <html lang="en">
+    <body
+      className={`${instrumentSans.variable} ${
+        inriaSerif.variable
+      } flex justify-center w-full ${isNative ? "native-padding" : ""}`}
+    >
       <SupabaseProvider>
         <PageProvider>
-          <body
-            className={`${instrumentSans.variable} ${inriaSerif.variable} flex justify-center w-full`}
-          >
-            <SubscriptionSync />
-            <div className="h-screen w-full max-w-md sm:max-w-lg md:max-w-3xl lg:max-w-5xl">
-              {children}
-            </div>
-          </body>
+          <SubscriptionSync />
+          <div className="h-screen w-full max-w-md sm:max-w-lg md:max-w-3xl lg:max-w-5xl">
+            {children}
+          </div>
         </PageProvider>
       </SupabaseProvider>
-    </html>
+    </body>
   );
 }

@@ -8,11 +8,16 @@ const SupabaseContext = createContext<Session | null>(null);
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    const fetchSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session ?? null);
+      setLoaded(true);
+    };
+
+    fetchSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -24,6 +29,8 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       listener.subscription.unsubscribe();
     };
   }, []);
+
+  if (!loaded) return null;
 
   return (
     <SupabaseContext.Provider value={session}>
