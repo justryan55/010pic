@@ -241,6 +241,7 @@ export default function AuthForm() {
 
   const handleNavigation = (targetPage: string) => {
     setCurrentPage(targetPage);
+    setAuthError("");
   };
 
   return (
