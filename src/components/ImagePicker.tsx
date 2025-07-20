@@ -69,33 +69,47 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     return Capacitor.isNativePlatform();
   };
 
-  const isCapacitorAvailable = () => {
+  const isPhotoAccessAvailable = () => {
     return Capacitor.isPluginAvailable("Camera");
   };
 
+  useEffect(() => {
+    const checkPermissionsOnMount = async () => {
+      if (isOpen && isMobile() && isPhotoAccessAvailable()) {
+        try {
+          const currentStatus = await Camera.checkPermissions();
+          if (
+            currentStatus.photos !== "granted" &&
+            currentStatus.photos !== "limited"
+          ) {
+            setError(
+              "Photo library access is required. Please enable it in your device settings."
+            );
+          } else {
+            setError("");
+          }
+        } catch (error) {
+          console.error("Error checking permissions on mount:", error);
+        }
+      }
+    };
+
+    checkPermissionsOnMount();
+  }, [isOpen]);
+
   const pickImages = async () => {
-    if (isMobile() && isCapacitorAvailable()) {
+    if (isMobile() && isPhotoAccessAvailable()) {
       try {
         const currentStatus = await Camera.checkPermissions();
-        const needsPhotoPermission =
+
+        if (
           currentStatus.photos !== "granted" &&
-          currentStatus.photos !== "limited";
-
-        if (needsPhotoPermission) {
-          await Camera.requestPermissions({
-            permissions: ["photos"],
-          });
-
-          const finalStatus = await Camera.checkPermissions();
-          if (
-            finalStatus.photos !== "granted" &&
-            finalStatus.photos !== "limited"
-          ) {
-            setError("Photo access is required to continue.");
-            console.log(error);
-            setIsLoading(false);
-            return;
-          }
+          currentStatus.photos !== "limited"
+        ) {
+          setError(
+            "Photo library access is required. Please enable it in your device settings and restart the app."
+          );
+          return;
         }
 
         if (Camera.pickImages) {
@@ -152,18 +166,29 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
             }
           } catch (error) {
             console.error("Error with fallback method:", error);
-            fileInputRef.current?.click();
+            if (isMobile()) {
+              setError(
+                "Unable to access photos. Please check your permissions in device settings."
+              );
+            } else {
+              fileInputRef.current?.click();
+            }
           }
         }
       } catch (error) {
         console.error("Error picking images:", error);
-        fileInputRef.current?.click();
+        if (isMobile()) {
+          setError(
+            "Unable to access photos. Please check your permissions in device settings."
+          );
+        } else {
+          fileInputRef.current?.click();
+        }
       }
     } else {
       fileInputRef.current?.click();
     }
   };
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const files = Array.from(event.target.files || []);
