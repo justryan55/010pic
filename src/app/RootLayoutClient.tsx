@@ -36,6 +36,7 @@ export default function RootLayoutClient({
       if (Capacitor.isNativePlatform()) {
         try {
           await StatusBar.setOverlaysWebView({ overlay: false });
+          await StatusBar.setBackgroundColor({ color: "#f5f0ed" });
           await StatusBar.setStyle({ style: Style.Light });
         } catch (error) {
           console.warn("StatusBar setup failed", error);
