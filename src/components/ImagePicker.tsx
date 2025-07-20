@@ -107,7 +107,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
           currentStatus.photos !== "limited"
         ) {
           setError(
-            "Photo library access is required. Please enable it in your device settings and restart the app."
+            "Photo library access is required. Please enable it in your device settings."
           );
           return;
         }
@@ -450,6 +450,13 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
                   </span>
                 </div>
               </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-700 text-sm font-medium">{error}</p>
+                </div>
+              )}
+
               <div className="pt-1">
                 {mainImage ? (
                   <div className="relative mb-4">
