@@ -9,6 +9,7 @@ import { softDeleteImage, uploadImagesToSupabase } from "@/lib/imageManager";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
 import { AnimatePresence, motion } from "framer-motion";
+import { supabase } from "@/lib/supabase/createSupabaseClient";
 
 interface SelectedImage {
   id: string;
@@ -237,14 +238,52 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   };
 
   const removeImage = async (imageId: string) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      console.error("User not authenticated.");
+      return [];
+    }
+
     const isExistingImage = existingImages.some((img) => img.id === imageId);
 
     if (isExistingImage) {
-      const success = await softDeleteImage(imageId);
+      const res = await softDeleteImage(imageId);
 
-      if (!success) {
+      if (!res.success || !res.data) {
         console.error("Failed to soft delete image");
         return;
+      }
+
+      const r2Key = res?.data.path;
+      const fullR2Key = r2Key.startsWith("images/") ? r2Key : `images/${r2Key}`;
+
+      if (r2Key) {
+        try {
+          const response = await fetch(
+            `https://supabase-r2-handler.app010pic.workers.dev/api/delete-image/${encodeURIComponent(
+              fullR2Key
+            )}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Failed to delete image from R2:", errorData.error);
+          } else {
+            console.log("Successfully deleted image from R2");
+          }
+        } catch (err) {
+          console.error("Failed to delete image from R2:", err);
+        }
       }
 
       const updatedExisting = existingImages.filter(
