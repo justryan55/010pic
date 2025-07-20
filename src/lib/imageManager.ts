@@ -511,18 +511,26 @@ export async function fetchUserImagesByPlaceYear(targetYear: string) {
 }
 
 export async function softDeleteImage(imageId: string) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("images")
     .update({ is_deleted: true })
-    .eq("id", imageId);
+    .eq("id", imageId)
+    .select("path")
+    .single();
 
   if (error) {
     console.error("Soft delete failed:", error.message);
-    return false;
+    return {
+      success: false,
+    };
   }
 
-  return true;
+  return {
+    success: true,
+    data,
+  };
 }
+
 export async function fetchSavedYears(tab: string) {
   try {
     const {
