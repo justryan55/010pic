@@ -262,7 +262,9 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
       if (r2Key) {
         try {
           const response = await fetch(
-            `/api/delete-image/${encodeURIComponent(r2Key)}`,
+            `https://supabase-r2-handler.app010pic.workers.dev//api/delete-image/${encodeURIComponent(
+              r2Key
+            )}`,
             {
               method: "DELETE",
               headers: {
