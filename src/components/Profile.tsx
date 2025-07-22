@@ -117,6 +117,11 @@ export default function Profile() {
                             logOut(router);
                           } else if (item.heading === "Subscription") {
                             toggleSubscription();
+                          } else if (
+                            item.heading === userProfile.name ||
+                            "Profile"
+                          ) {
+                            setStep(2);
                           }
                         }}
                       >
@@ -127,10 +132,7 @@ export default function Profile() {
                           height={20}
                         />
 
-                        <div
-                          className="flex flex-col"
-                          onClick={() => setStep(2)}
-                        >
+                        <div className="flex flex-col">
                           <h2 className="text-black font-semibold text-lg">
                             {item.heading}
                           </h2>
