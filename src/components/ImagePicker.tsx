@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 import Input from "@/components/Input";
 import Button from "./Button";
 import { softDeleteImage, uploadImagesToSupabase } from "@/lib/imageManager";
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Camera } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase/createSupabaseClient";
