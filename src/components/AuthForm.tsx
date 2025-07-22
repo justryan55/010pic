@@ -306,7 +306,7 @@ export default function AuthForm() {
               {...registerForm.register("name")}
               id="name"
               type="text"
-              placeholder="ex: john smith"
+              placeholder="John Smith"
             />
             {registerForm.formState.errors.name && (
               <p className="text-destructive text-sm mt-1">
@@ -324,7 +324,7 @@ export default function AuthForm() {
               : loginForm.register("email"))}
             id="email"
             type="email"
-            placeholder="ex: jon.smith@email.com"
+            placeholder="john.smith@gmail.com"
           />
           {isRegister && registerForm.formState.errors.email && (
             <p className="text-destructive text-sm mt-1">
