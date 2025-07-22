@@ -37,8 +37,8 @@ export const handlePostLogin = async ({
     }
 
     if (!profile?.onboarding_complete) {
-      router.push("/onboarding/welcome");
-      setCurrentPage("onboarding/welcome");
+      router.push("/onboarding/");
+      setCurrentPage("onboarding");
     } else {
       router.push("/date");
       setCurrentPage("date");

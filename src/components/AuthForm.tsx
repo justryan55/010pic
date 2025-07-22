@@ -195,8 +195,8 @@ export default function AuthForm() {
       }
 
       if (!profile?.onboarding_complete) {
-        router.push("/onboarding/welcome/");
-        setCurrentPage("onboarding/welcome");
+        router.push("/onboarding/");
+        setCurrentPage("onboarding");
         return;
       }
 

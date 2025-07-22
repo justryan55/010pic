@@ -53,7 +53,7 @@ export default function AuthCallback() {
           }
 
           // Redirect to onboarding for reactivated accounts
-          router.push("/onboarding/welcome");
+          router.push("/onboarding/");
           return;
         }
 
@@ -76,7 +76,7 @@ export default function AuthCallback() {
             return;
           }
 
-          router.push("/onboarding/welcome");
+          router.push("/onboarding/");
           return;
         }
 
@@ -84,7 +84,7 @@ export default function AuthCallback() {
         if (profile.onboarding_complete) {
           router.push("/date");
         } else {
-          router.push("/onboarding/welcome");
+          router.push("/onboarding/");
         }
       } catch (error) {
         console.error("Auth callback error:", error);
