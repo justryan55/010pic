@@ -15,6 +15,7 @@ export default function Profile() {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const [step, setStep] = useState(1);
 
   const slideVariants = {
     hidden: { y: "100%", opacity: 1 },
@@ -22,9 +23,9 @@ export default function Profile() {
     exit: { y: "100%", opacity: 1 },
   };
 
-  const items = [
+  const stepOneItems = [
     {
-      heading: userProfile.name,
+      heading: userProfile.name || "Profile",
       alt: "User profile icon",
       svg: "/images/user.svg",
     },
@@ -38,6 +39,27 @@ export default function Profile() {
       heading: "Sign Out",
       alt: "Sign out icon icon",
       svg: "/images/logout.svg",
+    },
+  ];
+
+  const stepTwoItems = [
+    {
+      // heading: userProfile.name,
+      heading: userProfile.name || "Username",
+      alt: "User profile icon",
+      svg: "/images/user.svg",
+    },
+    {
+      // heading: userProfile.email,
+      heading: userProfile.email || "Email",
+      alt: "Subscription icon",
+      svg: "/images/subscription.svg",
+    },
+    {
+      // heading: userProfile.email,
+      heading: "Change Password",
+      alt: "Subscription icon",
+      svg: "/images/subscription.svg",
     },
   ];
 
@@ -73,49 +95,102 @@ export default function Profile() {
                   Profile
                 </h1>
                 <Image
-                  onClick={toggleProfile}
+                  onClick={() => {
+                    toggleProfile();
+                    setStep(1);
+                  }}
                   src="/images/X.svg"
                   alt="Cancel Button"
                   width={14}
                   height={14}
                 />
               </div>
-              <div className="mt-10">
-                {items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-row gap-x-5 items-center w-full mt-8 cursor-pointer"
-                    onClick={() => {
-                      if (item.heading === "Sign Out") {
-                        logOut(router);
-                      } else if (item.heading === "Subscription") {
-                        toggleSubscription();
-                      }
-                    }}
-                  >
-                    <Image
-                      src={item.svg}
-                      alt={item.alt}
-                      width={20}
-                      height={20}
-                    />
+              {step === 1 && (
+                <>
+                  <div className="mt-10">
+                    {stepOneItems.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-row gap-x-5 items-center w-full mt-8 cursor-pointer"
+                        onClick={() => {
+                          if (item.heading === "Sign Out") {
+                            logOut(router);
+                          } else if (item.heading === "Subscription") {
+                            toggleSubscription();
+                          }
+                        }}
+                      >
+                        <Image
+                          src={item.svg}
+                          alt={item.alt}
+                          width={20}
+                          height={20}
+                        />
 
-                    <div className="flex flex-col">
-                      <h2 className="text-black font-semibold text-lg">
-                        {item.heading}
-                      </h2>
-                    </div>
+                        <div
+                          className="flex flex-col"
+                          onClick={() => setStep(2)}
+                        >
+                          <h2 className="text-black font-semibold text-lg">
+                            {item.heading}
+                          </h2>
+                        </div>
+                      </div>
+                    ))}
+                    {/* <p
+                      className="w-full mt-8 cursor-pointer text-[#E55A5A] font-semibold text-lg"
+                      onClick={() => {
+                        setOpenDeleteModal(true);
+                      }}
+                    >
+                      Delete Account
+                    </p> */}
                   </div>
-                ))}
-                <p
-                  className="w-full mt-8 cursor-pointer text-[#E55A5A] font-semibold text-lg"
-                  onClick={() => {
-                    setOpenDeleteModal(true);
-                  }}
-                >
-                  Delete Account
-                </p>
-              </div>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <div className="mt-10">
+                    {stepTwoItems.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-row gap-x-5 items-center w-full mt-8 cursor-pointer"
+                        onClick={() => {
+                          if (item.heading === "Sign Out") {
+                            logOut(router);
+                          } else if (item.heading === "Subscription") {
+                            toggleSubscription();
+                          } else if (item.heading === userProfile.name) {
+                            setStep(2);
+                          }
+                        }}
+                      >
+                        <Image
+                          src={item.svg}
+                          alt={item.alt}
+                          width={20}
+                          height={20}
+                        />
+
+                        <div className="flex flex-col">
+                          <h2 className="text-black font-semibold text-lg">
+                            {item.heading}
+                          </h2>
+                        </div>
+                      </div>
+                    ))}
+                    <p
+                      className="w-full mt-8 cursor-pointer text-[#E55A5A] font-semibold text-lg"
+                      onClick={() => {
+                        setOpenDeleteModal(true);
+                      }}
+                    >
+                      Delete Account
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             {openDeleteModal && (
