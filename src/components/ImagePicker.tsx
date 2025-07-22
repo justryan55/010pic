@@ -57,6 +57,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState("");
 
   const slideVariants = {
