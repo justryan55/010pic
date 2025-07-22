@@ -99,10 +99,15 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   }, [isOpen]);
 
   const pickImages = async () => {
-    if (isMobile() && isPhotoAccessAvailable()) {
+    const isNative = Capacitor.isNativePlatform();
+    const hasCameraPlugin = Capacitor.isPluginAvailable("Camera");
+
+    const remainingSlots =
+      maxImages - existingImages.length - pendingFiles.length;
+
+    if (isNative && hasCameraPlugin) {
       try {
         const currentStatus = await Camera.checkPermissions();
-
         if (
           currentStatus.photos !== "granted" &&
           currentStatus.photos !== "limited"
@@ -113,83 +118,31 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
           return;
         }
 
-        if (Camera.pickImages) {
-          const result = await Camera.pickImages({
-            quality: 90,
-            limit: maxImages - existingImages.length - pendingFiles.length,
-          });
+        const result = await Camera.pickImages({
+          quality: 90,
+          limit: remainingSlots,
+        });
 
-          const files: File[] = [];
-
-          for (const photo of result.photos) {
+        const files: File[] = await Promise.all(
+          result.photos.map(async (photo) => {
             const response = await fetch(photo.webPath!);
             const blob = await response.blob();
-            const file = new File([blob], `image_${nanoid()}.jpeg`, {
+            return new File([blob], `image_${nanoid()}.jpeg`, {
               type: blob.type,
             });
-            files.push(file);
-          }
+          })
+        );
 
-          processFiles(files);
-        } else {
-          const remainingSlots =
-            maxImages - existingImages.length - pendingFiles.length;
-          const promises = [];
-
-          for (let i = 0; i < Math.min(remainingSlots, 5); i++) {
-            promises.push(
-              Camera.getPhoto({
-                quality: 90,
-                allowEditing: false,
-                resultType: CameraResultType.Uri,
-                source: CameraSource.Photos,
-              })
-            );
-          }
-
-          try {
-            const results = await Promise.allSettled(promises);
-            const files: File[] = [];
-
-            for (const result of results) {
-              if (result.status === "fulfilled" && result.value.webPath) {
-                const response = await fetch(result.value.webPath);
-                const blob = await response.blob();
-                const file = new File([blob], `image_${nanoid()}.jpeg`, {
-                  type: blob.type,
-                });
-                files.push(file);
-              }
-            }
-
-            if (files.length > 0) {
-              processFiles(files);
-            }
-          } catch (error) {
-            console.error("Error with fallback method:", error);
-            if (isMobile()) {
-              setError(
-                "Unable to access photos. Please check your permissions in device settings."
-              );
-            } else {
-              fileInputRef.current?.click();
-            }
-          }
-        }
+        processFiles(files);
       } catch (error) {
-        console.error("Error picking images:", error);
-        if (isMobile()) {
-          setError(
-            "Unable to access photos. Please check your permissions in device settings."
-          );
-        } else {
-          fileInputRef.current?.click();
-        }
+        console.error("Camera.pickImages() failed:", error);
+        setError("Unable to access the photo library.");
       }
     } else {
       fileInputRef.current?.click();
     }
   };
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const files = Array.from(event.target.files || []);
@@ -203,6 +156,50 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     }
   };
 
+  // const processFiles = async (files: File[]) => {
+  //   try {
+  //     const remainingSlots =
+  //       maxImages - existingImages.length - pendingFiles.length;
+  //     const validFiles = files
+  //       .filter((file) => file.type.startsWith("image/"))
+  //       .slice(0, remainingSlots);
+
+  //     setPendingFiles((prev) => [...prev, ...validFiles]);
+
+  //     for (const file of validFiles) {
+  //       const tempId = nanoid();
+
+  //       const tempImage: SelectedImage = {
+  //         id: tempId,
+  //         src: "",
+  //         name: file.name,
+  //         isUploading: true,
+  //         file: file,
+  //       };
+
+  //       setSelectedImages((prev) => [...prev, tempImage]);
+
+  //       const reader = new FileReader();
+  //       reader.onload = (e) => {
+  //         setSelectedImages((prev) =>
+  //           prev.map((img) =>
+  //             img.id === tempId
+  //               ? {
+  //                   ...img,
+  //                   src: e.target?.result as string,
+  //                   isUploading: false,
+  //                 }
+  //               : img
+  //           )
+  //         );
+  //       };
+  //       reader.readAsDataURL(file);
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
   const processFiles = async (files: File[]) => {
     try {
       const remainingSlots =
@@ -213,37 +210,51 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
       setPendingFiles((prev) => [...prev, ...validFiles]);
 
-      for (const file of validFiles) {
-        const tempId = nanoid();
+      const tempImages: SelectedImage[] = validFiles.map((file) => ({
+        id: nanoid(),
+        src: "",
+        name: file.name,
+        isUploading: true,
+        file: file,
+      }));
 
-        const tempImage: SelectedImage = {
-          id: tempId,
-          src: "",
-          name: file.name,
-          isUploading: true,
-          file: file,
-        };
+      setSelectedImages((prev) => [...prev, ...tempImages]);
 
-        setSelectedImages((prev) => [...prev, tempImage]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
+      const fileReadPromises = tempImages.map(async (tempImage, index) => {
+        try {
+          const file = validFiles[index];
+          const fileDataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+
           setSelectedImages((prev) =>
             prev.map((img) =>
-              img.id === tempId
+              img.id === tempImage.id
                 ? {
                     ...img,
-                    src: e.target?.result as string,
+                    src: fileDataUrl,
                     isUploading: false,
                   }
                 : img
             )
           );
-        };
-        reader.readAsDataURL(file);
-      }
+        } catch (error) {
+          console.error(`Failed to process file ${tempImage.name}:`, error);
+          setSelectedImages((prev) =>
+            prev.filter((img) => img.id !== tempImage.id)
+          );
+          setPendingFiles((prev) => prev.filter((f) => f !== tempImage.file));
+        }
+      });
+
+      await Promise.all(fileReadPromises);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
