@@ -30,7 +30,7 @@ export const logOut = async (router: AppRouterInstance) => {
     const { error } = await supabase.auth.signOut();
 
     if (!error) {
-      router.push("/auth/login");
+      router.push("/auth");
     }
   } catch (err) {
     console.log(err);

@@ -30,7 +30,7 @@ export default function AppLayout({
       } = await supabase.auth.getSession();
 
       if (!session) {
-        router.replace("/auth/login");
+        router.replace("/auth");
         return;
       }
 
@@ -44,7 +44,7 @@ export default function AppLayout({
     } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         if (!session) {
-          router.replace("/auth/login");
+          router.replace("/auth");
         }
       }
     );

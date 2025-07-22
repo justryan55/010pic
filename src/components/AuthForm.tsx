@@ -125,7 +125,6 @@ export default function AuthForm() {
           return;
         }
 
-        // Auto-login after registration
         const { error: loginError } = await supabase.auth.signInWithPassword({
           email: values.email,
           password: values.password,

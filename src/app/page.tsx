@@ -15,7 +15,7 @@ export default function RootPage() {
       } = await supabase.auth.getSession();
 
       if (!session) {
-        router.replace("/auth/login");
+        router.replace("/auth");
         setIsLoading(false);
         return;
       }
@@ -29,7 +29,7 @@ export default function RootPage() {
 
       if (profileError || profile?.is_deleted) {
         await supabase.auth.signOut();
-        router.replace("/auth/login");
+        router.replace("/auth");
         setIsLoading(false);
         return;
       }
@@ -44,7 +44,7 @@ export default function RootPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) {
-        router.replace("/auth/login");
+        router.replace("/auth");
       }
     });
 
