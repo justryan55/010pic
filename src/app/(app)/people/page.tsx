@@ -67,7 +67,7 @@ export default function People() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[70vh]">
+      <div className="flex justify-center items-center min-h-[100vh]">
         <Image
           src="/images/spinner-black.svg"
           width={20}
