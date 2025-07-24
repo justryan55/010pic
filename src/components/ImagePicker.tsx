@@ -566,11 +566,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
             <Button
               text="SAVE"
               onClick={handleSave}
-              disabled={
-                (visibleExistingImages.length === 0 &&
-                  selectedImages.length === 0) ||
-                hasUploadingImages
-              }
+              disabled={hasUploadingImages}
               isLoading={isLoading}
             />
 
