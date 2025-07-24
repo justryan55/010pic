@@ -193,7 +193,7 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[100vh]">
+      <div className="flex justify-center items-center min-h-[60vh]">
         <Image
           src="/images/spinner-black.svg"
           width={20}
