@@ -53,14 +53,14 @@ export default function Profile() {
       // heading: userProfile.email,
       heading: userProfile.email || "Email",
       alt: "Subscription icon",
-      svg: "/images/subscription.svg",
+      svg: "/images/mail.svg",
     },
-    {
-      // heading: userProfile.email,
-      heading: "Change Password",
-      alt: "Subscription icon",
-      svg: "/images/subscription.svg",
-    },
+    // {
+    //   // heading: userProfile.email,
+    //   heading: "Change Password",
+    //   alt: "Subscription icon",
+    //   svg: "/images/subscription.svg",
+    // },
   ];
 
   const triggerAccountDeletion = async (userId: string, email: string) => {
