@@ -118,7 +118,7 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
               onSlideChange={(swiper) =>
                 setCurrentImageIndex(swiper.activeIndex)
               }
-              className="w-full h-full"
+              className="w-full h-full [--swiper-pagination-bottom:40px]"
             >
               {images.map((image) => (
                 <SwiperSlide key={image.id}>
