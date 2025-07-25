@@ -3,10 +3,50 @@
 import Button from "@/components/Button";
 import LogoText from "@/components/LogoText";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/createSupabaseClient";
 
 export default function Welcome() {
   // const [step, setStep] = useState(1);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const completeOnboarding = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setError("User not authenticated.");
+        setIsLoading(false);
+        return;
+      }
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ onboarding_complete: true })
+        .eq("id", user.id);
+
+      if (updateError) {
+        setError("Failed to update onboarding status.");
+        setIsLoading(false);
+        return;
+      }
+
+      router.push("/");
+    } catch (err) {
+      console.error("Onboarding completion error:", err);
+      setError("An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -68,8 +108,14 @@ export default function Welcome() {
         )} */}
 
         {/* <div className="px-6"> */}
-        <Link href="/date">
-          <Button text="Next" />
+        {error && <p className="text-destructive">{error}</p>}
+
+        <Link href="/">
+          <Button
+            text="Get Started"
+            onClick={completeOnboarding}
+            isLoading={isLoading}
+          />
         </Link>
         {/* </div> */}
       </div>
