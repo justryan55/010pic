@@ -280,14 +280,14 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
               if (res.success && res.data) {
                 const r2Key = res.data.path;
-                const fullR2Key = r2Key.startsWith("images/")
-                  ? r2Key
-                  : `images/${r2Key}`;
+                // const fullR2Key = r2Key.startsWith("images/")
+                //   ? r2Key
+                //   : `images/${r2Key}`;
 
                 if (r2Key) {
                   const response = await fetch(
                     `https://supabase-r2-handler.app010pic.workers.dev/api/delete-image/${encodeURIComponent(
-                      fullR2Key
+                      r2Key
                     )}`,
                     {
                       method: "DELETE",
