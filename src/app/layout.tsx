@@ -4,7 +4,12 @@ import RootLayoutClient from "./RootLayoutClient";
 export const metadata = {
   title: "O10P",
   description: "Remember only what matters",
-  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
