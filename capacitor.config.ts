@@ -11,7 +11,6 @@ const config: CapacitorConfig = {
     Camera: {},
     PurchasesPlugin: {},
     StatusBar: {
-      style: "light",
       backgroundColor: "#f5f0ed",
       overlaysWebView: false,
     },

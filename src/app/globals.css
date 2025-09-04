@@ -35,56 +35,6 @@ body {
   border-radius: 9999px;
 }
 
-/* Enhanced native padding with better device detection */
 .native-padding {
-  /* Default fallback */
-  padding-top: 20px;
-
-  /* Use safe area inset if available */
-  padding-top: env(safe-area-inset-top, 20px);
-
-  /* Ensure minimum padding for devices with notches */
-  padding-top: max(env(safe-area-inset-top, 20px), 20px);
-}
-
-/* Device-specific overrides */
-@supports (padding-top: env(safe-area-inset-top)) {
-  .native-padding {
-    padding-top: env(safe-area-inset-top);
-  }
-}
-
-/* Fallback for older iOS versions */
-@media screen and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait) {
-  .native-padding {
-    padding-top: max(47px, env(safe-area-inset-top, 47px));
-  }
-}
-
-@media screen and (-webkit-min-device-pixel-ratio: 3) and (orientation: landscape) {
-  .native-padding {
-    padding-top: max(0px, env(safe-area-inset-top, 0px));
-  }
-}
-
-/* Specific iPhone models */
-@media only screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) {
-  /* iPhone X, XS, 11 Pro */
-  .native-padding {
-    padding-top: 47px;
-  }
-}
-
-@media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) {
-  /* iPhone XR, 11 */
-  .native-padding {
-    padding-top: 47px;
-  }
-}
-
-@media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) {
-  /* iPhone XS Max, 11 Pro Max */
-  .native-padding {
-    padding-top: 47px;
-  }
+  padding-top: max(env(safe-area-inset-top), 10px);
 }

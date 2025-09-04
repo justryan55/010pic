@@ -6,6 +6,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Zoom } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/zoom";
+import { StatusBar, Style } from "@capacitor/status-bar";
+import { Capacitor } from "@capacitor/core";
 
 interface SelectedImage {
   id: string;
@@ -45,6 +47,26 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
     return () => {
       document.body.style.overflow = "";
     };
+  }, [currentImageIndex]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const updateStatusBarForViewer = async () => {
+      try {
+        if (currentImageIndex !== null) {
+          await StatusBar.setBackgroundColor({ color: "#000000" });
+          await StatusBar.setStyle({ style: Style.Dark });
+        } else {
+          await StatusBar.setBackgroundColor({ color: "#f5f0ed" });
+          await StatusBar.setStyle({ style: Style.Light });
+        }
+      } catch (err) {
+        console.warn("Failed to update status bar", err);
+      }
+    };
+
+    updateStatusBarForViewer();
   }, [currentImageIndex]);
 
   return (
