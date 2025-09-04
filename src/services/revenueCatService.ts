@@ -4,6 +4,7 @@ import {
   PurchasesPackage,
   CustomerInfo,
 } from "@revenuecat/purchases-capacitor";
+import { Capacitor } from "@capacitor/core";
 
 export interface SubscriptionStatus {
   isSubscribed: boolean;
@@ -16,7 +17,10 @@ export class RevenueCatService {
   private static instance: RevenueCatService;
   private isInitialized = false;
 
-  private readonly REVENUECAT_API_KEY = "goog_PqjTmpaXfwUypXmcExXVweBHOKQ";
+  apiKey =
+    Capacitor.getPlatform() === "ios"
+      ? process.env.NEXT_PUBLIC_REVENUECAT_API_KEY_IOS
+      : process.env.NEXT_PUBLIC_REVENUECAT_API_KEY_ANDROID;
 
   static getInstance(): RevenueCatService {
     if (!RevenueCatService.instance) {
