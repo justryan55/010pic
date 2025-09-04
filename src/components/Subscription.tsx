@@ -6,6 +6,7 @@ import Button from "./Button";
 import { useSubscription } from "@/providers/SubscriptionProvider";
 import { useRevenueCat } from "@/hooks/useRevenueCat";
 import { Capacitor } from "@capacitor/core";
+import { AnimatePresence, motion } from "framer-motion";
 
 const items = [
   {
@@ -30,7 +31,13 @@ const items = [
   // },
 ];
 
-export default function Subscription() {
+const slideVariants = {
+  hidden: { y: "100%", opacity: 1 },
+  visible: { y: 0, opacity: 1 },
+  exit: { y: "100%", opacity: 1 },
+};
+
+export default function Subscription({ animated = true }) {
   const { isSubOpen, toggleSubscription } = useSubscription();
   const {
     isInitialized,
@@ -175,107 +182,131 @@ export default function Subscription() {
   // }
 
   return (
-    <div
-      className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 min-h-screen ${
-        isSubOpen ? "translate-y-0 fixed" : "translate-y-[150%] hidden"
-      }`}
-    >
-      <div>
-        <div className="flex justify-between pt-8">
-          <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">
-            Subscription
-          </h1>
-          <Image
-            onClick={toggleSubscription}
-            src="/images/X.svg"
-            alt="Cancel Button"
-            width={14}
-            height={14}
-            className="cursor-pointer"
-          />
-        </div>
-
-        {!isInitialized && !error && isNative && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-blue-700 text-center">
-              Initializing subscription service...
-            </p>
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-6 p-4 bg-red-50 rounded-lg">
-            <p className="text-red-700 text-center">{error}</p>
-          </div>
-        )}
-
-        <div className="mt-10 mb-4">
-          {items.map((item, index) => (
+    <AnimatePresence mode="wait">
+      {isSubOpen && (
+        <motion.div
+          initial={`${animated ? "hidden" : ""}`}
+          animate={`${animated ? "visible" : "false"}`}
+          exit={`${animated ? "exit" : ""}`}
+          variants={slideVariants}
+          transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+          className="fixed inset-0 z-50 flex items-end"
+        >
+          <div
+            className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 min-h-screen 
+          
+          `}
+          >
             <div
-              key={index}
-              className="flex flex-row gap-x-5 items-center w-full mt-8 pointer-cursor"
+              className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 min-h-screen ${
+                isSubOpen ? "translate-y-0 fixed" : "translate-y-[150%] hidden"
+              }`}
             >
-              <Image src={item.svg} alt={item.heading} width={20} height={20} />
+              <div>
+                <div className="flex justify-between pt-8">
+                  <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">
+                    Subscription
+                  </h1>
+                  <Image
+                    onClick={toggleSubscription}
+                    src="/images/X.svg"
+                    alt="Cancel Button"
+                    width={14}
+                    height={14}
+                    className="cursor-pointer"
+                  />
+                </div>
 
-              <div className="flex flex-col">
-                <h2 className="text-black font-semibold text-lg">
-                  {item.heading}
-                </h2>
-                <p className="text-sm leading-[120%] font-normal text-[#6F6F6F]">
-                  {item.text}
-                </p>
+                {!isInitialized && !error && isNative && (
+                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <p className="text-blue-700 text-center">
+                      Initializing subscription service...
+                    </p>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="mt-6 p-4 bg-red-50 rounded-lg">
+                    <p className="text-red-700 text-center">{error}</p>
+                  </div>
+                )}
+
+                <div className="mt-10 mb-4">
+                  {items.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-row gap-x-5 items-center w-full mt-8 pointer-cursor"
+                    >
+                      <Image
+                        src={item.svg}
+                        alt={item.heading}
+                        width={20}
+                        height={20}
+                      />
+
+                      <div className="flex flex-col">
+                        <h2 className="text-black font-semibold text-lg">
+                          {item.heading}
+                        </h2>
+                        <p className="text-sm leading-[120%] font-normal text-[#6F6F6F]">
+                          {item.text}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex flex-row justify-center items-center">
+                  <Button
+                    text={`Monthly${monthlyPrice ? ` - ${monthlyPrice}` : ""}`}
+                    onClick={handleMonthlyPurchase}
+                    disabled={isProcessing || loading || !isInitialized}
+                    isLoading={isProcessing || loading}
+                    uppercase={false}
+                  />
+                </div>
+                <div className="flex flex-row justify-center items-center mt-4">
+                  <Button
+                    text={`Yearly${yearlyPrice ? ` - ${yearlyPrice}` : ""}`}
+                    onClick={handleYearlyPurchase}
+                    disabled={isProcessing || loading || !isInitialized}
+                    isLoading={isProcessing || loading}
+                    uppercase={false}
+                  />
+                </div>
+
+                <div className="flex flex-row justify-center items-center mt-4">
+                  <button
+                    onClick={handleRestorePurchases}
+                    disabled={isProcessing || loading || !isInitialized}
+                    className="text-sm text-gray-600 underline disabled:opacity-50"
+                  >
+                    Restore Purchases
+                  </button>
+                </div>
+                {/* Add restore purchases button */}
+
+                <div className="flex flex-row items-center justify-center gap-1 my-10">
+                  <p className="text-black font-semibold text-sm leading-[120%]">
+                    Support
+                  </p>{" "}
+                  <span
+                    className="text-black font-normal italic text-sm"
+                    style={{ fontFamily: "var(--font-inria)" }}
+                  >
+                    indie
+                  </span>{" "}
+                  <p className="text-black font-semibold text-sm leading-[120%]">
+                    Apps
+                  </p>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div className="flex flex-row justify-center items-center">
-          <Button
-            text={`Monthly${monthlyPrice ? ` - ${monthlyPrice}` : ""}`}
-            onClick={handleMonthlyPurchase}
-            disabled={isProcessing || loading || !isInitialized}
-            isLoading={isProcessing || loading}
-            uppercase={false}
-          />
-        </div>
-        <div className="flex flex-row justify-center items-center mt-4">
-          <Button
-            text={`Yearly${yearlyPrice ? ` - ${yearlyPrice}` : ""}`}
-            onClick={handleYearlyPurchase}
-            disabled={isProcessing || loading || !isInitialized}
-            isLoading={isProcessing || loading}
-            uppercase={false}
-          />
-        </div>
-
-        <div className="flex flex-row justify-center items-center mt-4">
-          <button
-            onClick={handleRestorePurchases}
-            disabled={isProcessing || loading || !isInitialized}
-            className="text-sm text-gray-600 underline disabled:opacity-50"
-          >
-            Restore Purchases
-          </button>
-        </div>
-        {/* Add restore purchases button */}
-
-        <div className="flex flex-row items-center justify-center gap-1 my-10">
-          <p className="text-black font-semibold text-sm leading-[120%]">
-            Support
-          </p>{" "}
-          <span
-            className="text-black font-normal italic text-sm"
-            style={{ fontFamily: "var(--font-inria)" }}
-          >
-            indie
-          </span>{" "}
-          <p className="text-black font-semibold text-sm leading-[120%]">
-            Apps
-          </p>
-        </div>
-      </div>
-    </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

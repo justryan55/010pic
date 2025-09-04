@@ -6,6 +6,7 @@ import { useSubscription } from "@/providers/SubscriptionProvider";
 import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import { useCurrentPage } from "@/providers/PageProvider";
 import { useRevenueCat } from "@/hooks/useRevenueCat";
+import { usePathname } from "next/navigation";
 
 export default function AddBtn({
   imageCount,
@@ -18,6 +19,7 @@ export default function AddBtn({
   const { togglePicker } = usePhotoFlow();
   const { currentPage } = useCurrentPage();
   const { subscriptionStatus } = useRevenueCat();
+  const pathname = usePathname();
 
   const isSubscribed = Boolean(subscriptionStatus?.isSubscribed);
 
@@ -34,7 +36,7 @@ export default function AddBtn({
 
   return (
     <div className="flex flex-row gap-2">
-      {requiresSubscription && currentPage === "date" && (
+      {requiresSubscription && pathname === "/date/" && (
         <Image
           src="/images/lock.svg"
           width={16}

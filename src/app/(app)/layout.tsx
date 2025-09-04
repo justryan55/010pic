@@ -30,7 +30,7 @@ export default function AppLayout({
       } = await supabase.auth.getSession();
 
       if (!session) {
-        router.replace("/auth/login");
+        router.replace("/auth");
         return;
       }
 
@@ -44,7 +44,7 @@ export default function AppLayout({
     } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         if (!session) {
-          router.replace("/auth/login");
+          router.replace("/auth");
         }
       }
     );
@@ -54,7 +54,7 @@ export default function AppLayout({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[70vh]">
+      <div className="flex justify-center items-center min-h-[100vh]">
         <Image
           src="/images/spinner-black.svg"
           width={20}

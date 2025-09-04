@@ -625,7 +625,8 @@ export const confirmDeletionFromDb = async (
       .from("images")
       .update({ is_deleted: true })
       .eq("user_id", user.id)
-      .eq("category", tab);
+      .eq("category", tab)
+      .eq("year", yearToRemove);
 
     if (updateError) {
       console.error("Error soft-deleting photos:", updateError.message);

@@ -20,7 +20,7 @@ export default function OnboardingLayout({
       } = await supabase.auth.getSession();
 
       if (!session) {
-        router.replace("/auth/login");
+        router.replace("/auth");
         return;
       }
 
@@ -33,7 +33,7 @@ export default function OnboardingLayout({
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) {
-        router.replace("/auth/login");
+        router.replace("/auth");
       }
     });
 
@@ -42,7 +42,7 @@ export default function OnboardingLayout({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[70vh]">
+      <div className="flex justify-center items-center min-h-[100vh]">
         <Image
           src="/images/spinner-black.svg"
           width={20}
@@ -54,8 +54,8 @@ export default function OnboardingLayout({
   }
 
   return (
-      <div className="flex flex-col min-h-screen bg-[var(--brand-bg)] px-6 ">
-        {children}
-      </div>
+    <div className="flex flex-col min-h-screen bg-[var(--brand-bg)] px-6 ">
+      {children}
+    </div>
   );
 }

@@ -70,7 +70,7 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
   }, [currentImageIndex]);
 
   return (
-    <div>
+    <div className="pb-4">
       <div className="grid grid-cols-5 grid-rows-2 h-56 gap-1 mt-2">
         {Array.from({ length: 10 }, (_, i) => {
           const image = images[i];
@@ -140,7 +140,7 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
               onSlideChange={(swiper) =>
                 setCurrentImageIndex(swiper.activeIndex)
               }
-              className="w-full h-full"
+              className="w-full h-full [--swiper-pagination-bottom:40px]"
             >
               {images.map((image) => (
                 <SwiperSlide key={image.id}>

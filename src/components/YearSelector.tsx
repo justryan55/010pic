@@ -61,7 +61,6 @@ export default function YearSelector({ isOpen, setIsOpen }: YearSelectorProps) {
 
   const openDeletionModal = (yearToRemove: number) => {
     setOpenDeleteModal(true);
-
     setYearToRemove(yearToRemove);
   };
 
@@ -79,6 +78,9 @@ export default function YearSelector({ isOpen, setIsOpen }: YearSelectorProps) {
       const updatedYears = (prev[activeTab] || []).filter(
         (year) => year !== yearToRemove
       );
+
+      setTargetYear(currentYear);
+
       return {
         ...prev,
         [activeTab]: updatedYears,

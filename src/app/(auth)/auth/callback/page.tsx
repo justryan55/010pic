@@ -19,7 +19,7 @@ export default function AuthCallback() {
 
         if (userError || !user) {
           console.error("Auth callback error:", userError);
-          router.push("/auth/login?error=auth_failed");
+          router.push("/auth?error=auth_failed");
           return;
         }
 
@@ -32,7 +32,7 @@ export default function AuthCallback() {
 
         if (profileError && profileError.code !== "PGRST116") {
           console.error("Profile fetch error:", profileError);
-          router.push("/auth/login?error=profile_fetch_failed");
+          router.push("/auth?error=profile_fetch_failed");
           return;
         }
 
@@ -48,12 +48,12 @@ export default function AuthCallback() {
 
           if (updateError) {
             console.error("Profile reactivation error:", updateError);
-            router.push("/auth/login?error=reactivation_failed");
+            router.push("/auth?error=reactivation_failed");
             return;
           }
 
           // Redirect to onboarding for reactivated accounts
-          router.push("/onboarding/welcome");
+          router.push("/onboarding/");
           return;
         }
 
@@ -72,11 +72,11 @@ export default function AuthCallback() {
 
           if (insertError) {
             console.error("Profile creation error:", insertError);
-            router.push("/auth/login?error=profile_creation_failed");
+            router.push("/auth?error=profile_creation_failed");
             return;
           }
 
-          router.push("/onboarding/welcome");
+          router.push("/onboarding/");
           return;
         }
 
@@ -84,11 +84,11 @@ export default function AuthCallback() {
         if (profile.onboarding_complete) {
           router.push("/date");
         } else {
-          router.push("/onboarding/welcome");
+          router.push("/onboarding/");
         }
       } catch (error) {
         console.error("Auth callback error:", error);
-        router.push("/auth/login?error=callback_failed");
+        router.push("/auth?error=callback_failed");
       }
     };
 
