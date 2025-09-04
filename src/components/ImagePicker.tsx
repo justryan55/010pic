@@ -78,12 +78,11 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
       if (isOpen && isMobile() && isPhotoAccessAvailable()) {
         try {
           const currentStatus = await Camera.checkPermissions();
-          if (
-            currentStatus.photos !== "granted" &&
-            currentStatus.photos !== "limited"
-          ) {
+          console.log("Mount permission check:", currentStatus); // Add logging
+
+          if (currentStatus.photos === "denied") {
             setError(
-              "Photo library access is required. Please enable it in your device settings."
+              "Photo library access is required. Please enable it in your device settings and restart the app."
             );
           } else {
             setError("");
@@ -100,17 +99,34 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
   const pickImages = async () => {
     if (isMobile() && isPhotoAccessAvailable()) {
       try {
-        const currentStatus = await Camera.checkPermissions();
+        let currentStatus = await Camera.checkPermissions();
 
         if (
           currentStatus.photos !== "granted" &&
           currentStatus.photos !== "limited"
         ) {
-          setError(
-            "Photo library access is required. Please enable it in your device settings."
-          );
+          currentStatus = await Camera.requestPermissions({
+            permissions: ["photos"],
+          });
+        }
+
+        if (
+          currentStatus.photos !== "granted" &&
+          currentStatus.photos !== "limited"
+        ) {
+          if (currentStatus.photos === "denied") {
+            setError(
+              "Photo library access was denied. Please go to Settings > Privacy & Security > Photos > 010Pic and enable access."
+            );
+          } else {
+            setError(
+              "Photo library access is required. Please enable it in your device settings and restart the app."
+            );
+          }
           return;
         }
+
+        setError("");
 
         if (Camera.pickImages) {
           const result = await Camera.pickImages({
@@ -133,62 +149,61 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
         } else {
           const remainingSlots =
             maxImages - existingImages.length - pendingFiles.length;
-          const promises = [];
 
-          for (let i = 0; i < Math.min(remainingSlots, 5); i++) {
-            promises.push(
-              Camera.getPhoto({
-                quality: 90,
-                allowEditing: false,
-                resultType: CameraResultType.Uri,
-                source: CameraSource.Photos,
-              })
-            );
+          if (remainingSlots <= 0) {
+            setError("Maximum number of images reached.");
+            return;
           }
 
           try {
-            const results = await Promise.allSettled(promises);
-            const files: File[] = [];
+            const result = await Camera.getPhoto({
+              quality: 90,
+              allowEditing: false,
+              resultType: CameraResultType.Uri,
+              source: CameraSource.Photos,
+            });
 
-            for (const result of results) {
-              if (result.status === "fulfilled" && result.value.webPath) {
-                const response = await fetch(result.value.webPath);
-                const blob = await response.blob();
-                const file = new File([blob], `image_${nanoid()}.jpeg`, {
-                  type: blob.type,
-                });
-                files.push(file);
-              }
-            }
-
-            if (files.length > 0) {
-              processFiles(files);
+            if (result.webPath) {
+              const response = await fetch(result.webPath);
+              const blob = await response.blob();
+              const file = new File([blob], `image_${nanoid()}.jpeg`, {
+                type: blob.type,
+              });
+              processFiles([file]);
             }
           } catch (error) {
             console.error("Error with fallback method:", error);
-            if (isMobile()) {
-              setError(
-                "Unable to access photos. Please check your permissions in device settings."
-              );
-            } else {
-              fileInputRef.current?.click();
+            if (error && typeof error === "object" && "message" in error) {
+              const errorMessage = (error as Error).message;
+              if (
+                !errorMessage.includes("cancelled") &&
+                !errorMessage.includes("canceled")
+              ) {
+                setError(
+                  "Unable to access photos. Please check your permissions in device settings and restart the app."
+                );
+              }
             }
           }
         }
       } catch (error) {
-        console.error("Error picking images:", error);
-        if (isMobile()) {
-          setError(
-            "Unable to access photos. Please check your permissions in device settings."
-          );
-        } else {
-          fileInputRef.current?.click();
+        if (error && typeof error === "object" && "message" in error) {
+          const errorMessage = (error as Error).message;
+          if (
+            !errorMessage.includes("cancelled") &&
+            !errorMessage.includes("canceled")
+          ) {
+            setError(
+              "Unable to access photos. Please check your permissions in device settings and restart the app."
+            );
+          }
         }
       }
     } else {
       fileInputRef.current?.click();
     }
   };
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const files = Array.from(event.target.files || []);

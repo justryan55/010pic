@@ -86,7 +86,7 @@ export default function RootLayoutClient({
   }, []);
 
   return (
-    <body
+    <div
       className={`${instrumentSans.variable} ${
         inriaSerif.variable
       } flex justify-center w-full ${isNative ? "native-padding" : ""}`}
@@ -99,6 +99,6 @@ export default function RootLayoutClient({
           </div>
         </PageProvider>
       </SupabaseProvider>
-    </body>
+    </div>
   );
 }
