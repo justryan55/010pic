@@ -13,6 +13,7 @@ import Image from "next/image";
 import Profile from "@/components/Profile";
 import { supabase } from "@/lib/supabase/createSupabaseClient";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { Capacitor } from "@capacitor/core";
 
 export default function AppLayout({
   children,
@@ -22,6 +23,11 @@ export default function AppLayout({
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [platform, setPlatform] = useState<"android" | "ios" | "web">("web");
+
+  useEffect(() => {
+    setPlatform(Capacitor.getPlatform() as "android" | "ios" | "web");
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -70,12 +76,29 @@ export default function AppLayout({
       <SubscriptionProvider>
         <PhotoFlowProvider>
           <div className="flex flex-col min-h-screen bg-[var(--brand-bg)]">
-            <div className={`sticky top-0 z-10 bg-[var(--brand-bg)] px-6`}>
+            <div
+              className={`${
+                platform === "android"
+                  ? "fixed top-0 left-0 right-0 native-padding"
+                  : platform === "ios"
+                  ? "sticky top-0 native-padding"
+                  : ""
+              } z-10 bg-[var(--brand-bg)] px-6`}
+            >
               <Header />
               <YearSelector isOpen={isOpen} setIsOpen={setIsOpen} />
               <AddPeoplePlaceBtn />
             </div>
-            <div className="flex-1 px-6">{children}</div>
+
+            {/* Push content down if header is fixed on Android */}
+            <div
+              className={`flex-1 px-6 ${
+                platform === "android" ? "mt-[var(--header-height,105px)]" : ""
+              }`}
+            >
+              {children}
+            </div>
+
             <BottomNav setIsOpen={setIsOpen} />
           </div>
           <Profile />

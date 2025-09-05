@@ -20,10 +20,15 @@
   --space-1_5: 6px;
   --space-6: 24px;
   --space-8_5: 34px;
+
+  --font-instrument: "Instrument Sans", sans-serif;
+  --font-inria: "Inria Serif", serif;
 }
 
 body {
-  font-family: var(--font-instrument);
+  /* font-family: var(--font-instrument); */
+  font-family: var(--font-instrument), var(--font-inria), sans-serif;
+
   background-color: var(--brand-bg);
   -webkit-overflow-scrolling: touch;
 }
@@ -36,5 +41,5 @@ body {
 }
 
 .native-padding {
-  padding-top: max(env(safe-area-inset-top), 10px);
+  padding-top: max(env(safe-area-inset-top), 40px);
 }

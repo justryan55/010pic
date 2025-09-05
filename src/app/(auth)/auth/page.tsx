@@ -5,7 +5,7 @@ import LogoText from "@/components/LogoText";
 export default function Login() {
   return (
     <div className="min-h-screen flex flex-col">
-      <LogoText position={"pl-6"} />
+      <LogoText position={"pt-[26px] pl-6"} />
       <AuthForm />
     </div>
   );

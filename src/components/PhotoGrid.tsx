@@ -101,33 +101,34 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
       {currentImage && (
         <>
           <div
-            className="fixed inset-0 z-50 w-full bg-black/90 flex flex-col justify-center items-center"
+            className="fixed inset-0 z-50 w-full bg-black/90 flex"
             onClick={(e) => {
               if ((e.target as HTMLElement).closest(".swiper-slide")) return;
               closeFullScreen();
             }}
           >
-            <h1 className="absolute top-8 left-4 z-60 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors">
-              {title}
-            </h1>
-            <button
-              onClick={closeFullScreen}
-              className="absolute top-8 right-4 z-60 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors"
-              title="Close fullscreen view"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
+            <div className="flex flex-col justify-center items-center native-padding">
+              <h1 className="absolute top-8 left-4 z-60 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors">
+                {title}
+              </h1>
+              <button
+                onClick={closeFullScreen}
+                className="absolute top-8 right-4 z-60 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors"
+                title="Close fullscreen view"
               >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
             <Swiper
               modules={[Zoom, Pagination]}
               zoom={{ maxRatio: 3 }}
