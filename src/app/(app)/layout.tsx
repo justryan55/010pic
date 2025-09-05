@@ -23,7 +23,7 @@ export default function AppLayout({
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [platform, setPlatform] = useState<"android" | "ios" | "web">("web");
+  const [, setPlatform] = useState<"android" | "ios" | "web">("web");
 
   useEffect(() => {
     setPlatform(Capacitor.getPlatform() as "android" | "ios" | "web");
@@ -77,25 +77,14 @@ export default function AppLayout({
         <PhotoFlowProvider>
           <div className="flex flex-col min-h-screen bg-[var(--brand-bg)]">
             <div
-              className={`${
-                platform === "android"
-                  ? "fixed top-0 left-0 right-0 native-padding"
-                  : platform === "ios"
-                  ? "sticky top-0 native-padding"
-                  : ""
-              } z-10 bg-[var(--brand-bg)] px-6`}
+              className={`fixed top-0 left-0 right-0 native-padding z-10 bg-[var(--brand-bg)] px-6`}
             >
               <Header />
               <YearSelector isOpen={isOpen} setIsOpen={setIsOpen} />
               <AddPeoplePlaceBtn />
             </div>
 
-            {/* Push content down if header is fixed on Android */}
-            <div
-              className={`flex-1 px-6 ${
-                platform === "android" ? "mt-[var(--header-height,105px)]" : ""
-              }`}
-            >
+            <div className={`flex-1 px-6 mt-[var(--header-height,105px)]`}>
               {children}
             </div>
 

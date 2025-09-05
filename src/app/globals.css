@@ -41,5 +41,5 @@ body {
 }
 
 .native-padding {
-  padding-top: max(env(safe-area-inset-top), 40px);
+  padding-top: max(env(safe-area-inset-top), 30px);
 }
