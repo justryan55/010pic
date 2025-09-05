@@ -193,15 +193,10 @@ export default function Subscription({ animated = true }) {
           className="fixed inset-0 z-50 flex items-end"
         >
           <div
-            className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 min-h-screen 
-          
-          `}
+            className="relative w-full"
+            style={{ height: "calc(var(--initial-vh) * 100)" }}
           >
-            <div
-              className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 min-h-screen ${
-                isSubOpen ? "translate-y-0 fixed" : "translate-y-[150%] hidden"
-              }`}
-            >
+            <div className="absolute bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 h-full">
               <div>
                 <div className="flex justify-between pt-8">
                   <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">

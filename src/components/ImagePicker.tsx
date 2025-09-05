@@ -422,177 +422,182 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
           className="fixed inset-0 z-50 flex items-end"
         >
           <div
-            className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around min-h-screen`}
+            className="relative w-full"
+            style={{ height: "calc(var(--initial-vh) * 100)" }}
           >
-            <div>
-              <div className="flex flex-row justify-between items-center">
-                {needsTitleInput ? (
-                  <div className="font-medium text-lg leading-[120%]">
-                    Title
-                  </div>
-                ) : (
-                  <div className="font-medium text-[28px] leading-[120%]">
-                    {title}
-                  </div>
-                )}
+            <div
+              className={`absolute bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-around h-full`}
+            >
+              <div>
+                <div className="flex flex-row justify-between items-center">
+                  {needsTitleInput ? (
+                    <div className="font-medium text-lg leading-[120%]">
+                      Title
+                    </div>
+                  ) : (
+                    <div className="font-medium text-[28px] leading-[120%]">
+                      {title}
+                    </div>
+                  )}
 
-                <div className=" flex justify-end my-3">
-                  <Image
-                    onClick={handleClose}
-                    src="/images/X.svg"
-                    alt="Close Button"
-                    width={14}
-                    height={14}
-                  />
-                </div>
-              </div>
-              {needsTitleInput && (
-                <div>
-                  <Input
-                    id="places"
-                    type="text"
-                    placeholder="Enter collection title"
-                    value={title}
-                    onChange={(e) => setTitle?.(e.target.value)}
-                  />
-                </div>
-              )}
-              <div className="flex justify-start items-center my-2 mb-1 gap-2">
-                <h2 className="text-sm font-semibold">Add Photos</h2>
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-500 text-sm font-normal">
-                    {totalCount.toString().padStart(2, "0")} / {maxImages}
-                  </span>
-                </div>
-              </div>
-
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-700 text-sm font-medium">{error}</p>
-                </div>
-              )}
-
-              <div className="pt-1">
-                {mainImage ? (
-                  <div className="relative mb-4">
+                  <div className=" flex justify-end my-3">
                     <Image
-                      src={mainImage.src}
-                      alt="Selected"
-                      className="w-full h-100 object-cover rounded-lg"
-                      width={100}
-                      height={100}
+                      onClick={handleClose}
+                      src="/images/X.svg"
+                      alt="Close Button"
+                      width={14}
+                      height={14}
                     />
-                    {mainImage.isUploading && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Image
-                          src="/images/spinner-black.svg"
-                          height={32}
-                          width={32}
-                          alt="Uploading..."
-                          className="animate-spin"
-                        />
-                      </div>
-                    )}
                   </div>
-                ) : (
-                  <div
-                    className="w-full h-100 border rounded-lg border-[#DFDFDF] flex flex-col items-center justify-center mb-4 cursor-pointer"
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onClick={pickImages}
-                  >
-                    <Image
-                      src="/images/file-add.svg"
-                      height={32}
-                      width={32}
-                      alt="Plus icon"
+                </div>
+                {needsTitleInput && (
+                  <div>
+                    <Input
+                      id="places"
+                      type="text"
+                      placeholder="Enter collection title"
+                      value={title}
+                      onChange={(e) => setTitle?.(e.target.value)}
                     />
                   </div>
                 )}
+                <div className="flex justify-start items-center my-2 mb-1 gap-2">
+                  <h2 className="text-sm font-semibold">Add Photos</h2>
+                  <div className="flex items-center gap-4">
+                    <span className="text-gray-500 text-sm font-normal">
+                      {totalCount.toString().padStart(2, "0")} / {maxImages}
+                    </span>
+                  </div>
+                </div>
 
-                <div>
-                  <div className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
-                    {allImages.map((image) => (
-                      <div
-                        key={image.id}
-                        className={`relative cursor-pointer flex-none w-20 h-28 rounded-lg overflow-hidden border-2 transition-all ${
-                          mainImage?.id === image.id
-                            ? "border-black ring-1 ring-black"
-                            : "border-transparent hover:border-gray-300"
-                        }`}
-                        onClick={() => selectMainImage(image)}
-                      >
-                        {image.src && (
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-700 text-sm font-medium">{error}</p>
+                  </div>
+                )}
+
+                <div className="pt-1">
+                  {mainImage ? (
+                    <div className="relative mb-4">
+                      <Image
+                        src={mainImage.src}
+                        alt="Selected"
+                        className="w-full h-100 object-cover rounded-lg"
+                        width={100}
+                        height={100}
+                      />
+                      {mainImage.isUploading && (
+                        <div className="absolute inset-0 flex items-center justify-center">
                           <Image
-                            src={image.src}
-                            alt="Thumbnail"
-                            className="w-full h-28 object-cover"
-                            fill
+                            src="/images/spinner-black.svg"
+                            height={32}
+                            width={32}
+                            alt="Uploading..."
+                            className="animate-spin"
                           />
-                        )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      className="w-full h-100 border rounded-lg border-[#DFDFDF] flex flex-col items-center justify-center mb-4 cursor-pointer"
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onClick={pickImages}
+                    >
+                      <Image
+                        src="/images/file-add.svg"
+                        height={32}
+                        width={32}
+                        alt="Plus icon"
+                      />
+                    </div>
+                  )}
 
-                        {image.isUploading ? (
-                          <div className="absolute inset-0 flex items-center justify-center">
+                  <div>
+                    <div className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overscroll-x-contain touch-pan-x">
+                      {allImages.map((image) => (
+                        <div
+                          key={image.id}
+                          className={`relative cursor-pointer flex-none w-20 h-28 rounded-lg overflow-hidden border-2 transition-all ${
+                            mainImage?.id === image.id
+                              ? "border-black ring-1 ring-black"
+                              : "border-transparent hover:border-gray-300"
+                          }`}
+                          onClick={() => selectMainImage(image)}
+                        >
+                          {image.src && (
                             <Image
-                              src="/images/spinner-black.svg"
-                              height={20}
-                              width={20}
-                              alt="Uploading..."
-                              className="animate-spin"
+                              src={image.src}
+                              alt="Thumbnail"
+                              className="w-full h-28 object-cover"
+                              fill
                             />
-                          </div>
-                        ) : (
-                          <button
-                            aria-label="Remove image"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeImage(image.id);
-                            }}
-                            className="absolute top-1 right-0 bg-white rounded-full p-1"
-                          >
-                            <Image
-                              src="/images/X.svg"
-                              alt="Cancel Button"
-                              width={14}
-                              height={14}
-                            />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                    {Array.from({
-                      length: maxImages - totalCount,
-                    }).map((_, i) => (
-                      <button
-                        key={`add-btn-${i}`}
-                        onClick={pickImages}
-                        className="flex-none w-20 h-28 rounded-lg border border-[#DFDFDF] flex items-center justify-center"
-                        aria-label="Add image"
-                        disabled={hasUploadingImages}
-                      >
-                        <Image
-                          src="/images/file-add.svg"
-                          height={20}
-                          width={20}
-                          alt="Plus icon"
-                          className={hasUploadingImages ? "opacity-50" : ""}
-                        />
-                      </button>
-                    ))}
+                          )}
+
+                          {image.isUploading ? (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <Image
+                                src="/images/spinner-black.svg"
+                                height={20}
+                                width={20}
+                                alt="Uploading..."
+                                className="animate-spin"
+                              />
+                            </div>
+                          ) : (
+                            <button
+                              aria-label="Remove image"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeImage(image.id);
+                              }}
+                              className="absolute top-1 right-0 bg-white rounded-full p-1"
+                            >
+                              <Image
+                                src="/images/X.svg"
+                                alt="Cancel Button"
+                                width={14}
+                                height={14}
+                              />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {Array.from({
+                        length: maxImages - totalCount,
+                      }).map((_, i) => (
+                        <button
+                          key={`add-btn-${i}`}
+                          onClick={pickImages}
+                          className="flex-none w-20 h-28 rounded-lg border border-[#DFDFDF] flex items-center justify-center"
+                          aria-label="Add image"
+                          disabled={hasUploadingImages}
+                        >
+                          <Image
+                            src="/images/file-add.svg"
+                            height={20}
+                            width={20}
+                            alt="Plus icon"
+                            className={hasUploadingImages ? "opacity-50" : ""}
+                          />
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
+              <Button
+                text="SAVE"
+                onClick={handleSave}
+                disabled={
+                  (existingImages.length === 0 &&
+                    selectedImages.length === 0) ||
+                  hasUploadingImages
+                }
+                isLoading={isLoading}
+              />
             </div>
-
-            <Button
-              text="SAVE"
-              onClick={handleSave}
-              disabled={
-                (existingImages.length === 0 && selectedImages.length === 0) ||
-                hasUploadingImages
-              }
-              isLoading={isLoading}
-            />
 
             <label htmlFor="file-upload" className="hidden">
               Upload Images

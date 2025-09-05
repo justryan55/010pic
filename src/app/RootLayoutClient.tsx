@@ -85,6 +85,18 @@ export default function RootLayoutClient({
     };
   }, []);
 
+  useEffect(() => {
+    const setInitialVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--initial-vh", `${vh}px`);
+    };
+
+    setInitialVh();
+
+    window.addEventListener("orientationchange", setInitialVh);
+    return () => window.removeEventListener("orientationchange", setInitialVh);
+  }, []);
+
   return (
     <div
       className={`${instrumentSans.variable} ${

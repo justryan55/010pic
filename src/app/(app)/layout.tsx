@@ -77,8 +77,8 @@ export default function AppLayout({
             </div>
             <div className="flex-1 px-6">{children}</div>
             <BottomNav setIsOpen={setIsOpen} />
-            <Profile />
           </div>
+          <Profile />
         </PhotoFlowProvider>
       </SubscriptionProvider>
     </UserProvider>

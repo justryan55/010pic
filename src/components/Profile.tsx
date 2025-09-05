@@ -85,61 +85,61 @@ export default function Profile() {
           className="fixed inset-0 z-50 flex items-end"
         >
           <div
-            className={`fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 min-h-screen 
-      
-      `}
+            className="relative w-full"
+            style={{ height: "calc(var(--initial-vh) * 100)" }}
           >
-            <div>
-              <div className="flex justify-between pt-8">
-                <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">
-                  Profile
-                </h1>
-                <Image
-                  onClick={() => {
-                    toggleProfile();
-                    setStep(1);
-                  }}
-                  src="/images/X.svg"
-                  alt="Cancel Button"
-                  width={14}
-                  height={14}
-                />
-              </div>
-              {step === 1 && (
-                <>
-                  <div className="mt-10">
-                    {stepOneItems.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex flex-row gap-x-5 items-center w-full mt-8 cursor-pointer"
-                        onClick={() => {
-                          if (item.heading === "Sign Out") {
-                            logOut(router);
-                          } else if (item.heading === "Subscription") {
-                            toggleSubscription();
-                          } else if (
-                            item.heading === userProfile.name ||
-                            "Profile"
-                          ) {
-                            setStep(2);
-                          }
-                        }}
-                      >
-                        <Image
-                          src={item.svg}
-                          alt={item.alt}
-                          width={20}
-                          height={20}
-                        />
+            <div className="absolute bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 h-full">
+              <div>
+                <div className="flex justify-between pt-8">
+                  <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">
+                    Profile
+                  </h1>
+                  <Image
+                    onClick={() => {
+                      toggleProfile();
+                      setStep(1);
+                    }}
+                    src="/images/X.svg"
+                    alt="Cancel Button"
+                    width={14}
+                    height={14}
+                  />
+                </div>
+                {step === 1 && (
+                  <>
+                    <div className="mt-10">
+                      {stepOneItems.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex flex-row gap-x-5 items-center w-full mt-8 cursor-pointer"
+                          onClick={() => {
+                            if (item.heading === "Sign Out") {
+                              logOut(router);
+                            } else if (item.heading === "Subscription") {
+                              toggleSubscription();
+                            } else if (
+                              item.heading === userProfile.name ||
+                              "Profile"
+                            ) {
+                              setStep(2);
+                            }
+                          }}
+                        >
+                          <Image
+                            src={item.svg}
+                            alt={item.alt}
+                            width={20}
+                            height={20}
+                          />
 
-                        <div className="flex flex-col">
-                          <h2 className="text-black font-semibold text-lg">
-                            {item.heading}
-                          </h2>
+                          <div className="flex flex-col">
+                            <h2 className="text-black font-semibold text-lg">
+                              {item.heading}
+                            </h2>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                    {/* <p
+                      ))}
+                      {/* <p
                       className="w-full mt-8 cursor-pointer text-[#E55A5A] font-semibold text-lg"
                       onClick={() => {
                         setOpenDeleteModal(true);
@@ -147,129 +147,135 @@ export default function Profile() {
                     >
                       Delete Account
                     </p> */}
-                  </div>
-                </>
-              )}
+                    </div>
+                  </>
+                )}
 
-              {step === 2 && (
-                <>
-                  <div className="mt-10">
-                    {stepTwoItems.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex flex-row gap-x-5 items-center w-full mt-8 cursor-pointer"
+                {step === 2 && (
+                  <>
+                    <div className="mt-10">
+                      {stepTwoItems.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex flex-row gap-x-5 items-center w-full mt-8 cursor-pointer"
+                          onClick={() => {
+                            if (item.heading === "Sign Out") {
+                              logOut(router);
+                            } else if (item.heading === "Subscription") {
+                              toggleSubscription();
+                            } else if (item.heading === userProfile.name) {
+                              setStep(2);
+                            }
+                          }}
+                        >
+                          <Image
+                            src={item.svg}
+                            alt={item.alt}
+                            width={20}
+                            height={20}
+                          />
+
+                          <div className="flex flex-col">
+                            <h2 className="text-black font-semibold text-lg">
+                              {item.heading}
+                            </h2>
+                          </div>
+                        </div>
+                      ))}
+                      <p
+                        className="w-full mt-8 cursor-pointer text-[#E55A5A] font-semibold text-lg"
                         onClick={() => {
-                          if (item.heading === "Sign Out") {
-                            logOut(router);
-                          } else if (item.heading === "Subscription") {
-                            toggleSubscription();
-                          } else if (item.heading === userProfile.name) {
-                            setStep(2);
-                          }
+                          setOpenDeleteModal(true);
                         }}
                       >
-                        <Image
-                          src={item.svg}
-                          alt={item.alt}
-                          width={20}
-                          height={20}
-                        />
-
-                        <div className="flex flex-col">
-                          <h2 className="text-black font-semibold text-lg">
-                            {item.heading}
-                          </h2>
-                        </div>
-                      </div>
-                    ))}
-                    <p
-                      className="w-full mt-8 cursor-pointer text-[#E55A5A] font-semibold text-lg"
-                      onClick={() => {
-                        setOpenDeleteModal(true);
-                      }}
-                    >
-                      Delete Account
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {openDeleteModal && (
-              <div
-                className="fixed inset-0 z-50 w-full bg-black/75 flex flex-col justify-center items-center"
-                onClick={() => setOpenDeleteModal(false)}
-              >
-                <div
-                  className={`opacity-100 h-[163px] z-60 bg-[var(--brand-bg)] relative w-[90%]  border border-black flex flex-col items-center justify-evenly transition duration-200 ease-in-out`}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    aria-label="Cancel deletion"
-                    className="absolute top-3 right-3 cursor-pointer"
-                    onClick={() => setOpenDeleteModal(false)}
-                  >
-                    <Image
-                      src="/images/X.svg"
-                      alt="Cancel Button"
-                      width={14}
-                      height={14}
-                    />
-                  </button>
-                  <div className="flex flex-col gap-2">
-                    <p className="text-sm font-bold leading-[120%] text-center w-[178px]">
-                      Are you sure?
-                    </p>
-                    <p className="text-sm font-normal leading-[120%] text-center w-[178px]">
-                      All pictures will be deleted
-                    </p>
-                    {error && (
-                      <p className="text-sm font-normal leading-[120%] text-center w-[178px]">
-                        {error}
+                        Delete Account
                       </p>
-                    )}
-                  </div>
-                  <Button
-                    text="Confirm & Delete"
-                    uppercase={false}
-                    padding="[15px]"
-                    textSize="text-[13px]"
-                    maxWidth="max-w-[159px]"
-                    onClick={() =>
-                      triggerAccountDeletion(userProfile.id, userProfile.email)
-                    }
-                  />
-                </div>
+                    </div>
+                  </>
+                )}
               </div>
-            )}
 
-            <div className="flex flex-col justify-center items-center">
-              <p className="text-sm font-normal text-[#919191] text-center">
-                We are two friends working on this app, feel free to{" "}
-                <a href="mailto:rp.app.studio@gmail.com" className="underline">
-                  write to us
-                </a>{" "}
-                for any questions
-              </p>
-              <div className="flex flex-row items-center justify-center gap-1 my-10">
-                <p className="text-black font-semibold text-sm leading-[120%] ">
-                  Support
-                </p>{" "}
-                <span
-                  className="text-black font-normal italic text-sm"
-                  style={{ fontFamily: "var(--font-inria)" }}
+              {openDeleteModal && (
+                <div
+                  className="fixed inset-0 z-50 w-full bg-black/75 flex flex-col justify-center items-center"
+                  onClick={() => setOpenDeleteModal(false)}
                 >
-                  indie
-                </span>{" "}
-                <p className="text-black font-semibold text-sm leading-[120%] ">
-                  Apps
+                  <div
+                    className={`opacity-100 h-[163px] z-60 bg-[var(--brand-bg)] relative w-[90%]  border border-black flex flex-col items-center justify-evenly transition duration-200 ease-in-out`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      aria-label="Cancel deletion"
+                      className="absolute top-3 right-3 cursor-pointer"
+                      onClick={() => setOpenDeleteModal(false)}
+                    >
+                      <Image
+                        src="/images/X.svg"
+                        alt="Cancel Button"
+                        width={14}
+                        height={14}
+                      />
+                    </button>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm font-bold leading-[120%] text-center w-[178px]">
+                        Are you sure?
+                      </p>
+                      <p className="text-sm font-normal leading-[120%] text-center w-[178px]">
+                        All pictures will be deleted
+                      </p>
+                      {error && (
+                        <p className="text-sm font-normal leading-[120%] text-center w-[178px]">
+                          {error}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      text="Confirm & Delete"
+                      uppercase={false}
+                      padding="[15px]"
+                      textSize="text-[13px]"
+                      maxWidth="max-w-[159px]"
+                      onClick={() =>
+                        triggerAccountDeletion(
+                          userProfile.id,
+                          userProfile.email
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col justify-center items-center">
+                <p className="text-sm font-normal text-[#919191] text-center">
+                  We are two friends working on this app, feel free to{" "}
+                  <a
+                    href="mailto:rp.app.studio@gmail.com"
+                    className="underline"
+                  >
+                    write to us
+                  </a>{" "}
+                  for any questions
                 </p>
-              </div>{" "}
-            </div>
+                <div className="flex flex-row items-center justify-center gap-1 my-10">
+                  <p className="text-black font-semibold text-sm leading-[120%] ">
+                    Support
+                  </p>{" "}
+                  <span
+                    className="text-black font-normal italic text-sm"
+                    style={{ fontFamily: "var(--font-inria)" }}
+                  >
+                    indie
+                  </span>{" "}
+                  <p className="text-black font-semibold text-sm leading-[120%] ">
+                    Apps
+                  </p>
+                </div>{" "}
+              </div>
 
-            {/* </div> */}
+              {/* </div> */}
 
-            {/* <div>
+              {/* <div>
         <div className="flex flex-row justify-center items-center">
           <Button text="Monthly - 20 kr." />
         </div>
@@ -290,7 +296,8 @@ export default function Profile() {
             Apps
           </p>
         </div>{" "} */}
-          </div>{" "}
+            </div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
