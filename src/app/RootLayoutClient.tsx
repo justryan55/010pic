@@ -8,6 +8,7 @@ import { PageProvider } from "@/providers/PageProvider";
 import { SubscriptionSync } from "@/components/SubscriptionSync";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
 import { Instrument_Sans, Inria_Serif } from "next/font/google";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
@@ -98,19 +99,21 @@ export default function RootLayoutClient({
   }, []);
 
   return (
-    <div
-      className={`${instrumentSans.variable} ${
-        inriaSerif.variable
-      } flex justify-center w-full ${isNative ? "native-padding" : ""}`}
-    >
-      <SupabaseProvider>
-        <PageProvider>
-          <SubscriptionSync />
-          <div className="h-screen w-full max-w-md sm:max-w-lg md:max-w-3xl lg:max-w-5xl">
-            {children}
-          </div>
-        </PageProvider>
-      </SupabaseProvider>
-    </div>
+    <ErrorBoundary>
+      <div
+        className={`${instrumentSans.variable} ${
+          inriaSerif.variable
+        } flex justify-center w-full ${isNative ? "native-padding" : ""}`}
+      >
+        <SupabaseProvider>
+          <PageProvider>
+            <SubscriptionSync />
+            <div className="h-screen w-full max-w-md sm:max-w-lg md:max-w-3xl lg:max-w-5xl">
+              {children}
+            </div>
+          </PageProvider>
+        </SupabaseProvider>
+      </div>
+    </ErrorBoundary>
   );
 }

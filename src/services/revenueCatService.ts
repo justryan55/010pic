@@ -19,8 +19,8 @@ export class RevenueCatService {
 
   apiKey =
     Capacitor.getPlatform() === "ios"
-      ? process.env.NEXT_PUBLIC_REVENUECAT_API_KEY_IOS!
-      : process.env.NEXT_PUBLIC_REVENUECAT_API_KEY_ANDROID!;
+      ? process.env.REVENUECAT_API_KEY_IOS!
+      : process.env.REVENUECAT_API_KEY_ANDROID!;
 
   static getInstance(): RevenueCatService {
     if (!RevenueCatService.instance) {
