@@ -10,6 +10,7 @@ import { SubscriptionSync } from "@/components/SubscriptionSync";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
 import { Instrument_Sans, Inria_Serif } from "next/font/google";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { registerServiceWorker } from "../../utils/serviceWorkerUtils";
 
 const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
@@ -100,6 +101,10 @@ export default function RootLayoutClient({
 
     window.addEventListener("orientationchange", setInitialVh);
     return () => window.removeEventListener("orientationchange", setInitialVh);
+  }, []);
+
+  useEffect(() => {
+    registerServiceWorker();
   }, []);
 
   return (

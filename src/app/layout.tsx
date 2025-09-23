@@ -12,6 +12,7 @@ export const viewport = {
   viewportFit: "cover",
 };
 
+
 export default function RootLayout({
   children,
 }: {

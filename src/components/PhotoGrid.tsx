@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Zoom } from "swiper/modules";
@@ -9,6 +8,7 @@ import "swiper/css/zoom";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Capacitor } from "@capacitor/core";
 import { EdgeToEdge } from "@capawesome/capacitor-android-edge-to-edge-support";
+import CachedImage, { useImageCache } from "./CachedImage";
 
 interface SelectedImage {
   id: string;
@@ -25,10 +25,23 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState<number | null>(
     null
   );
+  const { preloadImages } = useImageCache();
+
+  useEffect(() => {
+    const imageUrls = images.slice(0, 10).map((img) => img.src);
+    preloadImages(imageUrls);
+  }, [images, preloadImages]);
 
   const openFullScreen = (image: SelectedImage) => {
     const index = images.findIndex((img) => img.id === image.id);
     setCurrentImageIndex(index);
+
+    const preloadStart = Math.max(0, index - 2);
+    const preloadEnd = Math.min(images.length, index + 3);
+    const nearbyImages = images
+      .slice(preloadStart, preloadEnd)
+      .map((img) => img.src);
+    preloadImages(nearbyImages);
   };
 
   const closeFullScreen = () => {
@@ -56,7 +69,6 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
     const updateStatusBarForViewer = async () => {
       try {
         if (currentImageIndex !== null) {
-          // await EdgeToEdge.enable();
           await EdgeToEdge.setBackgroundColor({ color: "#000000" });
           await StatusBar.setBackgroundColor({ color: "#000000" });
           await StatusBar.setStyle({ style: Style.Dark });
@@ -84,12 +96,12 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
           return (
             <div key={i} className="border border-[#DFDFDF] overflow-hidden">
               {image ? (
-                <Image
+                <CachedImage
                   src={image.src}
                   alt={image.name}
                   height={50}
                   width={50}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover cursor-pointer"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -144,9 +156,17 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
                   `<span class="${className} custom-dot"></span>`,
               }}
               initialSlide={currentImageIndex ?? 0}
-              onSlideChange={(swiper) =>
-                setCurrentImageIndex(swiper.activeIndex)
-              }
+              onSlideChange={(swiper) => {
+                setCurrentImageIndex(swiper.activeIndex);
+
+                const currentIndex = swiper.activeIndex;
+                const preloadStart = Math.max(0, currentIndex - 1);
+                const preloadEnd = Math.min(images.length, currentIndex + 2);
+                const nearbyImages = images
+                  .slice(preloadStart, preloadEnd)
+                  .map((img) => img.src);
+                preloadImages(nearbyImages);
+              }}
               className="w-full h-full [--swiper-pagination-bottom:40px]"
             >
               {images.map((image) => (
@@ -155,7 +175,7 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
                     className="swiper-zoom-container flex justify-center items-center h-full"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <Image
+                    <CachedImage
                       src={image.src}
                       alt={image.name}
                       width={800}
