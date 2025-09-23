@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Capacitor, PluginListenerHandle } from "@capacitor/core";
+import { EdgeToEdge } from "@capawesome/capacitor-android-edge-to-edge-support";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Keyboard, KeyboardResize } from "@capacitor/keyboard";
 import { PageProvider } from "@/providers/PageProvider";
@@ -36,6 +37,9 @@ export default function RootLayoutClient({
     async function setupStatusBar() {
       if (Capacitor.isNativePlatform()) {
         try {
+          await EdgeToEdge.enable();
+          await EdgeToEdge.setBackgroundColor({ color: "#f5f0ed" });
+
           await StatusBar.setOverlaysWebView({ overlay: false });
           await StatusBar.setBackgroundColor({ color: "#f5f0ed" });
           await StatusBar.setStyle({ style: Style.Light });

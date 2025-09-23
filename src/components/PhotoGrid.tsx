@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/zoom";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Capacitor } from "@capacitor/core";
+import { EdgeToEdge } from "@capawesome/capacitor-android-edge-to-edge-support";
 
 interface SelectedImage {
   id: string;
@@ -55,11 +56,16 @@ export default function PhotoGrid({ images, title }: PhotoGridProps) {
     const updateStatusBarForViewer = async () => {
       try {
         if (currentImageIndex !== null) {
+          // await EdgeToEdge.enable();
+          await EdgeToEdge.setBackgroundColor({ color: "#000000" });
           await StatusBar.setBackgroundColor({ color: "#000000" });
           await StatusBar.setStyle({ style: Style.Dark });
+          await StatusBar.setOverlaysWebView({ overlay: false });
         } else {
+          await EdgeToEdge.setBackgroundColor({ color: "#f5f0ed" });
           await StatusBar.setBackgroundColor({ color: "#f5f0ed" });
           await StatusBar.setStyle({ style: Style.Light });
+          await StatusBar.setOverlaysWebView({ overlay: false });
         }
       } catch (err) {
         console.warn("Failed to update status bar", err);

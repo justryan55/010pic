@@ -14,6 +14,9 @@ const config: CapacitorConfig = {
       backgroundColor: "#f5f0ed",
       overlaysWebView: false,
     },
+    EdgeToEdge: {
+      backgroundColor: "#f5f0ed",
+    },
   },
   ios: {
     scheme: "O10pic",

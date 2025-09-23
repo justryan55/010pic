@@ -20,6 +20,7 @@
     "@capacitor/keyboard": "^7.0.1",
     "@capacitor/preferences": "^7.0.1",
     "@capacitor/status-bar": "^7.0.1",
+    "@capawesome/capacitor-android-edge-to-edge-support": "^7.2.3",
     "@hookform/resolvers": "^5.1.1",
     "@revenuecat/purchases-capacitor": "^10.3.5",
     "@sentry/capacitor": "^2.3.1",

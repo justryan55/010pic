@@ -40,6 +40,6 @@ body {
   border-radius: 9999px;
 }
 
-.native-padding {
+/* .native-padding {
   padding-top: max(env(safe-area-inset-top), 30px);
-}
+} */
