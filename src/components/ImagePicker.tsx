@@ -52,10 +52,17 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     folderType,
   } = config;
 
+  const [draftExistingImages, setDraftExistingImages] = useState<
+    SelectedImage[]
+  >([]);
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [mainImage, setMainImage] = useState<SelectedImage | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [isProcessingFiles, setIsProcessingFiles] = useState(false);
+
+  const [imagesToDelete, setImagesToDelete] = useState<Set<string>>(new Set());
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -64,6 +71,17 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     visible: { y: 0, opacity: 1 },
     exit: { y: "100%", opacity: 1 },
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      setDraftExistingImages([...existingImages]);
+      setImagesToDelete(new Set());
+      setSelectedImages([]);
+      setPendingFiles([]);
+      setMainImage(null);
+      setError("");
+    }
+  }, [isOpen, existingImages]);
 
   const isMobile = () => {
     return Capacitor.isNativePlatform();
@@ -78,7 +96,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
       if (isOpen && isMobile() && isPhotoAccessAvailable()) {
         try {
           const currentStatus = await Camera.checkPermissions();
-          console.log("Mount permission check:", currentStatus); // Add logging
+          console.log("Mount permission check:", currentStatus);
 
           if (currentStatus.photos === "denied") {
             setError(
@@ -129,9 +147,12 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
         setError("");
 
         if (Camera.pickImages) {
+          // Show loading state immediately when user starts selecting
+          setIsProcessingFiles(true);
+
           const result = await Camera.pickImages({
             quality: 90,
-            limit: maxImages - existingImages.length - pendingFiles.length,
+            limit: maxImages - draftExistingImages.length - pendingFiles.length,
           });
 
           const files: File[] = [];
@@ -145,10 +166,10 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
             files.push(file);
           }
 
-          processFiles(files);
+          await processFiles(files);
         } else {
           const remainingSlots =
-            maxImages - existingImages.length - pendingFiles.length;
+            maxImages - draftExistingImages.length - pendingFiles.length;
 
           if (remainingSlots <= 0) {
             setError("Maximum number of images reached.");
@@ -156,6 +177,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
           }
 
           try {
+            setIsProcessingFiles(true);
+
             const result = await Camera.getPhoto({
               quality: 90,
               allowEditing: false,
@@ -169,7 +192,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
               const file = new File([blob], `image_${nanoid()}.jpeg`, {
                 type: blob.type,
               });
-              processFiles([file]);
+              await processFiles([file]);
             }
           } catch (error) {
             console.error("Error with fallback method:", error);
@@ -184,6 +207,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
                 );
               }
             }
+            setIsProcessingFiles(false);
           }
         }
       } catch (error) {
@@ -198,6 +222,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
             );
           }
         }
+        setIsProcessingFiles(false);
       }
     } else {
       fileInputRef.current?.click();
@@ -219,45 +244,66 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
   const processFiles = async (files: File[]) => {
     try {
+      setIsProcessingFiles(true); // Show processing state immediately
+
       const remainingSlots =
-        maxImages - existingImages.length - pendingFiles.length;
+        maxImages - draftExistingImages.length - pendingFiles.length;
       const validFiles = files
         .filter((file) => file.type.startsWith("image/"))
         .slice(0, remainingSlots);
 
+      if (validFiles.length === 0) {
+        setIsProcessingFiles(false);
+        return;
+      }
+
       setPendingFiles((prev) => [...prev, ...validFiles]);
 
-      for (const file of validFiles) {
-        const tempId = nanoid();
+      // Create placeholder images immediately
+      const placeholderImages = validFiles.map((file) => ({
+        id: nanoid(),
+        src: "",
+        name: file.name,
+        isUploading: true,
+        file: file,
+      }));
 
-        const tempImage: SelectedImage = {
-          id: tempId,
-          src: "",
-          name: file.name,
-          isUploading: true,
-          file: file,
-        };
+      setSelectedImages((prev) => [...prev, ...placeholderImages]);
 
-        setSelectedImages((prev) => [...prev, tempImage]);
+      // Process files in batches for better performance
+      const batchSize = 3;
+      for (let i = 0; i < validFiles.length; i += batchSize) {
+        const batch = validFiles.slice(i, i + batchSize);
+        const batchPromises = batch.map((file, batchIndex) => {
+          const actualIndex = i + batchIndex;
+          const tempId = placeholderImages[actualIndex].id;
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setSelectedImages((prev) =>
-            prev.map((img) =>
-              img.id === tempId
-                ? {
-                    ...img,
-                    src: e.target?.result as string,
-                    isUploading: false,
-                  }
-                : img
-            )
-          );
-        };
-        reader.readAsDataURL(file);
+          return new Promise<void>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              setSelectedImages((prev) =>
+                prev.map((img) =>
+                  img.id === tempId
+                    ? {
+                        ...img,
+                        src: e.target?.result as string,
+                        isUploading: false,
+                      }
+                    : img
+                )
+              );
+              resolve();
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+
+        await Promise.all(batchPromises);
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      setIsProcessingFiles(false);
     }
   };
 
@@ -277,75 +323,35 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     }
   };
 
-  const removeImage = async (imageId: string) => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session?.access_token) {
-      console.error("User not authenticated.");
-      return [];
-    }
-
-    const isExistingImage = existingImages.some((img) => img.id === imageId);
+  const removeImage = (imageId: string) => {
+    const isExistingImage = draftExistingImages.some(
+      (img) => img.id === imageId
+    );
 
     if (isExistingImage) {
-      const res = await softDeleteImage(imageId);
-
-      if (!res.success || !res.data) {
-        console.error("Failed to soft delete image");
-        return;
-      }
-
-      const r2Key = res?.data.path;
-      const fullR2Key = r2Key.startsWith("images/") ? r2Key : `images/${r2Key}`;
-
-      if (r2Key) {
-        try {
-          const response = await fetch(
-            `https://supabase-r2-handler.app010pic.workers.dev/api/delete-image/${encodeURIComponent(
-              fullR2Key
-            )}`,
-            {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${session.access_token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Failed to delete image from R2:", errorData.error);
-          } else {
-            console.log("Successfully deleted image from R2");
-          }
-        } catch (err) {
-          console.error("Failed to delete image from R2:", err);
-        }
-      }
-
-      const updatedExisting = existingImages.filter(
-        (img) => img.id !== imageId
+      setImagesToDelete((prev) => new Set(prev).add(imageId));
+      setDraftExistingImages((prev) =>
+        prev.filter((img) => img.id !== imageId)
       );
-      onSave(updatedExisting);
     } else {
       const imageToRemove = selectedImages.find((img) => img.id === imageId);
+      setSelectedImages((prev) => prev.filter((img) => img.id !== imageId));
 
-      if (imageToRemove) {
-        setSelectedImages((prev) => prev.filter((img) => img.id !== imageId));
-
-        if (imageToRemove.file) {
-          setPendingFiles((prev) =>
-            prev.filter((file) => file !== imageToRemove.file)
-          );
-        }
+      if (imageToRemove && imageToRemove.file) {
+        setPendingFiles((prev) =>
+          prev.filter((file) => {
+            return !(
+              file.name === imageToRemove.file!.name &&
+              file.size === imageToRemove.file!.size &&
+              file.lastModified === imageToRemove.file!.lastModified
+            );
+          })
+        );
       }
     }
 
     if (mainImage?.id === imageId) {
-      const allImages = [...existingImages, ...selectedImages].filter(
+      const allImages = [...draftExistingImages, ...selectedImages].filter(
         (img) => img.id !== imageId
       );
       setMainImage(allImages.length > 0 ? allImages[0] : null);
@@ -356,6 +362,62 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
     setIsLoading(true);
 
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        console.error("User not authenticated.");
+        setIsLoading(false);
+        return;
+      }
+
+      for (const imageId of imagesToDelete) {
+        const imageToDelete = existingImages.find((img) => img.id === imageId);
+        if (imageToDelete) {
+          const res = await softDeleteImage(imageId);
+
+          if (res.success && res.data) {
+            const r2Key = res.data.path;
+            const fullR2Key = r2Key.startsWith("images/")
+              ? r2Key
+              : `images/${r2Key}`;
+
+            if (r2Key) {
+              try {
+                const response = await fetch(
+                  `https://supabase-r2-handler.app010pic.workers.dev/api/delete-image/${encodeURIComponent(
+                    fullR2Key
+                  )}`,
+                  {
+                    method: "DELETE",
+                    headers: {
+                      Authorization: `Bearer ${session.access_token}`,
+                      "Content-Type": "application/json",
+                    },
+                  }
+                );
+
+                if (!response.ok) {
+                  const errorData = await response.json();
+                  console.error(
+                    "Failed to delete image from R2:",
+                    errorData.error
+                  );
+                } else {
+                  console.log("Successfully deleted image from R2");
+                }
+              } catch (err) {
+                console.error("Failed to delete image from R2:", err);
+              }
+            }
+          } else {
+            console.error("Failed to soft delete image");
+          }
+        }
+      }
+
+      let uploadedImages: SelectedImage[] = [];
       if (pendingFiles.length > 0) {
         const cleanTitle = title?.trim() || "untitled";
 
@@ -367,19 +429,23 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
                 "_"
               )}`;
 
-        const uploadedImages = await uploadImagesToSupabase(
+        uploadedImages = await uploadImagesToSupabase(
           pendingFiles,
           storagePath
         );
-
-        const allImages = [...existingImages, ...uploadedImages];
-        onSave(allImages);
-      } else {
-        onSave(existingImages);
       }
+
+      const remainingExistingImages = existingImages.filter(
+        (img) => !imagesToDelete.has(img.id)
+      );
+      const finalImages = [...remainingExistingImages, ...uploadedImages];
+
+      onSave(finalImages);
 
       setPendingFiles([]);
       setSelectedImages([]);
+      setDraftExistingImages([]);
+      setImagesToDelete(new Set());
       setMainImage(null);
       setTitle?.("");
     } catch (error) {
@@ -392,24 +458,27 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
 
   const handleClose = () => {
     setSelectedImages([]);
+    setDraftExistingImages([]);
+    setImagesToDelete(new Set());
     setMainImage(null);
+    setPendingFiles([]);
     onClose();
   };
 
   useEffect(() => {
     if (isOpen && !mainImage) {
-      const allImages = [...existingImages, ...selectedImages];
+      const allImages = [...draftExistingImages, ...selectedImages];
       const availableImages = allImages.filter((img) => !img.isUploading);
       if (availableImages.length > 0) {
         setMainImage(availableImages[0]);
       }
     }
-  }, [isOpen, mainImage, existingImages, selectedImages]);
+  }, [isOpen, mainImage, draftExistingImages, selectedImages]);
 
-  const allImages = [...existingImages, ...selectedImages];
+  const allImages = [...draftExistingImages, ...selectedImages];
   const totalCount = allImages.length;
-  const hasUploadingImages = selectedImages.some((img) => img.isUploading);
-
+  const hasUploadingImages =
+    selectedImages.some((img) => img.isUploading) || isProcessingFiles;
   return (
     <AnimatePresence mode="wait">
       {isOpen && (
@@ -590,11 +659,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ config }) => {
               <Button
                 text="SAVE"
                 onClick={handleSave}
-                disabled={
-                  (existingImages.length === 0 &&
-                    selectedImages.length === 0) ||
-                  hasUploadingImages
-                }
+                disabled={hasUploadingImages}
                 isLoading={isLoading}
               />
             </div>
