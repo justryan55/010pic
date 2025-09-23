@@ -24,6 +24,7 @@ interface State {
 class ErrorBoundary extends Component<Props, State> {
   state = { hasError: false };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     Sentry.captureException(error);
     this.setState({ hasError: true });
