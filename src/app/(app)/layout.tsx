@@ -77,16 +77,14 @@ export default function AppLayout({
         <PhotoFlowProvider>
           <div className="flex flex-col min-h-screen bg-[var(--brand-bg)]">
             <div
-              className={`fixed top-0 left-0 right-0 native-padding z-10 bg-[var(--brand-bg)] px-6`}
+              className={`sticky top-0 left-0 right-0 native-padding z-10 bg-[var(--brand-bg)] px-6 pt-3`}
             >
               <Header />
               <YearSelector isOpen={isOpen} setIsOpen={setIsOpen} />
               <AddPeoplePlaceBtn />
             </div>
 
-            <div className={`flex-1 px-6 mt-[var(--header-height,105px)]`}>
-              {children}
-            </div>
+            <div className={`flex-1 px-6`}>{children}</div>
 
             <BottomNav setIsOpen={setIsOpen} />
           </div>

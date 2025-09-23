@@ -88,7 +88,7 @@ export default function Profile() {
             className="relative w-full"
             style={{ height: "calc(var(--initial-vh) * 100)" }}
           >
-            <div className="absolute bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 h-full native-padding">
+            <div className="absolute bottom-0 left-0 right-0 z-50 w-full bg-[var(--brand-bg)] px-6 flex flex-col justify-between transition-transform duration-300 h-full native-padding pt-5">
               <div>
                 <div className="flex justify-between">
                   <h1 className="text-black font-semibold text-[28px] leading-[120%] max-w-[241px]">
