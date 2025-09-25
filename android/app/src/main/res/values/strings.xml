@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">010Pic</string>
+    <string name="title_activity_main">010Pic</string>
+    <string name="package_name">com.ryanirani.app010pic</string>
+    <string name="custom_url_scheme">com.ryanirani.app010pic</string>
+</resources>
