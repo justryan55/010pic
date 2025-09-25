@@ -10,40 +10,75 @@ export default function RootPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-      if (!session) {
-        router.replace("/auth");
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          router.replace("/auth");
+          setIsLoading(false);
+          return;
+        }
+
+        if (!session) {
+          router.replace("/auth");
+          setIsLoading(false);
+          return;
+        }
+
+        const isOnline = navigator.onLine;
+
+        if (isOnline) {
+          const userId = session.user.id;
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("is_deleted")
+            .eq("id", userId)
+            .single();
+
+          if (profileError) {
+            console.error("Profile error:", profileError);
+            if (profileError.code !== "PGRST116") {
+              router.replace("/date");
+              setIsLoading(false);
+              return;
+            }
+          }
+
+          if (profile?.is_deleted) {
+            await supabase.auth.signOut();
+            router.replace("/auth");
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        router.replace("/date");
         setIsLoading(false);
-        return;
-      }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      const userId = session.user.id;
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("is_deleted")
-        .eq("id", userId)
-        .single();
-
-      if (profileError || profile?.is_deleted) {
-        await supabase.auth.signOut();
-        router.replace("/auth");
+        if (session) {
+          router.replace("/date");
+        } else {
+          router.replace("/auth");
+        }
         setIsLoading(false);
-        return;
       }
-
-      router.replace("/date");
-      setIsLoading(false);
     };
 
     checkAuth();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
         router.replace("/auth");
       }
     });

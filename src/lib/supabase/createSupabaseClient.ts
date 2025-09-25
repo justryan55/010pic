@@ -32,6 +32,8 @@ const supabase = (
             persistSession: true,
             autoRefreshToken: true,
             detectSessionInUrl: false,
+            storageKey: "sb-auth-token",
+            flowType: "pkce",
           },
         }
       )
