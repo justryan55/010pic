@@ -14,39 +14,33 @@ interface SelectedImage {
   name: string;
 }
 
-// Get month numbers in reverse order (Dec to Jan)
 const getAllMonthsForYear = (
   year: number,
   currentYear: number,
   currentMonthIndex: number
 ) => {
   if (year === currentYear) {
-    // For current year, show months from current month back to January
     const months = [];
     for (let i = currentMonthIndex; i >= 0; i--) {
-      months.push(i + 1); // +1 because getMonth() returns 0-11, but we want 1-12
+      months.push(i + 1);
     }
     return months;
   } else {
-    // For other years, show all months in reverse order
     return [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
   }
 };
 
-// Get localized month name
 const getMonthName = (monthNumber: number, year: number) => {
   const date = new Date(year, monthNumber - 1, 1);
   return date.toLocaleDateString(undefined, { month: "long" });
 };
 
-// Convert month number to the format your API expects (based on your database path structure)
 const formatMonthForAPI = (monthNumber: number): string => {
-  return monthNumber.toString().padStart(2, "0"); // Your paths use zero-padded months like "01", "02", etc.
+  return monthNumber.toString().padStart(2, "0");
 };
 
-// Create month key for imagesByMonth storage (should match your existing format)
 const createMonthKey = (year: number, monthNumber: number): string => {
-  return `${year}-${monthNumber.toString().padStart(2, "0")}`; // Match the format from your API response
+  return `${year}-${monthNumber.toString().padStart(2, "0")}`;
 };
 
 const getAccessHistory = (): string[] => {
@@ -85,11 +79,8 @@ export default function Home() {
 
   useEffect(() => {
     setCurrentPage("date");
-  }, [setCurrentPage]);
-
-  useEffect(() => {
     setAccessHistory(getAccessHistory());
-  }, []);
+  }, [setCurrentPage]);
 
   const monthNumbers = getAllMonthsForYear(
     targetYear || currentYear,
@@ -104,7 +95,6 @@ export default function Home() {
 
     if (hasActiveSubscription) return false;
 
-    // Current month is always unlocked
     if (
       monthDate.getFullYear() === currentDate.getFullYear() &&
       monthDate.getMonth() === currentDate.getMonth()
@@ -112,17 +102,14 @@ export default function Home() {
       return false;
     }
 
-    // Previously accessed months are unlocked
     if (accessHistory.includes(monthKey)) {
       return false;
     }
 
-    // Future months are locked
     if (monthDate > currentDate) {
       return true;
     }
 
-    // Past months are locked (unless in access history)
     return true;
   };
 
@@ -131,7 +118,6 @@ export default function Home() {
       if (!targetYear) return;
       setIsLoading(true);
 
-      // Load images for all visible months (we'll handle the lock status in the UI)
       const monthsForAPI = monthNumbers.map(formatMonthForAPI);
 
       const newImagesByMonth = await fetchUserImagesByMonth(
@@ -148,9 +134,8 @@ export default function Home() {
     };
 
     loadAllMonthImages();
-  }, [targetYear, refreshToggle]);
+  }, [targetYear, refreshToggle, accessHistory]);
 
-  // Add current month to access history
   useEffect(() => {
     const currentMonthKey = `${currentYear}-${(currentMonthIndex + 1)
       .toString()
