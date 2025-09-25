@@ -5,7 +5,6 @@ import { usePhotoFlow } from "@/providers/PhotoFlowProvider";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { fetchUserImagesByMonth } from "@/lib/imageManager";
-import monthNameToNumber from "@/components/MonthNameToIndex";
 import { useCurrentPage } from "@/providers/PageProvider";
 import { useRevenueCat } from "@/hooks/useRevenueCat";
 
@@ -15,20 +14,40 @@ interface SelectedImage {
   name: string;
 }
 
-const allMonths = [
-  "December",
-  "November",
-  "October",
-  "September",
-  "August",
-  "July",
-  "June",
-  "May",
-  "April",
-  "March",
-  "February",
-  "January",
-];
+// Get month numbers in reverse order (Dec to Jan)
+const getAllMonthsForYear = (
+  year: number,
+  currentYear: number,
+  currentMonthIndex: number
+) => {
+  if (year === currentYear) {
+    // For current year, show months from current month back to January
+    const months = [];
+    for (let i = currentMonthIndex; i >= 0; i--) {
+      months.push(i + 1); // +1 because getMonth() returns 0-11, but we want 1-12
+    }
+    return months;
+  } else {
+    // For other years, show all months in reverse order
+    return [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+  }
+};
+
+// Get localized month name
+const getMonthName = (monthNumber: number, year: number) => {
+  const date = new Date(year, monthNumber - 1, 1);
+  return date.toLocaleDateString(undefined, { month: "long" });
+};
+
+// Convert month number to the format your API expects (based on your database path structure)
+const formatMonthForAPI = (monthNumber: number): string => {
+  return monthNumber.toString().padStart(2, "0"); // Your paths use zero-padded months like "01", "02", etc.
+};
+
+// Create month key for imagesByMonth storage (should match your existing format)
+const createMonthKey = (year: number, monthNumber: number): string => {
+  return `${year}-${monthNumber.toString().padStart(2, "0")}`; // Match the format from your API response
+};
 
 const getAccessHistory = (): string[] => {
   if (typeof window === "undefined") return [];
@@ -68,49 +87,24 @@ export default function Home() {
     setCurrentPage("date");
   }, [setCurrentPage]);
 
-  const filteredMonths =
-    targetYear === currentYear
-      ? allMonths.filter((month) => {
-          const indexInCalendar = 11 - currentMonthIndex;
-          return allMonths.indexOf(month) >= indexInCalendar;
-        })
-      : allMonths;
-
   useEffect(() => {
-    const loadAllMonthImages = async () => {
-      if (!targetYear) return;
-      setIsLoading(true);
+    setAccessHistory(getAccessHistory());
+  }, []);
 
-      const monthNumbers = filteredMonths.map(monthNameToNumber);
+  const monthNumbers = getAllMonthsForYear(
+    targetYear || currentYear,
+    currentYear,
+    currentMonthIndex
+  );
 
-      const newImagesByMonth = await fetchUserImagesByMonth(
-        targetYear.toString(),
-        monthNumbers
-      );
-
-      setImagesByMonth((prev) => ({
-        ...prev,
-        ...newImagesByMonth,
-      }));
-
-      setIsLoading(false);
-    };
-
-    loadAllMonthImages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetYear, refreshToggle]);
-
-  const isMonthLocked = (month: string) => {
-    const monthNumber = monthNameToNumber(month);
-    const monthDate = new Date(
-      targetYear || currentYear,
-      Number(monthNumber) - 1
-    );
+  const isMonthLocked = (monthNumber: number) => {
+    const monthDate = new Date(targetYear || currentYear, monthNumber - 1);
     const currentDate = new Date(currentYear, currentMonthIndex);
-    const monthKey = `${targetYear || currentYear}-${monthNumber}`;
+    const monthKey = createMonthKey(targetYear || currentYear, monthNumber);
 
     if (hasActiveSubscription) return false;
 
+    // Current month is always unlocked
     if (
       monthDate.getFullYear() === currentDate.getFullYear() &&
       monthDate.getMonth() === currentDate.getMonth()
@@ -118,14 +112,17 @@ export default function Home() {
       return false;
     }
 
+    // Previously accessed months are unlocked
     if (accessHistory.includes(monthKey)) {
       return false;
     }
 
+    // Future months are locked
     if (monthDate > currentDate) {
       return true;
     }
 
+    // Past months are locked (unless in access history)
     return true;
   };
 
@@ -134,15 +131,12 @@ export default function Home() {
       if (!targetYear) return;
       setIsLoading(true);
 
-      const monthsToLoad = filteredMonths.filter(
-        (month) => hasActiveSubscription || !isMonthLocked(month)
-      );
-
-      const monthNumbers = monthsToLoad.map(monthNameToNumber);
+      // Load images for all visible months (we'll handle the lock status in the UI)
+      const monthsForAPI = monthNumbers.map(formatMonthForAPI);
 
       const newImagesByMonth = await fetchUserImagesByMonth(
         targetYear.toString(),
-        monthNumbers
+        monthsForAPI
       );
 
       setImagesByMonth((prev) => ({
@@ -154,11 +148,13 @@ export default function Home() {
     };
 
     loadAllMonthImages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetYear, refreshToggle, hasActiveSubscription, accessHistory]);
+  }, [targetYear, refreshToggle]);
 
+  // Add current month to access history
   useEffect(() => {
-    const currentMonthKey = `${currentYear}-${currentMonthIndex + 1}`;
+    const currentMonthKey = `${currentYear}-${(currentMonthIndex + 1)
+      .toString()
+      .padStart(2, "0")}`;
     addToAccessHistory(currentMonthKey);
     setAccessHistory((prev) => {
       if (!prev.includes(currentMonthKey)) {
@@ -167,29 +163,6 @@ export default function Home() {
       return prev;
     });
   }, [currentYear, currentMonthIndex]);
-
-  // function MonthPhotoGrid({ month }: { month: string }) {
-  //   const monthNumber = monthNameToNumber(month);
-  //   const monthKey = `${targetYear}-${monthNumber}`;
-  //   const images = imagesByMonth[monthKey] || [];
-  //   return <PhotoGrid images={images} title={month} />;
-  // }
-
-  // function MonthHeader({ month, locked }: { month: string; locked: boolean }) {
-  //   const displayYear = targetYear || new Date().getFullYear();
-  //   const monthNumber = monthNameToNumber(month);
-  //   const monthKey = `${displayYear}-${monthNumber}`;
-  //   const monthImages = imagesByMonth[monthKey] || [];
-  //   const imageCount = monthImages.length;
-
-  //   return (
-  //     <CollectionHeader
-  //       header={month}
-  //       imageCount={imageCount}
-  //       locked={locked}
-  //     />
-  //   );
-  // }
 
   if (isLoading) {
     return (
@@ -207,22 +180,29 @@ export default function Home() {
   return (
     <div>
       <div className="mb-30">
-        {filteredMonths.map((month) => {
-          const locked = isMonthLocked(month);
+        {monthNumbers.map((monthNumber) => {
+          const locked = isMonthLocked(monthNumber);
+          const monthName = getMonthName(
+            monthNumber,
+            targetYear || currentYear
+          );
           return (
             <div
-              key={month}
+              key={monthNumber}
               className={`cursor-pointer ${locked ? "relative" : ""}`}
-              onClick={() => setTargetMonth(month)}
+              onClick={() => setTargetMonth(monthName)}
             >
               <MonthHeader
-                month={month}
+                monthNumber={monthNumber}
+                monthName={monthName}
                 locked={locked}
                 targetYear={targetYear || currentYear}
                 imagesByMonth={imagesByMonth}
               />
               <MonthPhotoGrid
-                month={month}
+                monthNumber={monthNumber}
+                monthName={monthName}
+                locked={locked}
                 targetYear={targetYear || currentYear}
                 imagesByMonth={imagesByMonth}
               />
@@ -235,37 +215,45 @@ export default function Home() {
 }
 
 const MonthPhotoGrid = React.memo(function MonthPhotoGrid({
-  month,
+  monthNumber,
+  monthName,
   targetYear,
   imagesByMonth,
 }: {
-  month: string;
-  targetYear: number;
-  imagesByMonth: Record<string, SelectedImage[]>;
-}) {
-  const monthNumber = monthNameToNumber(month);
-  const monthKey = `${targetYear}-${monthNumber}`;
-  const images = imagesByMonth[monthKey] || [];
-  return <PhotoGrid images={images} title={month} />;
-});
-
-const MonthHeader = React.memo(function MonthHeader({
-  month,
-  locked,
-  targetYear,
-  imagesByMonth,
-}: {
-  month: string;
+  monthNumber: number;
+  monthName: string;
   locked: boolean;
   targetYear: number;
   imagesByMonth: Record<string, SelectedImage[]>;
 }) {
-  const monthNumber = monthNameToNumber(month);
-  const monthKey = `${targetYear}-${monthNumber}`;
+  const monthKey = createMonthKey(targetYear, monthNumber);
+  const images = imagesByMonth[monthKey] || [];
+
+  return <PhotoGrid images={images} title={monthName} />;
+});
+
+const MonthHeader = React.memo(function MonthHeader({
+  monthNumber,
+  monthName,
+  locked,
+  targetYear,
+  imagesByMonth,
+}: {
+  monthNumber: number;
+  monthName: string;
+  locked: boolean;
+  targetYear: number;
+  imagesByMonth: Record<string, SelectedImage[]>;
+}) {
+  const monthKey = createMonthKey(targetYear, monthNumber);
   const monthImages = imagesByMonth[monthKey] || [];
   const imageCount = monthImages.length;
 
   return (
-    <CollectionHeader header={month} imageCount={imageCount} locked={locked} />
+    <CollectionHeader
+      header={monthName}
+      imageCount={imageCount}
+      locked={locked}
+    />
   );
 });
