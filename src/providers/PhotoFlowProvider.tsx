@@ -94,7 +94,7 @@ export default function PhotoFlowProvider({
   const [activePicker, setActivePicker] = useState<PhotoPickerType>(null);
 
   const [targetMonth, setTargetMonth] = useState<string | null>(
-    new Date().toLocaleString("default", { month: "long" })
+  new Date().toLocaleString("en-US", { month: "long" })
   );
   const [targetYear, setTargetYear] = useState<number | null>(
     new Date().getFullYear()
