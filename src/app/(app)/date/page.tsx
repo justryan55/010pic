@@ -14,6 +14,11 @@ interface SelectedImage {
   name: string;
 }
 
+const capitalizeFirstLetter = (str: string): string => {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 const getAllMonthsForYear = (
   year: number,
   currentYear: number,
@@ -32,7 +37,8 @@ const getAllMonthsForYear = (
 
 const getMonthName = (monthNumber: number, year: number) => {
   const date = new Date(year, monthNumber - 1, 1);
-  return date.toLocaleDateString(undefined, { month: "long" });
+  const monthName = date.toLocaleDateString("en-US", { month: "long" });
+  return capitalizeFirstLetter(monthName);
 };
 
 const formatMonthForAPI = (monthNumber: number): string => {
