@@ -11,6 +11,7 @@ import { SupabaseProvider } from "@/providers/SupabaseProvider";
 import { Instrument_Sans, Inria_Serif } from "next/font/google";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { registerServiceWorker } from "../../utils/serviceWorkerUtils";
+import { useDeepLinking } from "@/hooks/useDeepLinking";
 
 const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
@@ -28,6 +29,8 @@ export default function RootLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
+  useDeepLinking();
+
   const [isNative, setIsNative] = useState(false);
 
   useEffect(() => {

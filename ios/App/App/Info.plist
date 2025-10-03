@@ -54,5 +54,17 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>O10Pic needs permission to save photos to your library.</string>
 
+	<key>CFBundleURLTypes</key>
+	<array>
+	<dict>
+		<key>CFBundleURLName</key>
+		<string>com.ryanirani.app010pic</string> 
+		<key>CFBundleURLSchemes</key>
+		<array>
+		<string>o10pic</string> 
+		</array>
+	</dict>
+	</array>
+
 </dict>
 </plist>

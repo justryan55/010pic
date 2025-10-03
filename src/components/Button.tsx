@@ -1,4 +1,3 @@
-import React from "react";
 import Image from "next/image";
 
 interface ButtonProps {
@@ -11,6 +10,7 @@ interface ButtonProps {
   textSize?: string;
   maxWidth?: string;
   isLoading?: boolean;
+  className?: string;
 }
 
 export default function Button({
@@ -23,12 +23,12 @@ export default function Button({
   textSize = "text-lg",
   maxWidth = "max-w-none",
   isLoading = false,
+  className = "",
 }: ButtonProps) {
   return (
     <button
       type={type}
       onClick={onClick}
-      // onClick={onClick}
       disabled={disabled}
       className={`w-full bg-black ${textSize} text-normal 
       ${isLoading && "flex justify-center items-center pt-[14px] pb-[14px]"} 
@@ -36,7 +36,7 @@ export default function Button({
         uppercase && "uppercase"
       } leading-[120%] text-white pt-[11px] pb-[11px] pr-${padding} pl-${padding} ${maxWidth} rounded-full hover:bg-gray-800 transition-colors cursor-pointer  ${
         disabled ? "disabled:bg-gray-300 disabled:cursor-not-allowed" : ""
-      }`}
+      } ${className}`}
     >
       {isLoading ? (
         <Image

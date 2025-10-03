@@ -399,6 +399,12 @@ export default function AuthForm() {
           </div>
         )}
 
+        {!isRegister && (
+          <div onClick={() => router.push("/auth/forgot-password")}>
+            <p className="text-sm underline">Forgot password?</p>
+          </div>
+        )}
+
         {authError && (
           <p className="text-destructive text-sm p-2">{authError}</p>
         )}

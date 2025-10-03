@@ -19,7 +19,7 @@ const config: CapacitorConfig = {
     },
   },
   ios: {
-    scheme: "O10pic",
+    scheme: "o10pic",
   },
 };
 
